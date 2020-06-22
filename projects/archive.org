@@ -1,0 +1,40 @@
+#+TITLE: Archive
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="archive/"/>
+#+END_EXPORT
+
+This is a place where I store random tarballs with my very old code as well as other stuff found on the internet. It might come in handy some day for someone.
+
+- [[file:dbug.tar.bz2][Early attempt at log4c]]
+- [[file:fence-vbox.tar.xz][Red Hat Cluster Services fencing agent using the Virtualbox WSDL API]]
+- [[file:gentoo-install.tar.xz][My attempt at building an automated Gentoo installer]]
+- [[file:gentoo-redhat-cluster.tar.xz][Instruction and some configuration file for installing and setup of Red Hat Cluster Suite on Gentoo]]
+- [[file:gg2jisp-1.0.tar.gz][Convert Polish Gadu-Gadu ICQ clone iconsets to standard Jabber JISP icon packages]]
+- [[file:ida.tar.xz][Some random IDA scripts]]
+- [[file:lutownica-soft.tar.xz][Firmware for a MSP430-based temperature controlled soldering station]]
+- [[file:mail2xmpp-1.1.tar.xz][Simple email -> XMPP gateway]]
+- [[file:oes.tar.bz2][My own OS v0.00001]]
+- [[file:public_html.tar.xz][My *very* old website]]
+- [[file:xilinx-wrappers.tar.xz][Wrapper scripts for Xlinx FPGA toolchain to make them more similar to GCC workflow]]
+- [[file:update-worlds.tar.xz][Ansible before there was Ansible]]
+- [[file:tunl.tar.gz][SSH2 tunnel management helper scripts]]
+- [[file:total-statistics.tar.xz][System monitoring (battery level, CPU frequency, temperatures, etc.) & logging scripts. Now would use collectd for that]]
+- [[file:gather-acpi][Gather ACPI information and make a tarball out of it]]
+- [[file:swfparse.cpp][Random SWF parser code]]
+- [[file:qrenc2.html][QR Encoder in Javascript and HTML]]
+- [[file:at91sam7s64.tar.xz][Some SDK and example code for AT91SAM7S64]]
+- [[file:HTTP-1.0-response][WISP Access Gateway protocol example request]]
+- [[file:lurker-filters.tar.xz][Script used to filter out interesting packets out of LAN pcaps]]
+- [[file:dwmstatus.sh][DWM Window Manager status script]]
+- [[file:gentoo.txt][Gentoo Filesystem Layout respecting FHS standards]]
+- [[file:measurement.ods][Random USB charger current measurement results]]
+- [[file:pajonk-lutek.tar.bz2][Flying spider blimp drone hardware & firmware]]
+- [[file:clonevm.py][Tool used to clone VMX files on VMWARE ESXi via SSH connection (ansible)]]
+- [[file:provision-datastores.txt][VMware ESXi datastore provisioning via SSH using Ansible playbook]]
+
+Stuff other people wrote
+
+- [[file:ntlmdecoder.py][NTLM decoder for packets sent via HTTP headers]]

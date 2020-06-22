@@ -1,0 +1,118 @@
+---
+- hosts: vmwares
+
+  vars:
+    vmfs_partition_guid: AA31E02A400F11DB9590000C2911D1B8
+
+    datastores:
+      - name: datastore1
+        # Local ATA Disk (t10.ATA_____ST31000524AS________________________________________6VPK5J2Z)
+        device_uuid: vml.01000000002020202020202020202020203656504b354a325a535433313030
+        # TODO: Autodetect this maybe?
+        max_sectors: "1953525134"
+
+      - name: datastore2
+        # Local ATA Disk (t10.ATA_____HITACHI_HUA722010ALA330_________________N12KATJL____________)
+        device_uuid: vml.01000000004e31324b41544a4c202020202020202020202020484954414348
+        # TODO: Autodetect this maybe?
+        max_sectors: "1953525134"
+
+      - name: datastore3
+        # Local ATA Disk (t10.ATA_____ST1000DM0032D1CH162__________________________________Z1D2XB6H)
+        device_uuid: vml.01000000002020202020202020202020205a31443258423648535431303030
+        # TODO: Autodetect this maybe?
+        max_sectors: "1953525134"
+
+      - name: datastore4
+        # Local ATA Disk (t10.ATA_____SAMSUNG_HD154UI_________________________S1Y6J1LS706055______)
+        device_uuid: vml.0100000000533159364a314c5337303630353520202020202053414d53554e
+        # TODO: Autodetect this maybe?
+        max_sectors: "2930277134"
+
+    passthrough:
+      - name: tank0
+        target_datastore: datastore1
+        # Local ATA Disk (t10.ATA_____TOSHIBA_DT01ACA300_________________________________Z5RS759KS)
+        device_uuid: vml.010000000020202020202020202020205a3552533735394b53544f53484942
+
+      - name: tank1
+        target_datastore: datastore1
+        # Local ATA Disk (t10.ATA_____ST3000DM0012D1ER166__________________________________Z502VF4T)
+        device_uuid: vml.01000000002020202020202020202020205a35303256463454535433303030
+
+      - name: tank2
+        target_datastore: datastore1
+        # Local ATA Disk (t10.ATA_____TOSHIBA_DT01ACA300_________________________________Z5RSBD8KS)
+        device_uuid: vml.010000000020202020202020202020205a3552534244384b53544f53484942
+
+      - name: tank3
+        target_datastore: datastore1
+        # Local ATA Disk (t10.ATA_____ST3000DM0012D1ER166__________________________________Z502VCJD)
+        device_uuid: vml.01000000002020202020202020202020205a35303256434a44535433303030
+
+    scratch_path: "/vmfs/volumes/datastore1/locker-{{ ansible_hostname }}"
+
+    images_path: /vmfs/volumes/datastore1/iso
+
+    images:
+      - name: sysrescuecd
+        url: http://downloads.sourceforge.net/project/systemrescuecd/sysresccd-x86/4.9.6/systemrescuecd-x86-4.9.6.iso?r=http%3A%2F%2Fwww.system-rescue-cd.org%2FDownload%2F&ts=1492114145&use_mirror=netix
+        local_file: "systemrescuecd-x86-4.9.6.iso"
+
+
+  tasks:
+
+    - name: Create partitions
+      command: "partedUtil setptbl /dev/disks/{{ item.device_uuid }} gpt '1 2048 {{ item.max_sectors }} {{ vmfs_partition_guid }} 0'"
+      with_items: "{{ datastores }}"
+
+    - name: Create filesystems
+      command: "vmkfstools -C vmfs6 -S {{ item.name }} /dev/disks/{{ item.device_uuid }}:1"
+      args:
+        creates: "/vmfs/volumes/{{ item.name }}"
+      with_items: "{{ datastores }}"
+
+    - name: Create passthrough devices
+      command: "vmkfstools -z /vmfs/devices/disks/{{ item.device_uuid }} /vmfs/volumes/{{ item.target_datastore }}/{{ item.name }}.vmdk"
+      args:
+        creates: "/vmfs/volumes/{{ item.target_datastore }}/{{ item.name }}.vmdk"
+      with_items: "{{ passthrough }}"
+
+    - name: Create a persistent scratchspace directory
+      file: path="{{ scratch_path }}" state=directory
+
+    - name: Set the scratch space parameter
+      command: "vim-cmd hostsvc/advopt/update ScratchConfig.ConfiguredScratchLocation string {{ scratch_path }}"
+
+    - name: Save state
+      command: "auto-backup.sh"
+
+    - name: Create ISO directory
+      file: path="{{ images_path }}" state=directory
+
+    - name: Download images to local disk
+      delegate_to: localhost
+      command: "wget --no-clobber -O {{ item.local_file }} {{ item.url }}"
+      args:
+        creates: "{{ item.local_file }}"
+      with_items: "{{ images }}"
+    
+    # We need to directly call scp because the copy module first copies the files to a temporary directory in ~/.ansible
+    # This causes the filesystem to fill up.
+    - name: Copy the ISO files
+      delegate_to: localhost
+      command: "scp {{ item.local_file }} {{ ansible_user }}@{{ ansible_host }}:{{ images_path }}"
+      with_items: "{{ images }}"
+
+    # A reboot is required to activate the scratch space
+    - name: Restart server
+      shell: reboot
+
+    - name: Wait for server to restart
+      local_action:
+        module: wait_for
+        host: "{{ ansible_host }}"
+        port: 22
+        delay: 30
+        timeout: 300
+

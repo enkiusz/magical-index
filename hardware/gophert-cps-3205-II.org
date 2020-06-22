@@ -1,0 +1,170 @@
+#+TITLE: GOPHERT CPS-3205 II power supply
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="gophert-cps-3205-II/"/>
+#+END_EXPORT
+
+* Hardware 
+
+The GOPHERT CPS-3205 II power supply is a very cheap lab power supply that can be purchased for example on [[https://www.aliexpress.com/wholesale?catId=0&SearchText=GOPHERT+CPS+3205][aliexpress]]. It has two boards inside:
+
+- a main power board
+- a smaller controller board screwed in front
+
+Both boards are connected using a short bundle of wires with pins labeled on both ends. The wire is marked as SW19 on the controller board. 
+
+[[file:controller-board.jpg][file:thumb-controller-board.jpg]]
+
+Main chips on the controller board are:
+
+| Designation | Label         | Notes                 |
+|-------------+---------------+-----------------------|
+| U1, U2      | [[https://www.ti.com/lit/ds/symlink/sn74hc595.pdf][74HC595D]]      | 8-bit shift registers |
+| U3          | [[https://www.st.com/content/ccc/resource/technical/document/datasheet/e1/a6/12/61/ea/f1/4b/b3/CD00200092.pdf/files/CD00200092.pdf/jcr:content/translations/en.CD00200092.pdf][STM8S105K4T6C]] |                       |
+| U4          | [[https://www.ti.com/lit/ds/symlink/lm358a.pdf][LM358A]]        | Dual opamp            |
+| U5          | LD1117AG-33   |                       |
+
+Connectors visible on the back of the controller board:
+
+[[file:controller-board-connectors.jpg][file:thumb-controller-board-connectors.jpg]]
+
+*** SW19 connector
+
+
+| Pin | Label | Purpose                    | Notes                                                                                   |
+|-----+-------+----------------------------+-----------------------------------------------------------------------------------------|
+|   1 | C.S   | Current sense              | See below for input voltage ranges                                                      |
+|   2 | V.S   | Voltage sense              | See below for input voltage ranges                                                      |
+|   3 | C.C   | Constant current set       | See below for output voltage ranges                                                     |
+|   4 | GND   |                            |                                                                                         |
+|   5 | +5V   | Power for controller board |                                                                                         |
+|   6 | C.V   | Voltage set                | 05.00 V set -> 0.534V, 15.6 V set -> 1.563 V, 32.3 V set -> 3.17, 0.1 of output voltage |
+|   7 | 0/1   | Output switch              | HIGH -> Output OFF, LOW -> Output ON                                                    |
+
+
+The current settings on the power supply maps to the voltage on the C.C pin in the following way:
+
+| Setting [A] | C.C voltage [V] |
+|-------------+-----------------|
+|     0 (MIN) |           0.022 |
+|         0.5 |           0.640 |
+|           1 |           0.914 |
+|         1.5 |           1.188 |
+|           2 |           1.462 |
+|         2.5 |           1.737 |
+|           3 |            2.00 |
+|         3.5 |            2.27 |
+|           4 |            2.55 |
+|         4.5 |            2.82 |
+|           5 |            3.10 |
+|   5.1 (MAX) |            3.15 |
+
+After running a simple linear regression using [[http://www.xuru.org/rt/LR.asp#CopyPaste]] on this data we find out that the relationship between the display and 
+driving voltage is:
+
+C.C voltage [V] = 0.573 * Current [A] + 0.264
+
+Corresponding table mapping the voltage seen on the C.S pin and the current displayed is provided below:
+
+| C.S voltage [V] | Current display [A] |
+|-----------------+---------------------|
+|           1.055 |               0.004 |
+|           1.131 |               0.049 |
+|           1.218 |               0.102 |
+|           1.385 |               0.202 |
+|           1.579 |               0.318 |
+|           1.747 |               0.418 |
+|           1.908 |               0.513 |
+|            2.11 |               0.636 |
+|            2.23 |               0.705 |
+|            2.42 |               0.816 |
+|            2.58 |               0.912 |
+|            2.78 |               1.031 |
+|            3.06 |               1.195 |
+|            3.38 |               1.384 |
+|            3.78 |               1.619 |
+|            4.09 |               1.803 |
+|            4.43 |               2.008 |
+|            4.66 |               2.145 |
+|            4.81 |               2.235 |
+|            4.88 |               2.275 |
+
+I measured only up to 4.88 as I was the top I could reach with a simple potentiometer connected to a 5V rail. But this should be enough to calculate a linear regression:
+
+Current display [A] = 0.593 * C.S voltage [V] - 0.619
+
+The same for mappinv between the voltage on the V.S pin and the voltage diplayed:
+
+| V.S voltage [V] | Voltage display [V] |
+|-----------------+---------------------|
+|           0.156 |                0.21 |
+|           0.192 |                0.27 |
+|           0.301 |                0.46 |
+|           0.417 |                0.66 |
+|           0.516 |                0.84 |
+|           0.607 |                1.00 |
+|           0.726 |                1.21 |
+|           0.859 |                1.44 |
+|           0.919 |                1.54 |
+|           1.055 |                1.78 |
+|           1.138 |                1.92 |
+|           1.208 |                2.05 |
+|           1.273 |                2.17 |
+|           1.332 |                2.27 |
+|           1.397 |                2.39 |
+|           1.476 |                2.52 |
+|           1.574 |                2.69 |
+|           1.658 |                2.85 |
+|           1.738 |                2.99 |
+|           1.816 |                3.11 |
+|           1.896 |                3.25 |
+|            2.03 |                3.49 |
+|            2.10 |                3.61 |
+|            2.17 |                3.72 |
+|            2.21 |                 3.8 |
+|            2.30 |                3.96 |
+|            2.39 |                4.13 |
+|            2.51 |                4.33 |
+|            2.62 |                4.53 |
+|            2.70 |                4.67 |
+|            2.80 |                4.85 |
+|            2.90 |                5.03 |
+|            3.00 |                5.20 |
+|            3.11 |                5.40 |
+|            3.20 |                5.55 |
+|            3.30 |                5.72 |
+|            3.41 |                5.91 |
+|            3.51 |                6.10 |
+|            3.58 |                6.22 |
+|            3.70 |                6.43 |
+|            3.80 |                6.60 |
+|            3.99 |                6.94 |
+|            4.11 |                7.16 |
+|            4.20 |                7.31 |
+|            4.31 |                7.50 |
+|            4.43 |                7.72 |
+|            4.50 |                7.84 |
+|            4.64 |                8.08 |
+|            4.71 |                8.20 |
+|            4.80 |                8.37 |
+|            4.90 |                8.54 |
+|            4.91 |                8.56 |
+
+Voltage display [V] = 1.757238498 * V.S Voltage [V] - 0.0723
+
+*** CON2 connector
+
+The second unpopulated connector on the board is used for programming of the microcontroller.
+
+| Pin | Label | Notes                                                                                      |
+|-----+-------+--------------------------------------------------------------------------------------------|
+|   1 | RESET |                                                                                            |
+|   2 | GND   |                                                                                            |
+|   3 | SWIM  |                                                                                            |
+|   4 | +3.3V | Power *output* from internal voltage regulator. Board needs to be powered using +5V input. |
+
+
+I tried to read the firmware with an STLINKv2 interface but unfortunately the readout is locked.
+

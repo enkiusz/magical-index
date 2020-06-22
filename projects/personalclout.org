@@ -1,0 +1,31 @@
+#+TITLE: Personal Clout
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+#+FILETAGS: noexport
+
+* PC
+
+- encrypted end-to-end
+- no SPOF for access
+- replicated by default (n=2)
+- no new infra reqd
+- gratis if own hw is used || gratis cloud is used
+- easy adding of your own resources
+- usable on very small devices (think smartwatch or nrf24L01 sensors || LORA)
+
+WHAT
+big files (photos, docs, personal movies)
+scanned documents
+leaks
+inbox/ingester
+ebooks/scanned books
+gpx data
+backups (phone, computer)
+credentials
+call logs & call recordings
+emails
+chat logs
+contacts -> dossiers
+places
+calendars
+

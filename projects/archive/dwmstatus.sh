@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# Config
+readonly SYS_BATTERY=${SYS_BATTERY:-BAT0} # The main system battery name used to decide whether to hibernate
+readonly POWER_SUPPLY_ROOT=${POWER_SUPPLY_ROOT:-/sys/class/power_supply} # The sysfs directory used to find all power supplies (AC+batteries)
+
+# Reference: http://robertmuth.blogspot.com/2012/08/better-bash-scripting-in-15-minutes.html
+set -o nounset
+set -o errexit
+set -o pipefail
+
+
+while true; do
+
+############################################################
+# Filesystem info.
+FSINFO=$(df -PT | grep -v tmpfs | tail -n +2 | awk '{printf("%s(%s) ", $7, $6);}' )
+
+############################################################
+# Power supply info
+
+
+# unset SUPPLY_INFO[*]
+# declare -A SUPPLY_INFO
+
+# for power_supply in $POWER_SUPPLY_ROOT/*; do
+
+#     SUPPLY_STATUS="?" # Power supply status is unknown first
+    
+#     # This will happen for all supplies (AC and battery)
+#     SUPPLY_ONLINE_FILE="$power_supply/online"
+#     if [[ -r "$SUPPLY_ONLINE_FILE" ]]; then
+# 	read SUPPLY_ONLINE < ${SUPPLY_ONLINE_FILE}
+# 	case "$SUPPLY_ONLINE" in
+# 	    1) 
+# 		SUPPLY_STATUS="+";;
+# 	    0)
+# 		SUPPLY_STATUS="-";;
+# 	esac
+#     fi
+
+#     # If more specific status is available override it. This will be the 
+#     # case for batteries which report charging/discharging state
+#     SUPPLY_STATUS_FILE="$power_supply/status"
+#     if [[ -r "$SUPPLY_STATUS_FILE" ]]; then
+# 	read SUPPLY_STATUS < ${SUPPLY_STATUS_FILE}
+# 	case "$SUPPLY_STATUS" in
+# 	    Full) 
+# 		SUPPLY_STATUS="=";;
+# 	    Discharging)
+# 		SUPPLY_STATUS="↓";;
+# 	    Charging)
+# 		SUPPLY_STATUS="↑";;
+# 	    Unknown)
+# 		SUPPLY_STATUS="?";;
+# 	esac
+#     fi
+
+#     unset SUPPLY_CAPACITY
+
+#     # Add capacity info if available
+#     SUPPLY_CAPACITY_FILE="$power_supply/capacity"
+#     [[ -r "$SUPPLY_CAPACITY_FILE" ]] && read SUPPLY_CAPACITY < ${SUPPLY_CAPACITY_FILE}
+
+#     SUPPLY_INFO[$power_supply]="$(basename $power_supply)$SUPPLY_STATUS${SUPPLY_CAPACITY:+$SUPPLY_CAPACITY}"
+# done
+
+
+
+############################################################
+# Hibernate if main battery is very low
+# read SYS_BATTERY_CAPACITY < $POWER_SUPPLY_ROOT/$SYS_BATTERY/capacity
+# read SYS_BATTERY_STATUS < $POWER_SUPPLY_ROOT/$SYS_BATTERY/status
+
+# [[ ( "$SYS_BATTERY_CAPACITY" -lt 3 ) && ( "$SYS_BATTERY_STATUS" == "Discharging" ) ]] && sudo systemctl hibernate
+
+
+############################################################
+# Network interfaces status
+
+unset IFACE_INFO[*]
+declare -A IFACE_INFO
+
+IFACE_NAMES=$(ip -o link | grep -v -e link/loopback -e link/sit | awk -F ':' '{print $2;}')
+for iface in $IFACE_NAMES; do
+    # Remove parent interface for VLAN subinterfaces
+    # Example:
+    # $ ip -o link  | grep -v -e link/loopback -e link/sit |  awk -F ':' '{print $2;}'
+    #  inteth
+    #  inteth.200@inteth
+    # $
+    iface=${iface/%@*/}
+    IFACEDIR="/sys/class/net/$iface"
+
+    if [[ -d "${IFACEDIR}" ]]; then
+	read STATE < "${IFACEDIR}/operstate"
+	
+	IFACE_INFO[$iface]="$iface: $STATE"
+
+	if [[ ${STATE} == "up" ]]; then
+	    IWCONFIG=`/usr/sbin/iw dev ${iface} link 2>/dev/null`
+	    
+	    if [[ "${IWCONFIG}" != "Not connected." ]]; then
+		ESSID=`echo "${IWCONFIG}" | grep "SSID" | cut -d" " -f 2-`
+		STRENGTH=`echo "${IWCONFIG}" | grep "signal:" | cut -d" " -f 2-`
+		IFACE_INFO[$iface]="$iface: ${ESSID} ${STRENGTH}"
+	    fi
+	fi
+	
+    fi
+done
+
+# xsetroot -name "${FSINFO} | ${SUPPLY_INFO[*]} | ${IFACE_INFO[*]} | $(date -Is)"
+xsetroot -name "${FSINFO} | ${IFACE_INFO[*]} | $(date -Is)"
+
+sleep 1
+done
+

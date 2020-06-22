@@ -1,0 +1,20 @@
+#+TITLE: Simple RC plane
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+#+FILETAGS: noexport
+
+* A 
+Receiver
+
+CH1 -> AIL1
+CH2 -> ELE
+CH3 -> THR
+CH4 -> RUD
+CH5 -> AIL2
+CH6
+
+AIL MIX:
+OFF -> steruje tylko CH1
+DELTA -> do skrzydła delta bez steru wysokości, osobne serwa po lewej i po prawej CH1 i CH2
+CH1/CH5 mix -> steruje CH1 i CH5 jednocześnie
+

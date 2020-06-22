@@ -1,0 +1,1171 @@
+#+TITLE: Whitestar
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="whitestar/"/>
+#+END_EXPORT
+
+The whitestar project is my attempt at building a reliable and fully automatic wardriving equipment for permanent installation in 
+my car. It's used to constantly gather 802.11 data for research purposes and contribution to the [[https://wigle.net]] crowdsourced WLAN map.
+
+The overall architecture of the system is presented below:
+
+[[file:diagram.svg]]
+
+* The hardware
+
+The whitestar is built around a kektop ([[http://www.ntt.pl/index.php?c=1279][NTT HOME W 300P]] net-top style PC) with an Intel Atom 230 CPU (1.6 GHz), 1 GB of RAM and a small 16GB internal SSD. 
+The kektop has two wireless cards and a GPS connected via USB for wardriving purposes. There is also an ELM327 interface connecting to the car OBD-II port. 
+Additionally, I figured I should store all of the data outside of the internal SSD to increase its life expectancy. For this purpose I connected a 2.5'' 
+500 GB USB hard disk. A laptop HDD was chosen because of better vibration resistance making it possible for it to actually survive working in a car for 
+extended periods of time.
+
+* Power
+
+In the beginning the whitestar was powered directly from the car lighter socket via a step-up converter from Aliexpress (XL6009-based). One of the improvements
+I wanted to make after using it for a while was to add some basic UPS capability to it. This is because the cigarette lighter power source has some drawbacks 
+in a car. There are some situations where the voltage there drops causing the computer to reboot loosing packet capture ability for the amount of time it 
+takes to boot up again. Also, short stops in your trip (for example gas stations) should not cause the packet capture to stop and restart. 
+
+So there are two problems here. The first one is a momentary drop in voltage as the engine is started (which reboots the kektop). The second problem are short 
+stops (think gas station) where it would be nice to keep the kektop running for a few minutes. To solve both of those I acquired a suitable battery. 
+In the spirit of efficiency I simply purchased a powerbank with a 19 V laptop output that can supply enough power to run the whitestar for a few minutes. 
+You would find it hard to be more generic than this brand:
+
+[[file:powerbank.jpg]]
+
+During some initial attempts at connecting all of this together I figured out that I can't just plug the powerbank to car 12 V to keep it constantly charging and 
+power the whitestar from it's 19 V output. This is because the charger built into the powerbank will not be able to keep up and keep the Li-ION battery charged.
+A different approach is therefore needed, where a relay will switch the load from car 12V to the battery and vice versa. To keep the kektop running during this time
+I figured I would need a supercap bank. Therefore I bought and built it:
+
+[[file:supercaps-bag.jpg]]
+
+[[file:supercaps-build1.jpg]]
+
+The resulting capacitor bank has 10F@27V (10 x 10F@2.7V). It can power the kektop for a good few seconds. So I decided to build a first version of the UPS to test
+it out, without the battery and relays first. Just the supercaps so that I would see will the kektop survive an engine start without a reboot.
+
+[[file:powersupply-build1.jpg]]
+
+For now the connections are:
+
+Cat 12V input <-> 10F@27V supercaps <-> SMPS <-> 19V <-> kektop
+
+
+
+* Software setup
+
+The software that I used was based on a clean Xubuntu installation with a GUI. After that I added some packages and changed some configuration options. 
+All of the scripts mentioned are available on github: [[https://github.com/mgrela/whitestar]]
+Below is a step-by-step guide for installing everything:
+
+** BIOS setup
+
+First we need to enter the BIOS of the machine and set up two important options:
+- enable automatic poweron on AC failure
+- disable all other booting mechanisms except internal HDD
+
+** OS installation
+
+The OS installed on the device is Xubuntu 15.10:
+
+#+BEGIN_SRC sh
+$ lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 15.10
+Release:	15.10
+Codename:	wily
+#+END_SRC
+
+** Disable console blanking and system splash screen
+
+Console blanking can be a nuisance when you connect a monitor to the PC to watch the kismet monitor. Also, when the PC boots there usually
+won't be a monitor attached anyway so we can get rid of the splashscreen. We can do both of these things by editing the grub configuration in
+/etc/default/grub
+
+#+BEGIN_SRC sh
+$ cat /etc/default/grub | grep CMDLINE_LINUX_DEFAULT
+#GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet consoleblank=0"
+#+END_SRC
+
+We remove the 'splash' option and add a 'consoleblank=0' to disable console blanking. Don't forget to run 'update-grub' to generate the 
+config files in /boot/grub.
+
+** Change default systemd target
+
+The default systemd target for the Xubuntu installation is graphical.target. This will start the X server and launch a graphical login screen.
+We do not want that so we need to change the default target that systemd tries to reach when it boots. 
+
+#+BEGIN_SRC sh
+# systemctl set-default multi-user.target
+#+END_SRC
+
+The multi-user.target provides us with an old-skool Linux text-based login.
+
+** Setup udev rules
+
+We need to setup some udev rules so that the devices which we will use in configuration of other parts of whitestar will have some defined 
+names. For example, the GPS unit should be always named /dev/gps, the OBD-II device should be always called /dev/odb and so on. Also, the
+network devices used for 802.11 scanning should have static kismet UUID identifiers attached. These files are put in /etc/udev/rules.d
+
+*** /etc/udev/rules.d/30-whitestar-devices.rules
+#+BEGIN_SRC
+# WLAN cards
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="00:c0:ca:57:10:89", ATTR{type}=="1", NAME="alfa", ENV{KISMET_UUID}="39ed09aa-2dcd-4eab-b460-781de88f79d6"
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="00:15:6d:84:1a:78", ATTR{type}=="1", NAME="sr71", ENV{KISMET_UUID}="e8d964d0-9409-408f-a1d7-01e841bae7ed"
+
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="80:1f:02:8f:77:6c", ATTR{type}=="1", NAME="chibi", ENV{KISMET_UUID}="fb187219-afd4-4be8-871a-220d16fb5cb0"
+
+# GPS receiver
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="0001", SYMLINK+="gps"
+
+# OBD-II cable
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="A6008qzE", SYMLINK+="obd"
+#+END_SRC
+
+The first three rules set up a KISMET_UUID property for each device we want to use for packet capture. We match the card MAC address as well as its type
+to prevent the monitor devices created by kismet from running the rule a second time. Next rules setup static symlinks for the GPS receiver and OBD-II interface.
+
+*** /etc/udev/rules.d/50-kismet.rules
+#+BEGIN_SRC
+SUBSYSTEM=="net", ACTION=="add", ENV{KISMET_UUID}=="?*", RUN+="/usr/local/bin/kismet-add-source $name:uuid=$env{KISMET_UUID}"
+SUBSYSTEM=="net", ACTION=="remove", ENV{KISMET_UUID}=="?*", RUN+="/usr/local/bin/kismet-remove-source $env{KISMET_UUID}"
+#+END_SRC
+
+Here we specify two scripts that will be run when the previously selected network devices appear or disappear (for example when the USB cable disconnects by 
+accident). These scripts will add or remove the interface as a kismet source which is needed for kismet not going crazy. We can verify if these rules are working 
+properly by connecting the devices and looking if all of the properties have been set.
+
+** Start the sshd and avahi-daemon services
+
+The avahi-daemon and sshd services will allow you to easily connect to whitestar via ethernet using only IPv6 link-local addressing. This will work in every case
+where a PC is simply connected to the whitestar with a Ethernet cable. Enable and start both services using the standard systemctl commands:
+
+#+BEGIN_SRC sh
+# systemctl enable ssh avahi-daemon
+Synchronizing state of ssh.service with SysV init with /lib/systemd/systemd-sysv-install...
+Executing /lib/systemd/systemd-sysv-install enable ssh
+Synchronizing state of avahi-daemon.service with SysV init with /lib/systemd/systemd-sysv-install...
+Executing /lib/systemd/systemd-sysv-install enable avahi-daemon
+# systemctl start ssh avahi-daemon
+#+END_SRC
+
+** Copy ssh key
+
+Use ssh-copy-id to copy your public SSH key to the authorized_keys of the user that will run the kismet services.
+
+** Install Python bindings for kismet
+
+In order to run the whitestar watchdog script you need to install the [[https://github.com/PaulMcMillan/kismetclient][kismetclient]] Python library using pip.
+
+** Install kismet and gpsd
+
+Install the kismet and gpsd packages using "apt".
+
+** Edit kismet.conf server configuration file
+
+Edit the kismet server configuration file, change a few of the options listed below. The other parameters are ok with their default values.
+
+/etc/kismet/kismet.conf
+#+BEGIN_SRC 
+# Prefix of where we log (as used in the logtemplate later)
+# logprefix=/some/path/to/logs
+logprefix=/var/log/kismet
+
+[...]
+
+# Do we have a GPS?
+gps=true
+# Do we use a locally serial attached GPS, or use a gpsd server, or
+# use a fixed virtual gps?
+# (Pick only one)
+gpstype=gpsd
+# Host:port that GPSD is running on.  This can be localhost OR remote!
+gpshost=localhost:2947
+
+[...]
+
+# How often (in seconds) do we write all our data files (0 to disable)
+writeinterval=10
+
+[...]
+
+# File types to log, comma seperated.  Built-in log file types:
+# alert                         Text file of alerts
+# gpsxml                        XML per-packet GPS log
+# nettxt                        Networks in text format
+# netxml                        Networks in XML format
+# pcapdump                      tcpdump/wireshark compatible pcap log file
+# string                        All strings seen (increases CPU load)
+#logtypes=pcapdump,gpsxml,netxml,nettxt,alert
+logtypes=alert,netxml,gpsxml
+
+[...]
+
+# Default log title
+logdefault=whitestar
+
+[...]
+#+END_SRC
+
+These settings have the following effect:
+  - store logs in /var/log which which is where the hard disk is mounted
+  - enable using a GPS and make it reconnect to gpsd if the connection is lost
+  - make the kismet server to flush all logs every 10 seconds, this prevents the log data from being lost when power is cut. This happens frequently in a car without battery backup for the whitestar.
+  - store alrts, networks and GPS position logs, do not store pcap dumps, these take up too much space
+  - set the log title to "whitestar", the title is used to build log filenames
+
+** Create a user to run the kismet
+
+We need to create a nonprivileged user to run the kismet monitor. In my whitestar this user is called 'enki'.
+
+** Setup log storage on external hard disk
+
+You should create two partitions (or better LVs) on the external HDD. One of those will be for the swap partition, the other we will mount as /var/log.
+
+** Make journal dir in /var/log
+
+
+If the /var/log/journal directory exists and systemd-journald has the default configuration "Storage=auto" it will store the journal in /var/log/journal. This is 
+what we want as the /var/log filesystem will be stored on the external HDD which will provide us with a nice way to troubleshoot or collect statistics from the
+system by just unplugging the drive and taking it with us.
+
+** Setup fs and swap
+
+Setup the two LVs as swap and /var/log filesystem in /etc/fstab. Remove the original swap device on the flash drive, it's a massively bad idea to put swap on flash.
+Take care to include the "nofail" flag in the /var/log filesystem entry. This prevents systemd from creating a "RequiredBy" dependency for local-fs.target which 
+in turn makes the system drop to emergency mode if the filesystem is not available (for example when the HDD is not connected).
+
+/etc/fstab
+#+BEGIN_SRC 
+UUID="<UUID1>"	none		swap	sw,nofail			0	0
+UUID="<UUID2>"	/var/log	auto	defaults,relatime,nofail	0	0
+#+END_SRC
+
+The UUID1 and UUID2 fields are UUID identifiers (from the 'blkid' command) for the swap device and the /var/log filesystem we set up earlier.
+
+** Systemd units for custom services
+
+I have created some custom systemd services for:
+  - kismet server
+  - kismet client acting as monitor and running on /dev/tty1
+  - the watchdog which checks the state of all other parts and reports the status on the LED monitor
+  - the archiver which moves old kismet logs from the main kismet directory to the archive directory. This allows for easier automatic extraction.
+  - the OBD-II data logger
+
+/etc/systemd/system/kismet-server.service
+#+BEGIN_SRC ini
+[Unit]
+Description=Kismet server
+RequiresMountsFor=/var/log/kismet
+
+[Service]
+ExecStart=/usr/bin/kismet_server -s
+ExecStartPost=/usr/local/bin/kismet-add-all-sources
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+
+The kismet-server systemd service file launches the kismet server as soon as /var/log/kismet becoms available (the external HDD needs to be mounted for this).
+After it starts it launches a script which adds all wireless interfaces marked before using udev rules as sources to kismet. Furthermore kismet server is restarted
+when it crashes (which happens more often than you'd imagine).
+
+/etc/systemd/system/kismet-monitor.service
+#+BEGIN_SRC ini
+[Unit]
+Description=Kismet monitor
+
+[Service]
+ExecStart=/usr/bin/kismet_client
+User=enki
+Group=enki
+Restart=always
+RestartSec=10
+StandardOutput=tty
+TTYPath=/dev/tty1
+
+[Install]
+WantedBy=basic.target
+#+END_SRC
+
+The kismet monitor runs bound to the /dev/tty1 terminal which means, that it should always be visible when you connect a monitor to the whitestar. It's started
+as the user we created before ('enki' in our case) and is always restarted when it breaks.
+
+/etc/systemd/system/whitestar-watchdog.service
+#+BEGIN_SRC ini
+[Unit]
+Description=Whitestar watchdog
+
+[Service]
+ExecStart=/usr/local/bin/whitestar-watchdog.py
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+
+The watchdog script monitors important aspects of whitestar operation and displays this information as status LEDs on the [[file:../../hardware/random-led-board/][random board of LEDs]] attached to the 
+whitestar PC via USB.
+
+/etc/systemd/system/whitestar-archiver.service
+#+BEGIN_SRC ini
+[Unit]
+Description=Gathered data archiver
+RequiresMountsFor=/var/log/kismet /var/log/archive
+After=kismet-server.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/archive-kismet-data.sh
+
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+
+The archiver script makes tarfiles out of all previously gathered kismet logs and moves them from /var/log/kismet to /var/log/archive. There they are available for 
+pickup after connecting to whitestar using the 'archiver' account.
+
+/etc/systemd/system/obdgpslogger.service
+#+BEGIN_SRC ini
+[Unit]
+Description=OBD GPS logger
+RequiresMountsFor=/var/log/obdgpslogger
+Requires=dev-obd.device
+
+[Service]
+ExecStart=/usr/bin/obdgpslogger -s /dev/obd -b 38400 -t -l /var/log/obdgpslogger/serial.log -d /var/log/obdgpslogger/db -i temp,rpm,vss,maf,throttle -u /var/log/obdgpslogger/out.log
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+
+The obdgpslogger is used to log OBD-II data. The baudrate of the OBD-II interface depends on the manufacturer and should be adjusted (try different baudrates using 'picocom'
+until you get one where you get an answer from the chip for the 'ATZ' command). The obdgpslogger waits for both the external HDD filesystem as well as for the ELM327
+device to appear. I'm logging everything including the serial port log for debugging purposes.
+
+** Enable all services to start at boot
+
+#+BEGIN_SRC 
+systemctl enable kismet-monitor.service kismet-server.service obdgpslogger.service whitestar-archiver.service whitestar-watchdog.service
+#+END_SRC
+
+** Disable NetworkManager
+
+As we won't be using NetworkManager but instead rely on systemd-networkd we can disable the NetworkManager service:
+
+#+BEGIN_SRC 
+# systemctl disable NetworkManager
+#+END_SRC
+
+** Systemd .network for LAN link
+
+The Ethernet device on the whitestar PC will be used to make an SSH connection for debugging and downloading of the gathered wardriving data. For this we need for
+some service to bring the internal Ethernet device up when a cable is plugged. The simplest way to do this (as we already have systemd) is to create a simple "connection"
+description for systemd.
+
+/etc/systemd/network/ether.network
+#+BEGIN_SRC ini
+[Match]
+MACAddress=e0:cb:4e:2e:2b:70
+
+[Network]
+Description=Local Ethernet network
+#+END_SRC
+
+What this network file will do is bring up the internal Ethernet interface (specified using it's MAC address) using only IPv6 local addressing. This is convenient for
+us as it allows to use the connection even when we just plug in a cable straight from the whitestar to a PC without a DHCP server present.
+
+** Setup archive directory
+
+Make a /var/log/archive directory so that the archiver can store the kismet logs for retrieval.
+
+** Setup archive file transfer account
+
+Create a user called 'archive' with the home directory pointing to /var/log/archive. This user will be used to download the log files from the whitestar via SSH for
+further processing. Set up SSH public key authentication for this account. Restrict it to only have sftp accessible, the following sshd_config snippet should come in handy:
+
+#+BEGIN_SRC 
+Match User archive
+     KbdInteractiveAuthentication no
+     PermitTTY no
+     ForceCommand internal-sftp
+#+END_SRC
+
+** Data transfer from whitestar
+
+There are two approaches now when dealing with data transfer from whitestar. The first is the legacy way in which I unplug and take home the HDD. This one is described 
+below. The new way uses a 3G dongle to automatically upload the data to a server via rsync+ssh. This is now implemented and described in the section "Mothership uplink".
+
+In order to get the data from whitestar and onto wigle.net I unplug the HDD and take it home. There, after plugging it into my workstation a number of automatic 
+steps are performed in the background by systemd resulting in the relevant files being copied from the HDD and uploaded to wigle.net. All of the code needed to 
+do this is available in [[https://github.com/mgrela/whitestar-host]] and [[https://github.com/mgrela/tools]]
+
+First, we need a way to launch code when the external HDD is connected to the PC. This is accomplished using the following udev file in /etc/udev/rules.d:
+
+#+BEGIN_SRC
+$ cat /etc/udev/rules.d/99-whitestar-disk.rules 
+ACTION=="add", SUBSYSTEM=="block", ATTR{partition}=="<PARTNO>", ATTRS{vendor}=="<HDD VENDOR> ", ATTRS{model}=="<HDD MODEL> ", TAG+="systemd", ENV{MANAGER_USER_WANTS}="whitestar-downloader.service"
+#+END_SRC
+
+The PARTNO, HDD VENDOR AND HDD MODEL parameters are used to identify a particular block device on the external drive, you can easily check for the relevant 
+attributes using the udevadm info -a command:
+
+#+BEGIN_SRC
+$ udevadm info -a --name=/dev/sdb2
+[...]
+  looking at device '/devices/pci0000:00/0000:00:1a.7/usb1/1-2/1-2:1.0/host6/target6:0:0/6:0:0:0/block/sdb/sdb2':
+    ATTR{partition}=="2"
+[...]
+  looking at parent device '/devices/pci0000:00/0000:00:1a.7/usb1/1-2/1-2:1.0/host6/target6:0:0/6:0:0:0':
+    ATTRS{model}=="<HDD MODEL> "
+[...]
+    ATTRS{vendor}=="<HDD VENDOR> "
+#+END_SRC
+
+These attributes belong to different sysfs nodes (a partition and a SCSI device) but because the ATTRS{} keyword in udev rules looks for attributes up in the 
+device hierarchy this works. Ok, so now when the external HDD is plugged in the "whitestar-downloader.service" unit will be started by the user's systemd instance.
+I'm not sure if this will be the instance of the user that is currently logged in or any user which has this service installed. 
+
+In order to allow the user to mount the external HDD in a location expected by the script (/mnt/whitestar) an fstab entry needs to be created:
+
+#+BEGIN_SRC
+$ cat /etc/fstab | grep whitestar
+/dev/disk/by-uuid/b0974a72-8dcd-4b82-9338-85bcdbd2701c	/mnt/whitestar	auto	defaults,relatime,nofail,noauto,user	0 0
+#+END_SRC
+
+In order to prevent this device from being automatically mounted when plugged in the 'noauto' flag is defined.
+
+The whitestar-downloader.service unit takes care of moving the files we want from the external HDD to a directory in our $HOME. 
+The unit just runs a companion script:
+
+#+BEGIN_SRC
+$ cat ~/.config/systemd/user/whitestar-downloader.service 
+[Unit]
+Description=Whitestar files downloader
+
+[Service]
+Type=oneshot
+ExecStart=/home/enki/bin/whitestar-dl.sh
+#+END_SRC
+
+#+BEGIN_SRC
+$ cat ~/bin/whitestar-dl.sh 
+#!/bin/sh
+
+readonly SRCDIR=/mnt/whitestar
+readonly DESTDIR=$HOME/devices/whitestar
+readonly DIRS="archive"
+mount "$SRCDIR"
+shopt -q nullglob
+
+echo "Downloading files from '$SRCDIR' to '$DESTDIR'" >&2
+
+pushd "$SRCDIR"
+for path in $DIRS; do
+    tgtdir="$DESTDIR/$path"
+    mkdir -p "$tgtdir"; pushd "$tgtdir"; rsync --remove-source-files -av "$SRCDIR/$path/" "$DESTDIR/$path"; popd
+done
+popd
+
+umount "$SRCDIR" || true
+#+END_SRC
+
+After this unit runs the files end up being copied to $HOME/devices/whitestar/archive. The progress can be tracked in the journal:
+
+#+BEGIN_SRC
+wrz 03 23:23:22 shoggoth slim[873]: "/org/freedesktop/UDisks2/block_devices/sdb" has new interfaces: ("org.freedesktop.UDisks2.Block", "org.freedesktop.UDisks2.PartitionTable")
+wrz 03 23:23:22 shoggoth slim[873]: "/org/freedesktop/UDisks2/block_devices/sdb1" has new interfaces: ("org.freedesktop.UDisks2.Block", "org.freedesktop.UDisks2.Partition", "org.freedesktop.UDisks2.Swapspace")
+wrz 03 23:23:22 shoggoth systemd[929]: Starting Whitestar files downloader...
+wrz 03 23:23:22 shoggoth slim[873]: "/org/freedesktop/UDisks2/block_devices/sdb2" has new interfaces: ("org.freedesktop.UDisks2.Block", "org.freedesktop.UDisks2.Filesystem", "org.freedesktop.UDisks2.Partition")
+wrz 03 23:23:22 shoggoth kernel: EXT4-fs (sdb2): mounted filesystem with ordered data mode. Opts: (null)
+wrz 03 23:23:22 shoggoth whitestar-dl.sh[31584]: Downloading files from '/mnt/whitestar' to '/home/enki/devices/whitestar'
+wrz 03 23:23:22 shoggoth whitestar-dl.sh[31584]: /mnt/whitestar ~
+wrz 03 23:23:22 shoggoth whitestar-dl.sh[31584]: ~/devices/whitestar/archive /mnt/whitestar ~
+wrz 03 23:23:22 shoggoth whitestar-dl.sh[31584]: sending incremental file list
+wrz 03 23:23:23 shoggoth whitestar-dl.sh[31584]: rsync: opendir "/mnt/whitestar/archive/.ssh" failed: Permission denied (13)
+wrz 03 23:23:23 shoggoth whitestar-dl.sh[31584]: ./
+wrz 03 23:23:23 shoggoth whitestar-dl.sh[31584]: kismet-2016-07-17T18:22:30+0000.tar
+wrz 03 23:23:23 shoggoth whitestar-dl.sh[31584]: sent 409,895 bytes  received 47 bytes  273,294.67 bytes/sec
+wrz 03 23:23:23 shoggoth whitestar-dl.sh[31584]: total size is 409,600  speedup is 1.00
+wrz 03 23:23:23 shoggoth whitestar-dl.sh[31584]: rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1178) [sender=3.1.2]
+wrz 03 23:23:23 shoggoth whitestar-dl.sh[31584]: /mnt/whitestar ~
+wrz 03 23:23:23 shoggoth whitestar-dl.sh[31584]: ~
+wrz 03 23:23:23 shoggoth systemd[929]: Started Whitestar files downloader.
+#+END_SRC
+
+The $HOME/devices/whitestar/archive directory is watched for new files by a systemd .path unit:
+
+#+BEGIN_SRC
+$ cat ~/.config/systemd/user/whitestar-archive.path 
+[Unit]
+Description=Whitestar archive path watcher
+
+[Path]
+PathExistsGlob=/home/enki/devices/whitestar/archive/kismet-*.tar
+Unit=wigle-uploader.service
+
+[Install]
+WantedBy=paths.target
+#+END_SRC
+
+This unit starts the wigle.net uploader tool when new files are being placed in the archive directory on our workstation. The wigle-uploader.service is started which
+just runs a helper script:
+
+#+BEGIN_SRC
+
+$ cat ~/.config/systemd/user/wigle-uploader.service 
+[Unit]
+Description=Wigle.net uploader
+
+[Service]
+Type=oneshot
+Environment="WIGLE_USERNAME=enkiusz" "WIGLE_PASSWORDFILE=%h/.config/wigle-uploader.password"
+ExecStart=/home/enki/bin/wigle-uploader.sh
+#+END_SRC
+
+#+BEGIN_SRC
+$ cat ~/bin/wigle-uploader.sh 
+#!/bin/sh
+
+readonly SRCDIR=$HOME/devices/whitestar/archive
+shopt -q nullglob
+
+if [ -z "$WIGLE_USERNAME" -o -z "$WIGLE_PASSWORDFILE" ]; then
+    echo "WIGLE_USERNAME and WIGLE_PASSWORD environment variables need to be set" >&2
+    exit 1
+fi
+
+echo "Uploading files inside '$SRCDIR' as '$WIGLE_USERNAME'" >&2
+
+# Gzip uncompressed tars, wigle.net only processes .tar.gz files properly
+for t in $SRCDIR/kismet-*.tar; do
+    gzip $t
+done
+
+systemd-inhibit --what=idle $HOME/bin/wiglenet-uploader.py -l "$WIGLE_USERNAME" -p "$WIGLE_PASSWORDFILE" --delete-imported $SRCDIR/kismet-*.tar.gz
+#+END_SRC
+
+The wiglenet-uploader.py script is available in [[https://github.com/mgrela/tools][my tools repo]]. The password is stored in a file outside of the usual configuaration files so that I can easily 
+share them here without the fear of any leaks ;). This is very good practice which I recommend to anyone who is publishing his dotfiles or other "personal" config
+files as public repositories. What results in deploying all of this good stuff is that .tar files placed in the $HOME/devices/whitestar/archive directory get 
+automatically uploaded to wigle.net. As before, the progress can be tracked using the journal. An example run is provided below:
+
+#+BEGIN_SRC
+wrz 03 23:23:23 shoggoth systemd[929]: Starting Wigle.net uploader...
+wrz 03 23:23:23 shoggoth wigle-uploader.sh[31592]: Uploading files inside '/home/enki/devices/whitestar/archive' as 'enkiusz'
+wrz 03 23:23:23 shoggoth wigle-uploader.sh[31592]: INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): wigle.net
+wrz 03 23:23:24 shoggoth wigle-uploader.sh[31592]: INFO:root:Successfuly authenticated to 'https://wigle.net/' as identity 'enkiusz', got session id '680063891'
+wrz 03 23:23:24 shoggoth wigle-uploader.sh[31592]: INFO:root:Uploading a batch of '1' source files
+wrz 03 23:23:24 shoggoth wigle-uploader.sh[31592]: INFO:root:Uploading source file '/home/enki/devices/whitestar/archive/kismet-2016-07-17T18:22:30+0000.tar.gz' (19387 bytes)
+wrz 03 23:23:25 shoggoth wigle-uploader.sh[31592]: INFO:root:Filename '1472937805_kismet-2016-07-17T18_22_30_00000' from source '/home/enki/devices/whitestar/archive/kismet-2016-07-17T18:22:30+0000.tar.gz' has transid '20160903-00637'
+wrz 03 23:23:25 shoggoth wigle-uploader.sh[31592]: INFO:root:Filename '1472937805_kismet-2016-07-17T18_22_30_00001whitestar-20160717-20-19-55-1.netxml' from source '/home/enki/devices/whitestar/archive/kismet-2016-07-17T18:22:30+0000.tar.gz' has transid '20160903-00638'
+wrz 03 23:23:25 shoggoth wigle-uploader.sh[31592]: INFO:root:Filename '1472937805_kismet-2016-07-17T18_22_30_00002whitestar-20160717-20-19-55-1.gpsxml' from source '/home/enki/devices/whitestar/archive/kismet-2016-07-17T18:22:30+0000.tar.gz' has transid '20160903-00639'
+wrz 03 23:23:25 shoggoth wigle-uploader.sh[31592]: INFO:root:Filename '1472937805_kismet-2016-07-17T18_22_30_00003whitestar-20160717-20-19-55-1.alert' from source '/home/enki/devices/whitestar/archive/kismet-2016-07-17T18:22:30+0000.tar.gz' has transid '20160903-00640'
+wrz 03 23:23:25 shoggoth wigle-uploader.sh[31592]: INFO:root:4 transactions from current batch still pending, total 0 transactions completed successfuly, total 0 transactions failed
+wrz 03 23:23:35 shoggoth wigle-uploader.sh[31592]: INFO:root:4 transactions from current batch still pending, total 0 transactions completed successfuly, total 0 transactions failed
+wrz 03 23:23:46 shoggoth wigle-uploader.sh[31592]: INFO:root:4 transactions from current batch still pending, total 0 transactions completed successfuly, total 0 transactions failed
+wrz 03 23:23:56 shoggoth wigle-uploader.sh[31592]: INFO:root:4 transactions from current batch still pending, total 0 transactions completed successfuly, total 0 transactions failed
+wrz 03 23:24:06 shoggoth wigle-uploader.sh[31592]: ERROR:root:Processing of 'kismet-2016-07-17T18_22_30_00000' has failed
+wrz 03 23:24:06 shoggoth wigle-uploader.sh[31592]: INFO:root:3 transactions from current batch still pending, total 0 transactions completed successfuly, total 1 transactions failed
+wrz 03 23:24:16 shoggoth wigle-uploader.sh[31592]: ERROR:root:Processing of 'T18_22_30_00003whitestar-20160717-20-19-55-1.alert' has failed
+wrz 03 23:24:16 shoggoth wigle-uploader.sh[31592]: INFO:root:Processing of '/home/enki/devices/whitestar/archive/kismet-2016-07-17T18:22:30+0000.tar.gz' has been successful, 0 new WiFi APs w/ GPS (0 total WiFi APs w/ GPS)
+wrz 03 23:24:16 shoggoth wigle-uploader.sh[31592]: INFO:root:Processing of '/home/enki/devices/whitestar/archive/kismet-2016-07-17T18:22:30+0000.tar.gz' has been successful, 0 new WiFi APs w/ GPS (0 total WiFi APs w/ GPS)
+wrz 03 23:24:16 shoggoth wigle-uploader.sh[31592]: INFO:root:Deleting source file '/home/enki/devices/whitestar/archive/kismet-2016-07-17T18:22:30+0000.tar.gz' with '2' files successfuly imported ('2' failures)
+wrz 03 23:24:16 shoggoth wigle-uploader.sh[31592]: INFO:root:0 transactions from current batch still pending, total 2 transactions completed successfuly, total 2 transactions failed
+wrz 03 23:24:26 shoggoth systemd[929]: Started Wigle.net uploader.
+#+END_SRC
+
+As you can see there are 0 new APs discovered as this is not the first time I have performed this test ;).
+
+** Mothership uplink
+
+Because we now live in a world of serious IoT the whitestar needed a uplink to the mothership in order to stay edgy :). This is now implemented to upload the gathered
+log files directly to a server. The solution has a few different parts:
+
+- a Sierra Wireless 307 USB 3G modem connected via USB to the whitestar
+- a PPP connection using a custom optimized chat script that gets activated every time the whitestar boots
+- a OpenVPN client which connects to my router
+- an rsync script which sends the content of the archive directory (/var/log/archive) to a remote server behind my VPN.
+
+First, because we don't use ModemManager and any of that *and* the Sierra Wireless modem exposes 4 different ttyUSB ports we need to simplify things for pppd.
+We match the UART port that is the AT interface and mark it to be /dev/modem:
+
+#+BEGIN_SRC
+root@whitestar:~# cat /etc/udev/rules.d/30-sierra-wireless-307.rules 
+# Sierra Wireless 307 3G modem
+SUBSYSTEM=="tty", SUBSYSTEMS=="usb", DRIVERS=="sierra", ATTRS{bNumEndpoints}=="03", SYMLINK+="modem"
+
+root@whitestar:~# 
+#+END_SRC
+
+This device is used by a pppd and chat script to establish a GPRS connection:
+
+#+BEGIN_SRC
+root@whitestar:~# cat /etc/chatscripts/aero2 
+ABORT 'BUSY'
+ABORT 'NO CARRIER'
+ABORT 'ERROR'
+ABORT '+CME ERROR: 100'
+'' ATZ
+OK ATH
+OK ATE1
+OK AT+CGDCONT=1,"IP","darmowy"
+OK ATD*99***1#
+CONNECT
+#+END_SRC
+
+#+BEGIN_SRC
+root@whitestar:~# cat /etc/ppp/peers/aero2 
+/dev/modem
+115200
+debug
+maxfail 0
+persist
+noauth
+noipdefault
+defaultroute
+usepeerdns
+user darmowy 
+password darmowy
+connect '/usr/sbin/chat -v -t 50 -f /etc/chatscripts/aero2'
+#+END_SRC
+
+There is a systemd service unit overseeing the pppd process:
+
+#+BEGIN_SRC
+root@whitestar:~# cat /etc/systemd/system/ppp@.service 
+[Unit]
+Description=PPP connection to %I
+Requires=dev-modem.device
+
+[Service]
+ExecStart=/usr/sbin/pppd nodetach call %I
+
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+
+This gives us an almost always on PPP connection:
+
+#+BEGIN_SRC
+root@whitestar:~# ip a show dev ppp0
+3: ppp0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UNKNOWN group default qlen 3
+    link/ppp 
+    inet x.x.x.x peer 10.64.64.64/32 scope global ppp0
+       valid_lft forever preferred_lft forever
+#+END_SRC
+
+On top of this an openvpn client configuration file is used
+
+#+BEGIN_SRC
+root@whitestar:~# cat /etc/openvpn/kraken-client.conf 
+verb 3
+client
+remote kraken.strangled.net 1194
+proto tcp
+remote-cert-tls server
+float
+comp-lzo
+#redirect-gateway
+ping-restart 30
+
+<ca>
+[...]
+</ca>
+<cert>
+[...]
+</cert>
+key kraken-client.key
+<dh>
+[...]
+</dh>
+
+dev tun.bukavpn
+#+END_SRC
+
+Also supervised by a systemd unit file. This time it's the standard openvpn@.service shipped with debian. This in turn gives us an almost always-on TUN connection
+to the VPN that gives us access to a backend server for collecting the wardriving logs.
+
+#+BEGIN_SRC
+# ip a show dev tun.bukavpn
+6: tun.bukavpn: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UNKNOWN group default qlen 100
+    link/none 
+    inet 10.100.0.3/24 brd 10.100.0.255 scope global tun.bukavpn
+       valid_lft forever preferred_lft forever
+#+END_SRC
+
+All of this is used to run an rsync which uploads contents of /var/log/archive to a remote server. This is acomplished by a simple script that simply attempts the rsync
+command every 2 minutes. It doesn't care about failures, it just retries on failure. Also, the files that were successfuly transferred are removed from the source dir
+which is useful.
+
+#+BEGIN_SRC
+# cat /usr/local/bin/whitestar-uploader.sh 
+#!/bin/sh
+
+while true; do
+	rsync --remove-source-files -av /var/log/archive whitestar@172.20.171.116:log
+	sleep 120
+done
+#+END_SRC
+
+This script is started by a systemd unit taking care of running it only after the archiver script has ended collecting the completed capture files from /var/log/kismet.
+
+#+BEGIN_SRC
+root@whitestar:~# cat /etc/systemd/system/whitestar-uploader.service 
+[Unit]
+Description=Whitestar watchdog
+After=whitestar-archiver.service
+
+[Service]
+ExecStart=/usr/local/bin/whitestar-uploader.sh
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+root@whitestar:~# 
+#+END_SRC
+
+On the mothership server rssh is used to restrict the uploading account to file access only.
+
+I know that the whole VPN bit seems a bit overengineered, but meh. You can simplify it yourself if you want.
+Also, now the files land on the mothership server and nothing uploads them anywhere, something that is next on my work list :).
+
+** Final time measurements
+
+Time to Capture == 28 sec from poweron
+
+19 seconds bios,
+
+#+BEGIN_SRC 
+# systemd-analyze 
+Startup finished in 9.242s (kernel) + 13.000s (userspace) = 22.242s
+#+END_SRC
+
+#+BEGIN_SRC 
+# systemd-analyze blame
+          4.229s systemd-networkd-resolvconf-update.service
+          2.602s kismet_archiver.service
+          2.386s dev-sda1.device
+          2.238s systemd-journal-flush.service
+          2.098s systemd-networkd.service
+          1.225s networking.service
+          1.111s gpsdctl@ttyUSB0.service
+           878ms systemd-logind.service
+           592ms systemd-journald.service
+           573ms systemd-udev-trigger.service
+           571ms kismet_server.service
+           569ms console-setup.service
+           547ms grub-common.service
+           531ms apport.service
+           521ms ondemand.service
+           469ms systemd-user-sessions.service
+           445ms user@1000.service
+           440ms pppd-dns.service
+           423ms lm-sensors.service
+           344ms var-log.mount
+           342ms systemd-modules-load.service
+           337ms systemd-tmpfiles-setup-dev.service
+           281ms avahi-daemon.service
+           202ms systemd-udevd.service
+           165ms speech-dispatcher.service
+           150ms systemd-sysctl.service
+           124ms alsa-restore.service
+           103ms systemd-remount-fs.service
+            96ms dev-mqueue.mount
+            95ms kmod-static-nodes.service
+            92ms systemd-update-utmp.service
+            82ms plymouth-quit-wait.service
+            76ms systemd-update-utmp-runlevel.service
+            74ms plymouth-quit.service
+            73ms ufw.service
+            70ms plymouth-read-write.service
+            62ms dev-disk-by\x2duuid-9152004c\x2d0317\x2d45c0\x2d9482\x2d1baa6c4e81fa.swap
+            60ms systemd-vconsole-setup.service
+            58ms sys-kernel-debug.mount
+            56ms sys-fs-fuse-connections.mount
+            53ms systemd-timesyncd.service
+            49ms systemd-rfkill@rfkill2.service
+            46ms systemd-tmpfiles-setup.service
+            45ms rc-local.service
+            37ms dns-clean.service
+            36ms ureadahead-stop.service
+            28ms resolvconf.service
+            26ms systemd-random-seed.service
+            22ms systemd-rfkill@rfkill0.service
+            22ms systemd-rfkill@rfkill1.service
+            16ms systemd-backlight@backlight:acpi_video0.service
+
+# systemd-analyze critical-chain
+The time after the unit is active or started is printed after the "@" character.
+The time the unit takes to start is printed after the "+" character.
+
+multi-user.target @9.919s
+└─rc-local.service @8.830s +45ms
+  └─network.target @8.815s
+    └─systemd-networkd.service @6.715s +2.098s
+      └─dbus.service @6.459s
+        └─basic.target @6.160s
+          └─sockets.target @6.160s
+            └─acpid.socket @6.160s
+              └─sysinit.target @6.158s
+                └─systemd-rfkill@rfkill2.service @9.217s +49ms
+                  └─system-systemd\x2drfkill.slice @5.452s
+                    └─system.slice @484ms
+                      └─-.slice @482ms
+#+END_SRC
+
+** Boot time optimization
+
+Attempts at using a custom Gentoo build to speed things up:
+
+Genkernel build:
+
+sudo genkernel --no-firmware --loglevel=5 --firmware-dir=$PWD/i686-chroot/lib/firmware --kerneldir=$PWD/i686-kernel-src/linux --logfile=$PWD/i686-var-log/genkernel.log --arch-override=x86 --module-prefix=$PWD/i686-chroot --bootdir=$PWD/i686-chroot/boot all
+
+Time on qemu: 4.19 s
+
+Log:
+
+$ qemu-system-i386 -kernel i686-chroot/boot/kernel-genkernel-x86-4.7.3 -nographic -append 'printk.time=1 console=ttyS0'
+[    0.000000] Linux version 4.7.3 (root@shoggoth) (gcc version 4.9.3 (Gentoo 4.9.3 p1.5, pie-0.6.4) ) #1 SMP Sat Sep 10 23:39:40 CEST 2016
+[    0.000000] x86/fpu: Legacy x87 FPU detected.
+[    0.000000] x86/fpu: Using 'eager' FPU context switches.
+[    0.000000] e820: BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x0000000007fdffff] usable
+[    0.000000] BIOS-e820: [mem 0x0000000007fe0000-0x0000000007ffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    0.000000] Notice: NX (Execute Disable) protection missing in CPU!
+[    0.000000] SMBIOS 2.8 present.
+[    0.000000] e820: last_pfn = 0x7fe0 max_arch_pfn = 0x100000
+[    0.000000] MTRR: Disabled
+[    0.000000] x86/PAT: MTRRs disabled, skipping PAT initialization too.
+[    0.000000] x86/PAT: Configuration [0-7]: WB  WT  UC- UC  WB  WT  UC- UC  
+[    0.000000] found SMP MP-table at [mem 0x000f6be0-0x000f6bef] mapped at [c00f6be0]
+[    0.000000] ACPI: Early table checksum verification disabled
+[    0.000000] ACPI: RSDP 0x00000000000F69F0 000014 (v00 BOCHS )
+[    0.000000] ACPI: RSDT 0x0000000007FE18DC 000030 (v01 BOCHS  BXPCRSDT 00000001 BXPC 00000001)
+[    0.000000] ACPI: FACP 0x0000000007FE17B8 000074 (v01 BOCHS  BXPCFACP 00000001 BXPC 00000001)
+[    0.000000] ACPI: DSDT 0x0000000007FE0040 001778 (v01 BOCHS  BXPCDSDT 00000001 BXPC 00000001)
+[    0.000000] ACPI: FACS 0x0000000007FE0000 000040
+[    0.000000] ACPI: APIC 0x0000000007FE182C 000078 (v01 BOCHS  BXPCAPIC 00000001 BXPC 00000001)
+[    0.000000] ACPI: HPET 0x0000000007FE18A4 000038 (v01 BOCHS  BXPCHPET 00000001 BXPC 00000001)
+[    0.000000] 0MB HIGHMEM available.
+[    0.000000] 127MB LOWMEM available.
+[    0.000000]   mapped low ram: 0 - 07fe0000
+[    0.000000]   low ram: 0 - 07fe0000
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.000000]   Normal   [mem 0x0000000001000000-0x0000000007fdffff]
+[    0.000000]   HighMem  empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.000000]   node   0: [mem 0x0000000000100000-0x0000000007fdffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000000001000-0x0000000007fdffff]
+[    0.000000] Using APIC driver default
+[    0.000000] ACPI: PM-Timer IO Port: 0x608
+[    0.000000] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.000000] IOAPIC[0]: apic_id 0, version 17, address 0xfec00000, GSI 0-23
+[    0.000000] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.000000] ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[    0.000000] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[    0.000000] ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[    0.000000] ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[    0.000000] Using ACPI (MADT) for SMP configuration information
+[    0.000000] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.000000] smpboot: Allowing 1 CPUs, 0 hotplug CPUs
+[    0.000000] PM: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.000000] PM: Registered nosave memory: [mem 0x0009f000-0x0009ffff]
+[    0.000000] PM: Registered nosave memory: [mem 0x000a0000-0x000effff]
+[    0.000000] PM: Registered nosave memory: [mem 0x000f0000-0x000fffff]
+[    0.000000] e820: [mem 0x08000000-0xfffbffff] available for PCI devices
+[    0.000000] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.000000] setup_percpu: NR_CPUS:8 nr_cpumask_bits:8 nr_cpu_ids:1 nr_node_ids:1
+[    0.000000] percpu: Embedded 19 pages/cpu @c7eca000 s47820 r0 d30004 u77824
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 32382
+[    0.000000] Kernel command line: printk.time=1 console=ttyS0
+[    0.000000] PID hash table entries: 512 (order: -1, 2048 bytes)
+[    0.000000] Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
+[    0.000000] Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
+[    0.000000] Initializing CPU#0
+[    0.000000] Initializing HighMem for node 0 (00000000:00000000)
+[    0.000000] Memory: 121980K/130552K available (4152K kernel code, 473K rwdata, 1664K rodata, 644K init, 268K bss, 8572K reserved, 0K cma-reserved, 0K highmem)
+[    0.000000] virtual kernel memory layout:
+[    0.000000]     fixmap  : 0xfff17000 - 0xfffff000   ( 928 kB)
+[    0.000000]     pkmap   : 0xff800000 - 0xffc00000   (4096 kB)
+[    0.000000]     vmalloc : 0xc87e0000 - 0xff7fe000   ( 880 MB)
+[    0.000000]     lowmem  : 0xc0000000 - 0xc7fe0000   ( 127 MB)
+[    0.000000]       .init : 0xc072a000 - 0xc07cb000   ( 644 kB)
+[    0.000000]       .data : 0xc050e66f - 0xc0728540   (2151 kB)
+[    0.000000]       .text : 0xc0100000 - 0xc050e66f   (4153 kB)
+[    0.000000] Checking if this processor honours the WP bit even in supervisor mode...Ok.
+[    0.000000] Hierarchical RCU implementation.
+[    0.000000] 	Build-time adjustment of leaf fanout to 32.
+[    0.000000] 	RCU restricting CPUs from NR_CPUS=8 to nr_cpu_ids=1.
+[    0.000000] RCU: Adjusting geometry for rcu_fanout_leaf=32, nr_cpu_ids=1
+[    0.000000] NR_IRQS:2304 nr_irqs:256 16
+[    0.000000] Console: colour VGA+ 80x25
+[    0.000000] console [ttyS0] enabled
+[    0.000000] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.000000] tsc: Unable to calibrate against PIT
+[    0.000000] tsc: using HPET reference calibration
+[    0.000000] tsc: Detected 2926.002 MHz processor
+[    0.040489] Calibrating delay loop (skipped), value calculated using timer frequency.. 5852.00 BogoMIPS (lpj=29260020)
+[    0.041282] pid_max: default: 32768 minimum: 301
+[    0.041850] ACPI: Core revision 20160422
+[    0.096479] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.096792] 
+[    0.097752] Security Framework initialized
+[    0.098494] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.098793] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.115660] Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
+[    0.115875] Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
+[    0.186862] Freeing SMP alternatives memory: 24K (c07cb000 - c07d1000)
+[    0.200899] smpboot: Max logical packages: 1
+[    0.201260] smpboot: APIC(0) Converting physical 0 to logical package 0
+[    0.201781] Enabling APIC mode:  Flat.  Using 1 I/O APICs
+[    0.206481] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.310000] smpboot: CPU0: Intel QEMU Virtual CPU version 2.5+ (family: 0x6, model: 0x6, stepping: 0x3)
+[    0.310000] Performance Events: Broken PMU hardware detected, using software events only.
+[    0.310000] Failed to access perfctr msr (MSR c2 is 0)
+[    0.312380] x86: Booted up 1 node, 1 CPUs
+[    0.312701] smpboot: Total of 1 processors activated (5852.00 BogoMIPS)
+[    0.323930] devtmpfs: initialized
+[    0.335799] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.337556] xor: measuring software checksum speed
+[    0.430126]    pIII_sse  :   731.600 MB/sec
+[    0.530116]    prefetch64-sse:   843.600 MB/sec
+[    0.530412] xor: using function: prefetch64-sse (843.600 MB/sec)
+[    0.539747] NET: Registered protocol family 16
+[    0.547190] cpuidle: using governor ladder
+[    0.548036] ACPI: bus type PCI registered
+[    0.552815] PCI: PCI BIOS revision 2.10 entry at 0xfd44b, last bus=0
+[    0.553154] PCI: Using configuration type 1 for base access
+[    0.586402] HugeTLB registered 4 MB page size, pre-allocated 0 pages
+[    0.760283] raid6: mmxx1    gen()   159 MB/s
+[    0.930153] raid6: mmxx2    gen()   154 MB/s
+[    1.100441] raid6: sse1x1   gen()   143 MB/s
+[    1.270418] raid6: sse1x2   gen()   173 MB/s
+[    1.440280] raid6: sse2x1   gen()   253 MB/s
+[    1.610241] raid6: sse2x1   xor()   131 MB/s
+[    1.780230] raid6: sse2x2   gen()   246 MB/s
+[    1.950281] raid6: sse2x2   xor()   132 MB/s
+[    1.950969] raid6: using algorithm sse2x1 gen() 253 MB/s
+[    1.951876] raid6: .... xor() 131 MB/s, rmw enabled
+[    1.952813] raid6: using intx1 recovery algorithm
+[    1.955075] ACPI: Added _OSI(Module Device)
+[    1.955866] ACPI: Added _OSI(Processor Device)
+[    1.956586] ACPI: Added _OSI(3.0 _SCP Extensions)
+[    1.957457] ACPI: Added _OSI(Processor Aggregator Device)
+[    1.997749] ACPI: Interpreter enabled
+[    1.999767] ACPI: (supports S0 S3 S4 S5)
+[    2.000173] ACPI: Using IOAPIC for interrupt routing
+[    2.001714] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    2.096743] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    2.098325] acpi PNP0A03:00: _OSC: OS supports [ASPM ClockPM Segments MSI]
+[    2.099682] acpi PNP0A03:00: _OSC failed (AE_NOT_FOUND); disabling ASPM
+[    2.100453] acpi PNP0A03:00: fail to add MMCONFIG information, can't access extended PCI configuration space under this bridge.
+[    2.105536] PCI host bridge to bus 0000:00
+[    2.106462] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    2.108768] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    2.110127] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    2.111360] pci_bus 0000:00: root bus resource [mem 0x08000000-0xfebfffff window]
+[    2.112647] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    2.141282] pci 0000:00:01.1: legacy IDE quirk: reg 0x10: [io  0x01f0-0x01f7]
+[    2.142659] pci 0000:00:01.1: legacy IDE quirk: reg 0x14: [io  0x03f6]
+[    2.143782] pci 0000:00:01.1: legacy IDE quirk: reg 0x18: [io  0x0170-0x0177]
+[    2.145021] pci 0000:00:01.1: legacy IDE quirk: reg 0x1c: [io  0x0376]
+[    2.150623] pci 0000:00:01.3: quirk: [io  0x0600-0x063f] claimed by PIIX4 ACPI
+[    2.151939] pci 0000:00:01.3: quirk: [io  0x0700-0x070f] claimed by PIIX4 SMB
+[    2.201275] ACPI: PCI Interrupt Link [LNKA] (IRQs 5 *10 11)
+[    2.203864] ACPI: PCI Interrupt Link [LNKB] (IRQs 5 *10 11)
+[    2.205933] ACPI: PCI Interrupt Link [LNKC] (IRQs 5 10 *11)
+[    2.210242] ACPI: PCI Interrupt Link [LNKD] (IRQs 5 10 *11)
+[    2.211830] ACPI: PCI Interrupt Link [LNKS] (IRQs *9)
+[    2.215773] ACPI: Enabled 3 GPEs in block 00 to 0F
+[    2.222232] vgaarb: setting as boot device: PCI:0000:00:02.0
+[    2.223449] vgaarb: device added: PCI:0000:00:02.0,decodes=io+mem,owns=io+mem,locks=none
+[    2.230143] vgaarb: loaded
+[    2.231207] vgaarb: bridge control possible 0000:00:02.0
+[    2.240916] SCSI subsystem initialized
+[    2.253731] PCI: Using ACPI for IRQ routing
+[    2.267459] HPET: 3 timers in total, 0 timers will be used for per-cpu timer
+[    2.268016] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    2.268361] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    2.273388] amd_nb: Cannot enumerate AMD northbridges
+[    2.276575] clocksource: Switched to clocksource hpet
+[    2.353606] VFS: Disk quotas dquot_6.6.0
+[    2.354715] VFS: Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
+[    2.360395] pnp: PnP ACPI init
+[    2.376200] pnp: PnP ACPI: found 6 devices
+[    2.470439] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    2.473543] NET: Registered protocol family 2
+[    2.481115] TCP established hash table entries: 1024 (order: 0, 4096 bytes)
+[    2.482460] TCP bind hash table entries: 1024 (order: 1, 8192 bytes)
+[    2.483582] TCP: Hash tables configured (established 1024 bind 1024)
+[    2.485540] UDP hash table entries: 256 (order: 1, 8192 bytes)
+[    2.486949] UDP-Lite hash table entries: 256 (order: 1, 8192 bytes)
+[    2.490147] NET: Registered protocol family 1
+[    2.491831] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    2.492884] pci 0000:00:01.0: PIIX3: Enabling Passive Release
+[    2.493974] pci 0000:00:01.0: Activating ISA DMA hang workarounds
+[    2.495374] pci 0000:00:02.0: Video device with shadowed ROM at [mem 0x000c0000-0x000dffff]
+[    2.511352] apm: BIOS version 1.2 Flags 0x03 (Driver version 1.16ac)
+[    2.511706] apm: overridden by ACPI.
+[    2.517889] futex hash table entries: 256 (order: 2, 16384 bytes)
+[    2.518903] audit: initializing netlink subsys (disabled)
+[    2.520602] audit: type=2000 audit(1473546147.510:1): initialized
+[    2.526930] workingset: timestamp_bits=28 max_order=15 bucket_order=0
+[    2.535964] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    2.547617] async_tx: api initialized (async)
+[    2.548288] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 253)
+[    2.548770] io scheduler noop registered
+[    2.548932] io scheduler deadline registered
+[    2.549364] io scheduler cfq registered (default)
+[    2.579228] isapnp: Scanning for PnP cards...
+[    2.943844] isapnp: No Plug & Play device found
+[    2.945847] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
+[    2.970865] 00:05: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    3.054149] brd: module loaded
+[    3.083919] loop: module loaded
+[    3.084264] Loading iSCSI transport class v2.0-870.
+[    3.086502] iscsi: registered transport (tcp)
+[    3.102373] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    3.105845] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    3.106399] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    3.111424] mousedev: PS/2 mouse device common for all mice
+[    3.117123] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0
+[    3.119877] md: raid0 personality registered for level 0
+[    3.123485] md: raid1 personality registered for level 1
+[    3.134815] md: raid6 personality registered for level 6
+[    3.135077] md: raid5 personality registered for level 5
+[    3.135272] md: raid4 personality registered for level 4
+[    3.135947] hidraw: raw HID events driver (C) Jiri Kosina
+[    3.138161] NET: Registered protocol family 17
+[    3.138527] mce: Unable to init device /dev/mcelog (rc: -5)
+[    3.144189] microcode: CPU0 sig=0x663, pf=0x1, revision=0x0
+[    3.147127] microcode: Microcode Update Driver: v2.01 <tigran@aivazian.fsnet.co.uk>, Peter Oruba
+[    3.147608] Using IPI No-Shortcut mode
+[    3.156299] registered taskstats version 1
+[    3.510519] tsc: Refined TSC clocksource calibration: 2925.959 MHz
+[    3.510854] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x2a2d0dabcb3, max_idle_ns: 440795233253 ns
+[    4.122663] input: ImExPS/2 BYD TouchPad as /devices/platform/i8042/serio1/input/input2
+[    4.125768] md: Waiting for all devices to be available before autodetect
+[    4.126365] md: If you don't use raid, use raid=noautodetect
+[    4.131852] md: Autodetecting RAID arrays.
+[    4.135301] md: Scanned 0 and added 0 devices.
+[    4.135801] md: autorun ...
+[    4.136066] md: ... autorun DONE.
+[    4.139829] VFS: Cannot open root device "(null)" or unknown-block(0,0): error -6
+[    4.145349] Please append a correct "root=" boot option; here are the available partitions:
+[    4.146319] 0100            8192 ram0  (driver?)
+[    4.146793] 0101            8192 ram1  (driver?)
+[    4.147204] 0102            8192 ram2  (driver?)
+[    4.147594] 0103            8192 ram3  (driver?)
+[    4.147985] 0104            8192 ram4  (driver?)
+[    4.148404] 0105            8192 ram5  (driver?)
+[    4.148795] 0106            8192 ram6  (driver?)
+[    4.149226] 0107            8192 ram7  (driver?)
+[    4.149620] 0108            8192 ram8  (driver?)
+[    4.150042] 0109            8192 ram9  (driver?)
+[    4.150581] 010a            8192 ram10  (driver?)
+[    4.150987] 010b            8192 ram11  (driver?)
+[    4.151392] 010c            8192 ram12  (driver?)
+[    4.151806] 010d            8192 ram13  (driver?)
+[    4.152205] 010e            8192 ram14  (driver?)
+[    4.153289] 010f            8192 ram15  (driver?)
+[    4.153868] Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+[    4.154997] CPU: 0 PID: 1 Comm: swapper/0 Not tainted 4.7.3 #1
+[    4.155648] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.9.3-0-ge2fc41e-prebuilt.qemu-project.org 04/01/2014
+[    4.156535]  00000000 00200086 c7881f04 c032b82c c7881f50 fffffffa c7881f1c c01d3651
+[    4.160102]  fffffffa c7881f50 fffffffa c7fd6280 c7881f7c c072aea5 c0607ac8 c7881f50
+[    4.160102]  c0607a77 c0607a44 00000000 c7881f50 fffffffa c7b14137 c0607b2c c7b14000
+[    4.160102] Call Trace:
+[    4.160102]  [<c032b82c>] dump_stack+0x47/0x5b
+[    4.160102]  [<c01d3651>] panic+0x87/0x1b0
+[    4.160102]  [<c072aea5>] mount_block_root+0x199/0x213
+[    4.160102]  [<c072b03a>] mount_root+0x63/0x68
+[    4.160102]  [<c072b184>] prepare_namespace+0x145/0x176
+[    4.160102]  [<c072ac33>] kernel_init_freeable+0x196/0x1a8
+[    4.160102]  [<c0508405>] kernel_init+0x8/0xd0
+[    4.160102]  [<c050c822>] ret_from_kernel_thread+0xe/0x24
+[    4.160102]  [<c05083fd>] ? rest_init+0x5f/0x5f
+[    4.160102] Kernel Offset: disabled
+[    4.160102] ---[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+QEMU: Terminated
+
+
+Disable mdraid.
+
+$ sudo genkernel --no-mdadm --no-dmraid --no-firmware --loglevel=5 --firmware-dir=$PWD/i686-chroot/lib/firmware --kerneldir=$PWD/i686-kernel-src/linux --logfile=$PWD/i686-var-log/genkernel.log --arch-override=x86 --module-prefix=$PWD/i686-chroot --bootdir=$PWD/i686-chroot/boot all
+
+** Future plans
+
+When six out of the below goals will be achieved I will consider the whitestar to be proper Vorlon technology :).
+
+*** Other upload destinations
+- Mozilla stumbler (OK, this one is not opensource but still better than Google ;)
+- openbmap.org
+*** Better OBD-II integration
+While the whitestar already logs OBD-II data using obdgpslogger, a proper integration would allow 
+for better fuel economy tracking than the paper-and-pencil method I'm using now.
+*** Improved statistics & monitoring
+I feel the need to better monitor the wardriving performance and environmental factors. Measurements like amount of packets 
+captured for each 802.11 card vs. current cruise speed would allow to properly determine the best strategy for capturing 
+most information.
+*** Cell information capture
+A different form of radio beacon that is useful for location services are cellphone tower IDs. There are a number of ways 
+for those to be captured, the simplest one would be to connect a cellphone modem to the PC periodically fethcing the current
+visible cell tower IDs from it. I'm also considering other approaches such as using multiple osmocom-bb compatible phones
+for parallel GSM spectrum scanning. This should achieve better results as you won't be limited to the cell towers for your home
+network.
+*** GPS receiver sharing with cell phone
+The GPS receiver that I have connected to the system achieves higher TTFF than my cellphone. It would be thus good to be able
+to feed the GPS sentences from the phone to kektop until the whitestar's GPS receiver gets a fix.
+*** GPS used to provide time
+GPS should be usable as a time synchronization source for ntpd running on the whitestar.
+*** Zero-flash-writes
+The goal of this setup is to achieve zero writes on the internal flash to increase it's endurance. For this to be achieved a system of monitoring and logging
+processes which perform frequent writes to the flash needs to be built.
+*** Navigation integration
+It would be nice if the phone navigation could be instructed to guide the user through a particular route that is optimal
+for wardriving. For example, routes could be taken which take us onto roads or parts of the city where the amount of known
+wifi networks is scarce.
+*** Custom Gentoo build
+i686-pc-linux-gnu-emerge libgpg-error
+
+util-linux has to be emerged without systemd and udev first
+then emerged again with udev and systemd
+
+kismet depends on openssl
+
+
+i686-pc-linux-gnu-emerge dev-python/pip
+
+python needs ncurses
+
+Python breaks build with ncurses and readline enabled:
+
+# cat > disable-python-useflags
+dev-lang/python -ncurses -readline
+
+
+i686-pc-linux-gnu-emerge -avt app-arch/tar
+i686-pc-linux-gnu-emerge -avt lsof
+
+Disable xattr for portage to not trigger a build failure:
+[ebuild  N     ]   dev-python/pyxattr-0.5.5::gentoo to /usr/i686-pc-linux-gnu/ USE="-doc {-test}" PYTHON_TARGETS="python2_7 python3_4 -pypy (-python3_3) -python3_5" 0 KiB
+
+

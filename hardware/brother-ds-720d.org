@@ -1,0 +1,27 @@
+#+TITLE: Brother DS-720D
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="brother-ds-720d/"/>
+#+END_EXPORT
+
+The Brother DS-720D is a color duplex roll scanner with Letter maximum paper width. It works with Linux using binary-only SANE backend files.
+I mirrored them here in case they become unavailable sometime in the future together with the scanner docs:
+
+[[file:cv_ds620_ase_qsg.pdf][Quick Start Guide]] [[file:cv_ds620_ase_usr.pdf][User Manual]]
+
+[[file:drivers/linux/libsane-dsseries_1.0.5-1_amd64.deb][libsane-dsseries_1.0.5-1_amd64.deb]]
+
+[[file:drivers/linux/libsane-dsseries_1.0.5-1_i386.deb][libsane-dsseries_1.0.5-1_i386.deb]]
+
+[[file:drivers/linux/libsane-dsseries-1.0.5-1.i586.rpm][libsane-dsseries-1.0.5-1.i586.rpm]]
+
+[[file:drivers/linux/libsane-dsseries-1.0.5-1.x86_64.rpm][libsane-dsseries-1.0.5-1.x86_64.rpm]]
+
+History of this item:
+
+|  Timestamp | Event                                         |
+|------------+-----------------------------------------------|
+| 2015-11-01 | Purchased on [[http://www.x-kom.pl/]] for 569 PLN |
+

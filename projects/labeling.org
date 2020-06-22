@@ -1,0 +1,37 @@
+#+TITLE: Labeling scheme
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+#+FILETAGS: noexport
+
+* Intro
+
+Designed to be used for cable snap-on markers
+[[https://allegro.pl/oferta/oznacznik-kabli-na-klipsie-cyfry-0-9-do-2-5-mm-7693621213]]
+[[https://allegro.pl/oferta/oznaczniki-kabli-alfabet-0-9znaki-ele-3-5-1450-szt-7988386821]]
+[[https://allegro.pl/oferta/oznacznik-kabli-nasuwany-zestaw-alfabet-260-szt-7953187325]]
+
+<tag>[SEP]<tag>[SEP]...
+
+Tag types:
+
+P - Plug
+S - Socket
+B - building
+RK - Rack
+RM - Room
+PP - Patchpanel
+W,X - location specific
+Y,Z - separators (SEP)
+
+
+XY - relation (A<->B) separator
+Z - location specific
+W - tag separator
+
+Color codes:
+BL - Black
+BR - Brown
+BK - Black
+WH - White
+
+

@@ -1,0 +1,747 @@
+#+TITLE: WRT-54G
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="wrt-54g/"/>
+#+END_EXPORT
+
+Some notes about my attempts at resurrecting an old WRT54G v2.2 router board in order to use it as a managed switch.
+
+** Original firmware boot log
+
+The original openwrt firmware on this device was ATTITUDE ADJUSTMENT (12.09, r36088)
+
+#+BEGIN_EXPORT html
+<pre>
+picocom -b 115200 /dev/ttyUSB0                                                                     
+picocom v2.2
+
+port is        : /dev/ttyUSB0
+flowcontrol    : none
+baudrate is    : 115200
+parity is      : none
+databits are   : 8
+stopbits are   : 1
+escape is      : C-a
+local echo is  : no
+noinit is      : no
+noreset is     : no
+nolock is      : no
+send_cmd is    : sz -vv
+receive_cmd is : rz -vv -E
+imap is        : 
+omap is        : 
+emap is        : crcrlf,delbs,
+
+Type [C-a] [C-h] to see available commands
+
+Terminal ready
+
+
+CFE version 1.0.37 for BCM947XX (32bit,SP,LE)
+Build Date: Mon Oct 18 14:27:36 CST 2004 (root@me)
+Copyright (C) 2000,2001,2002,2003 Broadcom Corporation.
+
+Initializing Arena.
+Initializing Devices.
+
+No DPN
+et0: Broadcom BCM47xx 10/100 Mbps Ethernet Controller 3.60.13.0
+rndis0: Broadcom USB RNDIS Network Adapter (P-t-P)
+CPU type 0x29007: 216MHz
+Total memory: 0x1000000 bytes (16MB)
+
+Total memory used by CFE:  0x80300000 - 0x8043EB40 (1305408)
+Initialized Data:          0x80338DB0 - 0x8033B160 (9136)
+BSS Area:                  0x8033B160 - 0x8033CB40 (6624)
+Local Heap:                0x8033CB40 - 0x8043CB40 (1048576)
+Stack Area:                0x8043CB40 - 0x8043EB40 (8192)
+Text (code) segment:       0x80300000 - 0x80338DB0 (232880)
+Boot area (physical):      0x0043F000 - 0x0047F000
+Relocation Factor:         I:00000000 - D:00000000
+
+Boot version: v3.4
+The boot is CFE
+
+mac_init(): Find mac [00:12:17:C7:39:04] in location 0
+Nothing...
+
+eou_key_init(): Find key pair in location 0
+The eou device id is same
+The eou public key is same
+The eou private key is same
+Device eth0:  hwaddr 00-12-17-C7-39-04, ipaddr 192.168.1.1, mask 255.255.255.0
+        gateway not set, nameserver not set
+Reading :: Failed.: Timeout occured
+Loader:raw Filesys:raw Dev:flash0.os File: Options:(null)
+Loading: .. 3780 bytes read
+Entry at 0x80001000
+Closing network.
+Starting program at 0x80001000
+[    0.000000] Linux version 3.3.8 (blogic@Debian-60-squeeze-64-minimal) (gcc version 4.6.3 20120201 (prerelease) (Linaro GCC 4.6-2012.02) ) #1 Sat Mar 23 16:01:31 UTC 2013
+[    0.000000] CPU revision is: 00029007 (Broadcom BMIPS3300)
+[    0.000000] bcm47xx: using ssb bus
+[    0.000000] ssb: Found chip with id 0x4712, rev 0x01 and package 0x02
+[    0.000000] ssb: chipcommon status is 0x0
+[    0.000000] ssb: Initializing MIPS core...
+[    0.000000] ssb: set_irq: core 0x0812, irq 4 => 4
+[    0.000000] ssb: set_irq: core 0x0806, irq 5 => 5
+[    0.000000] ssb: set_irq: core 0x0818, irq 6 => 2
+[    0.000000] ssb: set_irq: core 0x0804, irq 2 => 6
+[    0.000000] ssb: after irq reconfiguration
+[    0.000000] ssb: core 0x0800, irq : 2(S)  3* 4  5  6  D  I 
+[    0.000000] ssb: core 0x0812, irq : 2(S)  3  4* 5  6  D  I 
+[    0.000000] ssb: core 0x0806, irq : 2(S)  3  4  5* 6  D  I 
+[    0.000000] ssb: core 0x0818, irq : 2(S)* 3  4  5  6  D  I 
+[    0.000000] ssb: core 0x0817, irq : 2(S)* 3  4  5  6  D  I 
+[    0.000000] ssb: core 0x0816, irq : 2(S)* 3  4  5  6  D  I 
+[    0.000000] ssb: core 0x080f, irq : 2(S)  3  4  5  6  D  I*
+[    0.000000] ssb: core 0x0804, irq : 2(S)  3  4  5  6* D  I 
+[    0.000000] found parallel flash.
+[    0.000000] can not parse nvram name (null)ag0(null) with value 255 got -34
+[    0.000000] ssb: Sonics Silicon Backplane found at address 0x18000000
+[    0.000000] gpiochip_add: registered GPIOs 0 to 15 on device: bcm47xx
+[    0.000000] Determined physical RAM map:
+[    0.000000]  memory: 01000000 @ 00000000 (usable)
+[    0.000000] Initrd not found or empty - disabling initrd
+[    0.000000] Zone PFN ranges:
+[    0.000000]   Normal   0x00000000 -> 0x00001000
+[    0.000000] Movable zone start PFN for each node
+[    0.000000] Early memory PFN ranges
+[    0.000000]     0: 0x00000000 -> 0x00001000
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping off.  Total pages: 4064
+[    0.000000] Kernel command line:  root=/dev/mtdblock2 rootfstype=squashfs,jffs2 noinitrd console=ttyS0,115200
+[    0.000000] PID hash table entries: 64 (order: -4, 256 bytes)
+[    0.000000] Dentry cache hash table entries: 2048 (order: 1, 8192 bytes)
+[    0.000000] Inode-cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.000000] Primary instruction cache 8kB, VIPT, 2-way, linesize 16 bytes.
+[    0.000000] Primary data cache 4kB, 2-way, VIPT, no aliases, linesize 16 bytes
+[    0.000000] Memory: 12856k/16384k available (2540k kernel code, 3528k reserved, 379k data, 168k init, 0k highmem)
+[    0.000000] NR_IRQS:128
+[    0.000000] console [ttyS0] enabled
+[    0.004000] Calibrating delay loop... 213.50 BogoMIPS (lpj=427008)
+[    0.044000] pid_max: default: 32768 minimum: 301
+[    0.048000] Mount-cache hash table entries: 512
+[    0.060000] NET: Registered protocol family 16
+[    0.124000] bio: create slab <bio-0> at 0
+[    0.144000] Switching to clocksource MIPS
+[    0.184000] NET: Registered protocol family 2
+[    0.188000] IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.200000] TCP established hash table entries: 512 (order: 0, 4096 bytes)
+[    0.208000] TCP bind hash table entries: 512 (order: -1, 2048 bytes)
+[    0.212000] TCP: Hash tables configured (established 512 bind 512)
+[    0.220000] TCP reno registered
+[    0.224000] UDP hash table entries: 256 (order: 0, 4096 bytes)
+[    0.228000] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes)
+[    0.236000] NET: Registered protocol family 1
+[    0.256000] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.264000] JFFS2 version 2.2 (NAND) (SUMMARY) (LZMA) (RTIME) (CMODE_PRIORITY) (c) 2001-2006 Red Hat, Inc.
+[    0.276000] msgmni has been set to 25
+[    0.280000] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 254)
+[    0.288000] io scheduler noop registered
+[    0.292000] io scheduler deadline registered (default)
+[    0.300000] Serial: 8250/16550 driver, 16 ports, IRQ sharing enabled
+[    0.328000] serial8250: ttyS0 at MMIO 0xb8000300 (irq = 3) is a 16550A
+[    0.356000] serial8250: ttyS1 at MMIO 0xb8000400 (irq = 3) is a 16550A
+[    0.412000] serial8250.0: ttyS0 at MMIO 0xb8000300 (irq = 3) is a 16550A
+[    0.444000] serial8250.0: ttyS1 at MMIO 0xb8000400 (irq = 3) is a 16550A
+[    0.460000] bcm47xx_pflash: flash init: 0x1c000000 0x02000000
+[    0.468000] Physically mapped flash: Found 1 x16 devices at 0x0 in 16-bit bank. Manufacturer ID 0x000089 Chip ID 0x0088c5
+[    0.480000] Intel/Sharp Extended Query Table at 0x0035
+[    0.484000] Using auto-unlock on power-up/resume
+[    0.488000] cfi_cmdset_0001: Erase suspend on write enabled
+[    0.496000] bcm47xx_pflash: Flash device: 0x2000000 at 0x1fc00000
+[    0.500000] bcm47xx_part: bootloader size: 262144
+[    0.508000] bcm47xx_part: Looking for dual image
+[    0.516000] bcm47xx_part: TRX offset : 0
+[    0.520000] 4 bcm47xx partitions found on MTD device Physically mapped flash
+[    0.528000] Creating 4 MTD partitions on "Physically mapped flash":
+[    0.532000] 0x000000000000-0x000000040000 : "cfe"
+[    0.548000] 0x000000040000-0x0000003f0000 : "linux"
+[    0.564000] 0x000000133c00-0x0000003f0000 : "rootfs"
+[    0.568000] mtd: partition "rootfs" must either start or end on erase block boundary or be smaller than an erase block -- forcing read-only
+[    0.592000] mtd: partition "rootfs" set to be root filesystem
+[    0.596000] mtd: partition "rootfs_data" created automatically, ofs=310000, len=E0000 
+[    0.604000] 0x000000310000-0x0000003f0000 : "rootfs_data"
+[    0.620000] 0x0000003f0000-0x000000400000 : "nvram"
+[    0.640000] bcm47xx_sflash: error registering platform driver: -19
+[    0.648000] bcm47xx_nflash: error registering platform driver: -19
+[    0.656000] b44: Broadcom 44xx/47xx 10/100 PCI ethernet driver version 2.0
+[    0.668000] b44 ssb0:1: eth0: Broadcom 44xx/47xx 10/100 PCI ethernet driver 00:12:17:c7:39:04
+[    0.680000] BCM47xx Watchdog Timer enabled (30 seconds, nowayout)
+[    0.692000] TCP cubic registered
+[    0.696000] NET: Registered protocol family 17
+[    0.700000] Bridge firewalling registered
+[    0.704000] 8021q: 802.1Q VLAN Support v1.8
+[    0.724000] VFS: Mounted root (squashfs filesystem) readonly on device 31:2.
+[    0.736000] Freeing unused kernel memory: 168k freed
+[    5.548000] diag: Detected 'Linksys WRT54G/GS/GL'
+[    5.636000] b44 ssb0:1: eth0: Link is up at 100 Mbps, full duplex
+[    5.644000] b44 ssb0:1: eth0: Flow control is off for TX and off for RX
+[    6.868000] roboswitch: Probing device eth0: found a 5325! It's a 5350.
+- preinit -
+Press the [f] key and hit [enter] to enter failsafe mode
+- regular preinit -
+[   14.956000] JFFS2 notice: (332) jffs2_build_xattr_subsystem: complete building xattr subsystem, 1 of xdatum (0 unchecked, 0 orphan) and 10 of xref (0 dead, 6 orphan) found.
+switching to jffs2
+- init -
+[   15.592000] b44 ssb0:1: eth0: powering down PHY
+
+Please press Enter to activate this console. [   21.600000] Compat-drivers backport release: compat-drivers-2012-09-04-2-gddac993
+[   21.608000] Backport based on wireless-testing.git master-2012-09-07
+[   21.616000] compat.git: wireless-testing.git
+[   21.712000] cfg80211: Calling CRDA to update world regulatory domain
+[   21.716000] cfg80211: World regulatory domain updated:
+[   21.724000] cfg80211:   (start_freq - end_freq @ bandwidth), (max_antenna_gain, max_eirp)
+[   21.732000] cfg80211:   (2402000 KHz - 2472000 KHz @ 40000 KHz), (300 mBi, 2000 mBm)
+[   21.740000] cfg80211:   (2457000 KHz - 2482000 KHz @ 20000 KHz), (300 mBi, 2000 mBm)
+[   21.748000] cfg80211:   (2474000 KHz - 2494000 KHz @ 20000 KHz), (300 mBi, 2000 mBm)
+[   21.756000] cfg80211:   (5170000 KHz - 5250000 KHz @ 40000 KHz), (300 mBi, 2000 mBm)
+[   21.764000] cfg80211:   (5735000 KHz - 5835000 KHz @ 40000 KHz), (300 mBi, 2000 mBm)
+[   23.076000] b43-phy0: Broadcom 4712 WLAN found (core revision 7)
+[   23.104000] b43-phy0: Found PHY: Analog 2, Type 2 (G), Revision 2
+[   23.132000] Broadcom 43xx driver loaded [ Features: PNL ]
+[   23.260000] Broadcom 43xx-legacy driver loaded [ Features: PLID ]
+[   23.904000] PPP generic driver version 2.4.2
+[   24.724000] ip_tables: (C) 2000-2006 Netfilter Core Team
+[   25.200000] NET: Registered protocol family 24
+[   25.272000] nf_conntrack version 0.5.0 (203 buckets, 812 max)
+[   31.264000] b44 ssb0:1: eth0: Link is up at 100 Mbps, full duplex
+[   31.272000] b44 ssb0:1: eth0: Flow control is off for TX and off for RX
+[   40.020000] b44 ssb0:1: eth0: powering down PHY
+[   40.108000] b44 ssb0:1: eth0: Link is up at 100 Mbps, full duplex
+[   40.112000] b44 ssb0:1: eth0: Flow control is off for TX and off for RX
+[   40.180000] device eth0.0 entered promiscuous mode
+[   40.188000] device eth0 entered promiscuous mode
+[   40.208000] br-lan: port 1(eth0.0) entered forwarding state
+[   40.212000] br-lan: port 1(eth0.0) entered forwarding state
+[   42.216000] br-lan: port 1(eth0.0) entered forwarding state
+[   52.004000] b43-phy0: Loading firmware version 666.2 (2011-02-23 01:15:07)
+[   52.224000] device wlan0 entered promiscuous mode
+[   52.372000] b43-phy0: Loading firmware version 666.2 (2011-02-23 01:15:07)
+[   56.936000] br-lan: port 2(wlan0) entered forwarding state
+[   56.944000] br-lan: port 2(wlan0) entered forwarding state
+[   58.948000] br-lan: port 2(wlan0) entered forwarding state
+
+
+
+BusyBox v1.19.4 (2013-03-14 05:29:29 UTC) built-in shell (ash)
+Enter 'help' for a list of built-in commands.
+
+  _______                     ________        __
+ |       |.-----.-----.-----.|  |  |  |.----.|  |_
+ |   -   ||  _  |  -__|     ||  |  |  ||   _||   _|
+ |_______||   __|_____|__|__||________||__|  |____|
+          |__| W I R E L E S S   F R E E D O M
+ -----------------------------------------------------
+ ATTITUDE ADJUSTMENT (12.09, r36088)
+ -----------------------------------------------------
+  * 1/4 oz Vodka      Pour all ingredients into mixing
+  * 1/4 oz Gin        tin with ice, strain into glass.
+  * 1/4 oz Amaretto
+  * 1/4 oz Triple sec
+  * 1/4 oz Peach schnapps
+  * 1/4 oz Sour mix
+  * 1 splash Cranberry juice
+ -----------------------------------------------------
+root@lazengann:/# 
+</pre>
+#+END_EXPORT
+
+** New firmware
+
+I tried to build a new firmware from openwrt trunk, unfortunately the b44 ethernet driver did not work in openwrt stable kernel 4.19.
+
+#+BEGIN_EXPORT html
+<pre>
+CFE version 1.0.37 for BCM947XX (32bit,SP,LE)
+Build Date: Mon Oct 18 14:27:36 CST 2004 (root@me)
+Copyright (C) 2000,2001,2002,2003 Broadcom Corporation.
+
+Initializing Arena.
+Initializing Devices.
+
+No DPN
+et0: Broadcom BCM47xx 10/100 Mbps Ethernet Controller 3.60.13.0
+rndis0: Broadcom USB RNDIS Network Adapter (P-t-P)
+CPU type 0x29007: 216MHz
+Total memory: 0x1000000 bytes (16MB)
+
+Total memory used by CFE:  0x80300000 - 0x8043EB40 (1305408)
+Initialized Data:          0x80338DB0 - 0x8033B160 (9136)
+BSS Area:                  0x8033B160 - 0x8033CB40 (6624)
+Local Heap:                0x8033CB40 - 0x8043CB40 (1048576)
+Stack Area:                0x8043CB40 - 0x8043EB40 (8192)
+Text (code) segment:       0x80300000 - 0x80338DB0 (232880)
+Boot area (physical):      0x0043F000 - 0x0047F000
+Relocation Factor:         I:00000000 - D:00000000
+
+Boot version: v3.4
+The boot is CFE
+
+mac_init(): Find mac [00:12:17:C7:39:04] in location 0
+Nothing...
+
+eou_key_init(): Find key pair in location 0
+The eou device id is same
+The eou public key is same
+The eou private key is same
+Device eth0:  hwaddr 00-12-17-C7-39-04, ipaddr 192.168.1.1, mask 255.255.255.0
+        gateway not set, nameserver not set
+Reading :: Failed.: Timeout occured
+Loader:raw Filesys:raw Dev:flash0.os File: Options:(null)
+Loading: .. 3816 bytes read
+Entry at 0x80001000
+Closing network.
+Starting program at 0x80001000
+[    0.000000] Linux version 4.19.115 (enki@newton) (gcc version 8.4.0 (OpenWrt GCC 8.4.0 r13151-c3a43753b9)) #0 Wed May 6 15:50:31 2020
+[    0.000000] CPU0 revision is: 00029007 (Broadcom BMIPS3300)
+[    0.000000] bcm47xx: Using ssb bus
+[    0.000000] ssb: Found chip with id 0x4712, rev 0x01 and package 0x02
+[    0.000000] can not parse nvram name (null)ag0(null) with value 255 got -34
+[    0.000000] ssb: Sonics Silicon Backplane found at address 0x18000000
+[    0.000000] Determined physical RAM map:
+[    0.000000]  memory: 01000000 @ 00000000 (usable)
+[    0.000000] Initrd not found or empty - disabling initrd
+[    0.000000] Primary instruction cache 8kB, VIPT, 2-way, linesize 16 bytes.
+[    0.000000] Primary data cache 4kB, 2-way, VIPT, no aliases, linesize 16 bytes
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000000000000-0x0000000000ffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000000000000-0x0000000000ffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000000000000-0x0000000000ffffff]
+[    0.000000] random: get_random_bytes called from 0x803a16c4 with crng_init=0
+[    0.000000] Built 1 zonelists, mobility grouping off.  Total pages: 4064
+[    0.000000] Kernel command line:   noinitrd console=ttyS0,115200
+[    0.000000] Dentry cache hash table entries: 2048 (order: 1, 8192 bytes)
+[    0.000000] Inode-cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.000000] Memory: 12016K/16384K available (3150K kernel code, 144K rwdata, 412K rodata, 188K init, 263K bss, 4368K reserved, 0K cma-reserved)
+[    0.000000] SLUB: HWalign=32, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] NR_IRQS: 128
+[    0.000000] MIPS: machine is Linksys WRT54G/GS/GL
+[    0.000000] clocksource: MIPS: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 17696855987 ns
+[    0.000058] sched_clock: 32 bits at 108MHz, resolution 9ns, wraps every 19884107771ns
+[    0.000302] Calibrating delay loop... 213.50 BogoMIPS (lpj=427008)
+[    0.036636] pid_max: default: 32768 minimum: 301
+[    0.038326] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.038532] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.054640] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.054791] futex hash table entries: 256 (order: -1, 3072 bytes)
+[    0.057457] NET: Registered protocol family 16
+[    0.192225] clocksource: Switched to clocksource MIPS
+[    0.209914] NET: Registered protocol family 2
+[    0.213926] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes)
+[    0.214179] TCP established hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.214408] TCP bind hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.214608] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.215742] UDP hash table entries: 256 (order: 0, 4096 bytes)
+[    0.215977] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes)
+[    0.217614] NET: Registered protocol family 1
+[    0.259212] Crashlog allocated RAM at address 0xf00000
+[    0.273778] workingset: timestamp_bits=30 max_order=12 bucket_order=0
+[    0.331028] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.331128] jffs2: version 2.2 (NAND) (SUMMARY) (LZMA) (RTIME) (CMODE_PRIORITY) (c) 2001-2006 Red Hat, Inc.
+[    0.416114] io scheduler noop registered
+[    0.416457] io scheduler deadline registered (default)
+[    0.417345] Serial: 8250/16550 driver, 2 ports, IRQ sharing enabled
+[    0.421656] console [ttyS0] disabled
+[    0.442034] serial8250.0: ttyS0 at MMIO 0xb8000300 (irq = 3, base_baud = 3375000) is a 16550A
+[    0.787440] console [ttyS0] enabled
+[    0.813650] serial8250.0: ttyS1 at MMIO 0xb8000400 (irq = 3, base_baud = 3375000) is a 16550A
+[    0.828435] physmap platform flash device: 02000001 at 1c000000
+[    0.834819] physmap-flash.0: Found 1 x16 devices at 0x0 in 16-bit bank. Manufacturer ID 0x000089 Chip ID 0x0088c5
+[    0.845820] Intel/Sharp Extended Query Table at 0x0035
+[    0.851253] Using auto-unlock on power-up/resume
+[    0.856140] cfi_cmdset_0001: Erase suspend on write enabled
+[    0.865439] 3 bcm47xxpart partitions found on MTD device physmap-flash.0
+[    0.872416] Creating 3 MTD partitions on "physmap-flash.0":
+[    0.878299] 0x000000000000-0x000000040000 : "boot"
+[    0.908939] 0x000000040000-0x0000003f0000 : "firmware"
+[    0.921308] 3 trx partitions found on MTD device firmware
+[    0.926995] Creating 3 MTD partitions on "firmware":
+[    0.932457] 0x00000000001c-0x000000000948 : "loader"
+[    0.955953] 0x000000000948-0x000000139800 : "linux"
+[    0.974419] 0x000000139800-0x0000003b0000 : "rootfs"
+[    0.986041] mtd: device 4 (rootfs) set to be root filesystem
+[    0.992060] 1 squashfs-split partitions found on MTD device rootfs
+[    0.998568] 0x000000310000-0x0000003b0000 : "rootfs_data"
+[    1.022982] 0x0000003f0000-0x000000400000 : "nvram"
+[    1.064504] libphy: Fixed MDIO Bus: probed
+[    1.070627] bcm47xx-wdt bcm47xx-wdt.0: BCM47xx Watchdog Timer enabled (30 seconds, Software Timer)
+[    1.080671] GPIO_WDT: failed to register misc device
+[    1.087547] NET: Registered protocol family 17
+[    1.092648] 8021q: 802.1Q VLAN Support v1.8
+[    1.128993] VFS: Mounted root (squashfs filesystem) readonly on device 31:4.
+[    1.140521] Freeing unused kernel memory: 188K
+[    1.145242] This architecture does not have kernel memory protection.
+[    1.151919] Run /sbin/init as init process
+[    1.224375] random: fast init done
+failed to find a module named zram
+failed to find a module named ext4
+[    3.457258] init: Can't open /sys/block/zram0/disksize: No such file or directory
+[    3.467139] init: Console is alive
+[    3.472076] init: - watchdog -
+[    3.503479] kmodloader: loading kernel modules from /etc/modules-boot.d/*
+[    3.812923] b44: Broadcom 44xx/47xx 10/100 PCI ethernet driver version 2.0
+[    3.820495] b44 ssb0:1: Required 30BIT DMA mask unsupported by the system
+[    3.836916] kmodloader: done loading kernel modules from /etc/modules-boot.d/*
+[    3.856584] init: - preinit -
+[    8.246808] random: jshn: uninitialized urandom read (4 bytes read)
+[    8.452113] random: jshn: uninitialized urandom read (4 bytes read)
+[    8.633883] random: jshn: uninitialized urandom read (4 bytes read)
+Press the [f] key and hit [enter] to enter failsafe mode
+Press the [1], [2], [3] or [4] key and hit [enter] to select the debug level
+[   14.291547] jffs2_scan_eraseblock(): End of filesystem marker found at 0x10000
+[   14.299038] jffs2_build_filesystem(): unlocking the mtd device... 
+[   14.299201] done.
+[   14.307577] jffs2_build_filesystem(): erasing all blocks after the end marker... 
+[   19.306727] done.
+[   19.316722] jffs2: notice: (339) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[   19.339087] mount_root: overlay filesystem has not been fully initialized yet
+[   19.354104] mount_root: switching to jffs2 overlay
+[   19.394181] overlayfs: upper fs does not support tmpfile.
+- config restore -
+[   20.408026] procd: - early -
+[   20.411813] procd: - watchdog -
+[   20.993739] procd: cannot set group dialout for /dev/ttyS0 (getgrnam: 0)
+[   21.007410] procd: cannot set group dialout for /dev/ttyS1 (getgrnam: 0)
+[   21.535586] procd: - watchdog -
+[   21.541488] procd: - ubus -
+[   21.888519] random: ubusd: uninitialized urandom read (4 bytes read)
+[   21.897518] random: ubusd: uninitialized urandom read (4 bytes read)
+[   21.904607] random: ubusd: uninitialized urandom read (4 bytes read)
+[   21.920625] procd: - init -
+Please press Enter to activate this console.
+[   26.235424] kmodloader: loading kernel modules from /etc/modules.d/*
+[   26.273332] tun: Universal TUN/TAP device driver, 1.6
+[   26.338210] kmodloader: done loading kernel modules from /etc/modules.d/*
+[   26.685479] urngd: v1.0.2 started.
+[   27.700788] random: crng init done
+[   27.704489] random: 4 urandom warning(s) missed due to ratelimiting
+
+
+
+BusyBox v1.31.1 () built-in shell (ash)
+
+  _______                     ________        __
+ |       |.-----.-----.-----.|  |  |  |.----.|  |_
+ |   -   ||  _  |  -__|     ||  |  |  ||   _||   _|
+ |_______||   __|_____|__|__||________||__|  |____|
+          |__| W I R E L E S S   F R E E D O M
+ -----------------------------------------------------
+ OpenWrt SNAPSHOT, r13151-c3a43753b9
+ -----------------------------------------------------
+</pre>
+#+END_EXPORT
+
+By attempting to load a new image (trx without the device-specific header) I got dropped to the CEF bootloader shell which was
+interesting as I've never seen it:
+
+#+BEGIN_EXPORT html
+<pre>
+CFE version 1.0.37 for BCM947XX (32bit,SP,LE)
+Build Date: Mon Oct 18 14:27:36 CST 2004 (root@me)
+Copyright (C) 2000,2001,2002,2003 Broadcom Corporation.
+
+Initializing Arena.
+Initializing Devices.
+
+No DPN
+et0: Broadcom BCM47xx 10/100 Mbps Ethernet Controller 3.60.13.0
+rndis0: Broadcom USB RNDIS Network Adapter (P-t-P)
+CPU type 0x29007: 216MHz
+Total memory: 0x1000000 bytes (16MB)
+
+Total memory used by CFE:  0x80300000 - 0x8043EB40 (1305408)
+Initialized Data:          0x80338DB0 - 0x8033B160 (9136)
+BSS Area:                  0x8033B160 - 0x8033CB40 (6624)
+Local Heap:                0x8033CB40 - 0x8043CB40 (1048576)
+Stack Area:                0x8043CB40 - 0x8043EB40 (8192)
+Text (code) segment:       0x80300000 - 0x80338DB0 (232880)
+Boot area (physical):      0x0043F000 - 0x0047F000
+Relocation Factor:         I:00000000 - D:00000000
+
+Boot version: v3.4
+The boot is CFE
+
+mac_init(): Find mac [00:12:17:C7:39:04] in location 0
+Nothing...
+
+eou_key_init(): Find key pair in location 0
+The eou device id is same
+The eou public key is same
+The eou private key is same
+Device eth0:  hwaddr 00-12-17-C7-39-04, ipaddr 192.168.1.1, mask 255.255.255.0
+        gateway not set, nameserver not set
+Reading :: CODE Pattern is INCORRECT! (W54G)
+Failed.: Error
+CFE> 
+CFE> help
+Available commands:
+
+rndis               Broadcom USB RNDIS utility.
+et                  Broadcom Ethernet utility.
+nvram               NVRAM utility.
+reboot              Reboot.
+flash               Update a flash memory device
+memtest             Test memory.
+f                   Fill contents of memory.
+e                   Modify contents of memory.
+d                   Dump memory.
+u                   Disassemble instructions.
+autoboot            Automatic system bootstrap.
+batch               Load a batch file into memory and execute it
+go                  Verify and boot OS image.
+boot                Load an executable file into memory and execute it
+load                Load an executable file into memory without executing it
+save                Save a region of memory to a remote file via TFTP
+ping                Ping a remote IP host.
+arp                 Display or modify the ARP Table
+ifconfig            Configure the Ethernet interface
+show devices        Display information about the installed devices.
+unsetenv            Delete an environment variable.
+printenv            Display the environment variables
+setenv              Set an environment variable.
+help                Obtain help for CFE commands
+
+For more information about a command, enter 'help command-name'
+CFE> show devices
+Device Name          Description
+-------------------  ---------------------------------------------------------
+uart0                NS16550 UART at 0x18000300
+uart1                NS16550 UART at 0x18000400
+flash0.boot          New CFI flash at 1C000000 offset 00000000 size 256KB
+flash0.trx           New CFI flash at 1C000000 offset 00040000 size 1KB
+flash0.os            New CFI flash at 1C000000 offset 0004001C size 3808KB
+flash0.nvram         New CFI flash at 1C000000 offset 003F8000 size 32KB
+flash1.boot          New CFI flash at 1C000000 offset 00000000 size 256KB
+flash1.trx           New CFI flash at 1C000000 offset 00040000 size 3808KB
+flash1.nvram         New CFI flash at 1C000000 offset 003F8000 size 32KB
+flash0               New CFI flash at 1C000000 size 4096KB
+eth0                 Broadcom BCM47xx 10/100 Mbps Ethernet Controller
+eth1                 Broadcom USB RNDIS Network Adapter (P-t-P)
+CFE> printenv
+Variable Name        Value
+-------------------- --------------------------------------------------
+BOOT_CONSOLE         uart0
+CFE_VERSION          1.0.37
+CFE_BOARDNAME        BCM947XX
+CFE_MEMORYSIZE       16
+NET_DEVICE           eth0
+NET_IPADDR           192.168.1.1
+NET_NETMASK          255.255.255.0
+NET_GATEWAY          0.0.0.0
+NET_NAMESERVER       0.0.0.0
+STARTUP              go;
+CFE> ifconfig
+Device eth0:  hwaddr 00-12-17-C7-39-04, ipaddr 192.168.1.1, mask 255.255.255.0
+        gateway not set, nameserver not set
+CFE> 
+</pre>
+#+END_EXPORT
+
+Finally I managed to figure out how to build a proper .bin image by adding a prefix with the device-specific "pattern" using the addpattern tool built by openwrt. I
+found the proper command [[http://www.jcomeau.com/blog/build_firmware.sh][here]]. I also enabled the "Use the testing kernel version" option in "Global build settings" which was linux-5.14. The final image size was
+3412000 bytes which is only a bit shorter than 3866624 bytes available in the 4 MB flash.
+
+#+BEGIN_EXPORT html
+<pre>
+➜  openwrt git:(master) build_dir/host/firmware-utils/bin/addpattern -i bin/targets/bcm47xx/generic/openwrt-bcm47xx-generic-standard-squashfs.trx -o bin/targets/bcm47xx/generic/openwrt-bcm47xx-generic-linksys-wrt54g-squashfs.bin -p W54G -2
+mjn3's addpattern replacement - v0.81
+writing firmware v3.37.2 on 20/5/11 (y/m/d)
+</pre>
+#+END_EXPORT
+
+This resulted in the image being properly detected and flashed:
+
+#+BEGIN_EXPORT html
+<pre>
+CFE version 1.0.37 for BCM947XX (32bit,SP,LE)
+Build Date: Mon Oct 18 14:27:36 CST 2004 (root@me)
+Copyright (C) 2000,2001,2002,2003 Broadcom Corporation.
+
+Initializing Arena.
+Initializing Devices.
+
+No DPN
+et0: Broadcom BCM47xx 10/100 Mbps Ethernet Controller 3.60.13.0
+rndis0: Broadcom USB RNDIS Network Adapter (P-t-P)
+CPU type 0x29007: 216MHz
+Total memory: 0x1000000 bytes (16MB)
+
+Total memory used by CFE:  0x80300000 - 0x8043EB40 (1305408)
+Initialized Data:          0x80338DB0 - 0x8033B160 (9136)
+BSS Area:                  0x8033B160 - 0x8033CB40 (6624)
+Local Heap:                0x8033CB40 - 0x8043CB40 (1048576)
+Stack Area:                0x8043CB40 - 0x8043EB40 (8192)
+Text (code) segment:       0x80300000 - 0x80338DB0 (232880)
+Boot area (physical):      0x0043F000 - 0x0047F000
+Relocation Factor:         I:00000000 - D:00000000
+
+Boot version: v3.4
+The boot is CFE
+
+mac_init(): Find mac [00:12:17:C7:39:04] in location 0
+Nothing...
+
+eou_key_init(): Find key pair in location 0
+The eou device id is same
+The eou public key is same
+The eou private key is same
+Device eth0:  hwaddr 00-12-17-C7-39-04, ipaddr 192.168.1.1, mask 255.255.255.0
+        gateway not set, nameserver not set
+Reading :: CODE Pattern is CORRECT!
+upgrade_ver[v3.37.2] upgrade_ver[33702] 4712_ver[15000]
+Done. 3412000 bytes read
+fname=flash1.trx 
+CODE Pattern is correct! (W54G)
+Programming...done. 3411968 bytes written
+Loader:raw Filesys:raw Dev:flash0.os File: Options:(null)
+Loading: .. 3816 bytes read
+Entry at 0x80001000
+Closing network.
+Starting program at 0x80001000
+[    0.000000] Linux version 5.4.38 (enki@newton) (gcc version 8.4.0 (OpenWrt GCC 8.4.0 r13151-c3a43753b9)) #0 Wed May 6 15:50:31 2020
+[    0.000000] CPU0 revision is: 00029007 (Broadcom BMIPS3300)
+[    0.000000] bcm47xx: Using ssb bus
+[    0.000000] ssb: Found chip with id 0x4712, rev 0x01 and package 0x02
+[    0.000000] can not parse nvram name (null)ag0(null) with value 255 got -34
+[    0.000000] ssb: Sonics Silicon Backplane found at address 0x18000000
+[    0.000000] Initrd not found or empty - disabling initrd
+[    0.000000] Primary instruction cache 8kB, VIPT, 2-way, linesize 16 bytes.
+[    0.000000] Primary data cache 4kB, 2-way, VIPT, no aliases, linesize 16 bytes
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000000000000-0x0000000000ffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000000000000-0x0000000000ffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000000000000-0x0000000000ffffff]
+[    0.000000] Built 1 zonelists, mobility grouping off.  Total pages: 4064
+[    0.000000] Kernel command line:   noinitrd console=ttyS0,115200
+[    0.000000] Dentry cache hash table entries: 2048 (order: 1, 8192 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] Memory: 12428K/16384K available (2933K kernel code, 138K rwdata, 296K rodata, 144K init, 253K bss, 3956K reserved, 0K cma-reserved)
+[    0.000000] SLUB: HWalign=32, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] NR_IRQS: 128
+[    0.000000] MIPS: machine is Linksys WRT54G/GS/GL
+[    0.000000] random: get_random_bytes called from 0x8034c9b4 with crng_init=0
+[    0.000000] clocksource: MIPS: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 17696855987 ns
+[    0.000055] sched_clock: 32 bits at 108MHz, resolution 9ns, wraps every 19884107771ns
+[    0.000276] Calibrating delay loop... 213.50 BogoMIPS (lpj=427008)
+[    0.036687] pid_max: default: 32768 minimum: 301
+[    0.038010] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.038222] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.053703] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.053860] futex hash table entries: 256 (order: -1, 3072 bytes, linear)
+[    0.056346] NET: Registered protocol family 16
+[    0.204783] clocksource: Switched to clocksource MIPS
+[    0.222937] NET: Registered protocol family 2
+[    0.227065] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.227331] TCP established hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.227573] TCP bind hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.227765] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.229142] UDP hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.229385] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.230581] NET: Registered protocol family 1
+[    0.230858] PCI: CLS 0 bytes, default 16
+[    0.286023] workingset: timestamp_bits=30 max_order=12 bucket_order=0
+[    0.344288] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.344378] jffs2: version 2.2 (NAND) (SUMMARY) (LZMA) (RTIME) (CMODE_PRIORITY) (c) 2001-2006 Red Hat, Inc.
+[    0.434116] Serial: 8250/16550 driver, 2 ports, IRQ sharing enabled
+[    0.438671] printk: console [ttyS0] disabled
+[    0.459178] serial8250.0: ttyS0 at MMIO 0xb8000300 (irq = 3, base_baud = 3375000) is a 16550A
+[    0.802258] printk: console [ttyS0] enabled
+[    0.829410] serial8250.0: ttyS1 at MMIO 0xb8000400 (irq = 3, base_baud = 3375000) is a 16550A
+[    0.844389] physmap-flash physmap-flash.0: physmap platform flash device: [mem 0x1c000000-0x1e000000]
+[    0.854025] physmap-flash.0: Found 1 x16 devices at 0x0 in 16-bit bank. Manufacturer ID 0x000089 Chip ID 0x0088c5
+[    0.865320] Intel/Sharp Extended Query Table at 0x0035
+[    0.870743] Using auto-unlock on power-up/resume
+[    0.875621] cfi_cmdset_0001: Erase suspend on write enabled
+[    0.885095] 3 bcm47xxpart partitions found on MTD device physmap-flash.0
+[    0.892054] Creating 3 MTD partitions on "physmap-flash.0":
+[    0.897944] 0x000000000000-0x000000040000 : "boot"
+[    0.929682] 0x000000040000-0x0000003f0000 : "firmware"
+[    0.942383] 3 trx partitions found on MTD device firmware
+[    0.948057] Creating 3 MTD partitions on "firmware":
+[    0.953340] 0x00000000001c-0x000000000948 : "loader"
+[    0.978344] 0x000000000948-0x00000011d800 : "linux"
+[    0.997932] 0x00000011d800-0x0000003b0000 : "rootfs"
+[    1.009871] mtd: device 4 (rootfs) set to be root filesystem
+[    1.015904] 1 squashfs-split partitions found on MTD device rootfs
+[    1.022403] 0x000000300000-0x0000003b0000 : "rootfs_data"
+[    1.047707] 0x0000003f0000-0x000000400000 : "nvram"
+[    1.089440] libphy: Fixed MDIO Bus: probed
+[    1.095518] bcm47xx-wdt bcm47xx-wdt.0: BCM47xx Watchdog Timer enabled (30 seconds, Software Timer)
+[    1.105496] GPIO_WDT: failed to register misc device
+[    1.112385] NET: Registered protocol family 17
+[    1.117427] 8021q: 802.1Q VLAN Support v1.8
+[    1.149228] VFS: Mounted root (squashfs filesystem) readonly on device 31:4.
+[    1.159767] Freeing unused kernel memory: 144K
+[    1.164483] This architecture does not have kernel memory protection.
+[    1.171171] Run /sbin/init as init process
+[    1.248920] random: fast init done
+[    3.250314] zram: Added device: zram0
+failed to find a module named ext4
+[    3.424014] Can't allocate a compression stream
+[    3.428966] zram: Cannot initialise lzo-rle compressing backend
+[    3.445499] init: Can't exec /usr/sbin/mkfs.ext4: No such file or directory
+[    3.491409] init: Can't mount /dev/zram0 on /tmp: No such device
+[    3.500010] init: Console is alive
+[    3.505596] init: - watchdog -
+[    3.546165] kmodloader: loading kernel modules from /etc/modules-boot.d/*
+[    3.855041] b44: Broadcom 44xx/47xx 10/100 PCI ethernet driver version 2.0
+[    3.987097] b53_common: found switch: BCM5325, rev 0
+[    3.992970] libphy: b44_eth_mii: probed
+[    3.997376] Broadcom B53 (1) 1:1e: attached PHY driver [Broadcom B53 (1)] (mii_bus:phy_addr=1:1e, irq=POLL)
+[    4.007395] b44 ssb0:1 eth0: Broadcom 44xx/47xx 10/100 PCI ethernet driver 00:12:17:c7:39:04
+[    4.025441] kmodloader: done loading kernel modules from /etc/modules-boot.d/*
+[    4.045437] init: - preinit -
+[    9.172668] random: jshn: uninitialized urandom read (4 bytes read)
+[    9.641891] random: jshn: uninitialized urandom read (4 bytes read)
+[   10.171140] random: jshn: uninitialized urandom read (4 bytes read)
+[   11.076232] random: procd: uninitialized urandom read (4 bytes read)
+[   11.121776] b44 ssb0:1 eth0: Link is up at 100 Mbps, half duplex
+[   11.128066] b44 ssb0:1 eth0: Flow control is off for TX and off for RX
+[   11.143722] b44 ssb0:1 eth0: Link is Up - 100Mbps/Full - flow control off
+Press the [f] key and hit [enter] to enter failsafe mode
+Press the [1], [2], [3] or [4] key and hit [enter] to select the debug level
+[   16.713419] mount_root: jffs2 not ready yet, using temporary tmpfs overlay
+[   16.866899] b44 ssb0:1 eth0: Link is Down
+[   16.871280] b44 ssb0:1 eth0: powering down PHY
+[   16.966825] procd: - early -
+[   16.970649] procd: - watchdog -
+[   18.275605] procd: - watchdog -
+[   18.281710] procd: - ubus -
+[   18.339379] random: ubusd: uninitialized urandom read (4 bytes read)
+[   18.348214] random: ubusd: uninitialized urandom read (4 bytes read)
+[   18.355232] random: ubusd: uninitialized urandom read (4 bytes read)
+[   18.371592] procd: - init -
+Please press Enter to activate this console.
+[   22.545323] urngd: v1.0.2 started.
+[   23.114969] kmodloader: loading kernel modules from /etc/modules.d/*
+[   23.551904] random: crng init done
+[   23.555608] random: 3 urandom warning(s) missed due to ratelimiting
+[   23.803669] kmodloader: done loading kernel modules from /etc/modules.d/*
+[  181.607554] b44 ssb0:1 eth0: Link is up at 100 Mbps, full duplex
+[  181.613874] b44 ssb0:1 eth0: Flow control is off for TX and off for RX
+[  181.622935] b44 ssb0:1 eth0: Link is Up - 100Mbps/Full - flow control off
+[  181.798943] br-lan: port 1(eth0.1) entered blocking state
+[  181.804633] br-lan: port 1(eth0.1) entered disabled state
+[  181.814662] device eth0.1 entered promiscuous mode
+[  181.819738] device eth0 entered promiscuous mode
+[  181.904733] br-lan: port 1(eth0.1) entered blocking state
+[  181.910616] br-lan: port 1(eth0.1) entered forwarding state
+[  184.700092] jffs2_scan_eraseblock(): End of filesystem marker found at 0x0
+[  184.753110] jffs2_build_filesystem(): unlocking the mtd device... 
+[  184.753267] done.
+[  184.761795] jffs2_build_filesystem(): erasing all blocks after the end marker... 
+[  190.947311] done.
+[  190.957223] jffs2: notice: (801) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[  191.335738] overlayfs: upper fs does not support tmpfile.
+</pre>
+#+END_EXPORT
+
+As you can see this time the ethernet device was properly initialized. The entire openwrt configuration file can be found [[file:openwrt-config.txt][here]].

@@ -1,0 +1,1071 @@
+#+TITLE: Cubify Cube 3D printer
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="cubify-cube3d"/>
+#+END_EXPORT
+
+The Cubify Cube 3d printer is a plastic filament 3D-printer. It's production is discontinued but I got mine for free from one of the members of the [[https://hackerspace.pl][Warsaw Hackerspace]] so I 
+thought I might as well see what's it worth. The online reviews of this printer are pretty bad (it has > 50% 1-star reviews on Amazon) but hey, I got it for free together with
+two cartridges of filament.
+
+Screws are Allen H2.5 *not* Allen H3 or Torx like I thought.
+
+* Main board
+** Chips
+
+| Item                  | Type                                                                | Notes                                                                                              |
+|-----------------------+---------------------------------------------------------------------+----------------------------------------------------------------------------------------------------|
+| Microcontroller       | [[https://www.microchip.com/wwwproducts/en/PIC32MX450F256H][PIC32MX450F256H]]                                                     |                                                                                                    |
+| WLAN chip             | [[https://www.microchip.com/wwwproducts/en/RN131][RN131C//RM]]                                                          |                                                                                                    |
+|                       | VN5050J                                                             | Automotive driver, purpose unknown                                                                 |
+| Stepper motor drivers | A3979                                                               | 4 x stepper motor drivers. Makes sense, the 3d printer has 4 stepper motors (3 axes and extruder). |
+| LCD                   | https://www.docdroid.net/JLZDTjm/pt0242432t-c402-j-vera.pdf#page=11 |                                                                                                    |
+| OTG transciever       |                                                                     | For both host (usb sticks) and device (back connector for firmware programming).                                                                                                   |
+
+
+** Connectors
+
+There are the following connectors on the board:
+
+- a PICkit2 connector (unpopulated)
+- a CONN12 connector (unpopulated)
+- a microSD (TransFlash) connector (populated with a 4 GB card). It is likely used to store the print gcode files and settings
+- a twopin cartridge plug-in detect connector. Connected to the PIC pin 63 RPE3/CTPLS/PMD3/RE3
+- spring pins connecting to a chip inside the cartridge via 1-Wire, connected to the PIC pin SDA2/U2RX/PMA9/CN17/RF4
+
+** Tapping the PIC <-> WLAN communications
+
+I soldered two new pin headers onto the board to access the PICkit2 connector as well as the CONN12 which I expected would be the serial port. 
+My suspicions were correct, when plugging in a USB<->RS232 adapter I started seeing some interesting output. 
+This is actually the interface between the PIC microprocessor and the WLAN module.
+
+Here is what can be seen on the console when the Cube is powered on:
+
+#+BEGIN_EXPORT html
+<pre>
+# picocom -b 57600 /dev/ttyUSB0 
+picocom v2.2
+
+port is        : /dev/ttyUSB0
+flowcontrol    : none
+baudrate is    : 57600
+parity is      : none
+databits are   : 8
+stopbits are   : 1
+escape is      : C-a
+local echo is  : no
+noinit is      : no
+noreset is     : no
+nolock is      : no
+send_cmd is    : sz -vv
+receive_cmd is : rz -vv -E
+imap is        : 
+omap is        : 
+emap is        : crcrlf,delbs,
+
+Type [C-a] [C-h] to see available commands
+
+Terminal ready
+
+
+0.000 Cube V2.07
+0.000 Baud:227272
+</pre>
+#+END_EXPORT
+
+Later after the button is pressed and the GUI starts:
+
+#+BEGIN_EXPORT html
+<pre>
+2.000 $$$
+2.200 D_LOAD_SETTINGS_FILE_CHECK_FS
+2.200 D_LOAD_SETTINGS_FILE_CHECK_FILE
+2.200 D_LOAD_SETTINGS_FILE_AND_RENAME
+2.200 D_WRITE_NVM
+CMD
+2.200 set u m 0x31
+AOK
+2.225 set w l 5
+AOK
+2.225 save
+Storing in config
+2.225 get mac
+Mac Addr=00:06:66:21:f1:46
+2.250 ver
+wifly-GSX Ver 4.00.1, Apr 19 2013 11:48:31 on RN-131
+2.250 exit
+EXIT
+</pre>
+#+END_EXPORT
+
+Each message has a timestamp in it's header which is like sysUpTime in that it counts time since boot. Some more interesting strings are produced when a WiFi scan is triggered:
+
+#+BEGIN_EXPORT html
+<pre>
+126.550 $$$
+CMD
+126.600 set w j 0
+AOK
+126.625 save
+Storing in config
+126.625 reboot
+*Reboot* 
+128.625 $$$
+CMD
+128.675 set sys printlvl 0x4000
+AOK
+128.700 scan
+SCAN:Found 4
+01,06,-75,04,3104,28,40,xx:xx:xx:xx:xx:xx,ZyXEL XXXXXX v2
+02,11,-39,04,1104,28,00,xx:xx:xx:xx:xx:xx,XXXXX
+03,11,-84,04,3100,28,00,xx:xx:xx:xx:xx:xx,XXXXXXXXXX
+04,11,-83,04,3100,28,00,xx:xx:xx:xx:xx:xx,XXXXXXXX
+131.300 exit
+END:
+EXIT
+</pre>
+#+END_EXPORT
+
+The commands are documented on [[http://ww1.microchip.com/downloads/en/DeviceDoc/50002230B.pdf][Microchip's site]]
+
+Example WLAN association output:
+
+#+BEGIN_EXPORT html
+<pre>
+525.150 $$$
+CMD
+525.325 set w j 0
+AOK
+525.350 save
+Storing in config
+525.375 reboot
+*Reboot*
+527.375 $$$
+CMD
+527.425 set sys printlvl 0x4000
+AOK
+527.450 scan
+SCAN:Found 6
+01,01,-84,04,1105,28,40,xx:xx:xx:xx:xx:xx,XXXXXXXXX
+02,08,-76,04,3104,28,40,xx:xx:xx:xx:xx:xx,XXXXXXXXXX
+03,11,-40,04,1104,28,00,xx:xx:xx:xx:xx:xx,XXXXXXx
+04,11,-78,04,3100,28,00,xx:xx:xx:xx:xx:xx,XXXX
+05,11,-78,04,3100,28,00,xx:xx:xx:xx:xx:xx,XXXXXXXXX
+06,11,-80,04,3100,28,00,xx:xx:xx:xx:xx:xx,XXX
+530.075 exit
+END:
+EXIT
+620.800 $$$
+CMD
+620.825 set i d 1
+AOK
+620.850 set w a 4
+AOK
+620.850 set w p XXXXX
+AOK
+621.300 set w j 1
+AOK
+621.300 set w c 0
+AOK
+621.300 join XXXXX
+Auto-Assoc XXXXX chan=11 mode=MIXED SCAN OK
+Joining XXXX now..
+Associated!
+DHCP: Start
+DHCP in 4789ms, lease=3600s
+IF=UP
+DHCP=ON
+IP=10.1.0.8:2000
+NM=255.255.255.240
+GW=10.1.0.1
+626.625 save
+Listen on 2000
+Storing in config
+626.625 exit
+EXIT
+</pre>
+#+END_EXPORT
+
+* Cartridges
+
+The chip inside the cartridge with filament is a DS28E01.
+
+* Software
+
+The software needed is the older Cubify not the new Cube Print. When trying to print the new files the printer displays a message "Cannot print this file".
+
+
+* CONN12 output while printing
+
+Besides communication from the microcontroller to the WLAN chip the CONN12 serial port serves also as a debug console. I have wired an external cable reaching out of the case
+to watch what happens there. The pinout of this connector is the following:
+
+|------------+--------+--------+------+-------|
+| PIN        | +3.3 V | GND    | TXD  | RXD   |
+| Ext. cable |        | purple | blue | green |
+|------------+--------+--------+------+-------|
+
+The serial port setup to receive data is 57600 bps 8n1. Here are some dumps from the printer doing printing-related stuff.
+
+Debug output when printing and filament broke:
+
+#+BEGIN_EXPORT html
+<pre>
+2.000 $$$
+2.200 D_LOAD_SETTINGS_FILE_CHECK_FS
+2.200 D_LOAD_SETTINGS_FILE_CHECK_FILE
+CMD
+2.750 set u m 0x31
+AOK
+2.775 set w l 5
+AOK
+2.775 save
+Storing in config
+2.800 get mac
+Mac Addr=00:06:66:21:f1:46
+2.825 ver
+wifly-GSX Ver 4.00.1, Apr 19 2013 11:48:31 on RN-131
+2.825 exit
+EXIT
+55.450 D_FILAMENT_LENGTH=
+55.450 106590
+55.450 TE4 RST E1 T=10
+68.300 TE4 E1 T=125 DT=115 CR=2300 TH=225
+73.275 TE4 E1 T=150 DT=25 CR=500 TH=225
+78.250 TE4 E1 T=174 DT=24 CR=480 TH=200
+83.225 TE4 E1 T=195 DT=21 CR=420 TH=200
+88.200 TE4 E1 T=214 DT=19 CR=380 TH=175
+96.950 Encoder=2.75mm ext=0mm
+98.250 Encoder=5.51mm ext=3mm
+100.250 Encoder=8.26mm ext=6mm
+101.250 Encoder=11.01mm ext=8mm
+103.200 Encoder=13.77mm ext=11mm
+104.300 Encoder=16.52mm ext=13mm
+106.150 Encoder=19.27mm ext=16mm
+107.350 Encoder=22.02mm ext=18mm
+109.450 Encoder=24.78mm ext=22mm
+110.650 Encoder=27.53mm ext=24mm
+112.800 Encoder=30.28mm ext=27mm
+114.000 Encoder check, ext=30mm
+114.100 Encoder=33.04mm ext=30mm
+116.000 Encoder=35.79mm ext=33mm
+117.300 Encoder=38.54mm ext=35mm
+119.400 Encoder=41.30mm ext=39mm
+120.350 Encoder=44.05mm ext=40mm
+122.950 Encoder=46.80mm ext=44mm
+124.050 Encoder=49.55mm ext=46mm
+125.850 Encoder=52.31mm ext=49mm
+127.100 Encoder=55.06mm ext=51mm
+129.200 Encoder=57.81mm ext=54mm
+130.400 Encoder=60.57mm ext=56mm
+132.250 Encoder check, ext=60mm
+132.500 Encoder=63.32mm ext=60mm
+133.800 Encoder=66.07mm ext=62mm
+134.200 Encoder=68.82mm ext=63mm
+134.650 Encoder=71.58mm ext=63mm
+136.350 Encoder=74.33mm ext=65mm
+137.650 Encoder=77.08mm ext=68mm
+139.700 Encoder=79.84mm ext=71mm
+140.700 Encoder=82.59mm ext=73mm
+142.600 Encoder=85.34mm ext=76mm
+143.700 Encoder=88.10mm ext=78mm
+145.500 Encoder=90.85mm ext=81mm
+147.050 Encoder=93.60mm ext=83mm
+149.100 Encoder=96.36mm ext=87mm
+150.300 Encoder=99.11mm ext=89mm
+150.700 Encoder check, ext=90mm
+152.400 Encoder=101.86mm ext=92mm
+153.750 Encoder=104.61mm ext=95mm
+155.650 Encoder=107.37mm ext=98mm
+156.950 Encoder=110.12mm ext=100mm
+158.950 Encoder=112.87mm ext=104mm
+160.000 Encoder=115.63mm ext=105mm
+161.850 Encoder=118.38mm ext=109mm
+162.950 Encoder=121.13mm ext=111mm
+164.800 Encoder=123.88mm ext=114mm
+165.950 Encoder=126.64mm ext=116mm
+168.100 Encoder=129.39mm ext=119mm
+168.200 Encoder check, ext=120mm
+169.200 Encoder=132.14mm ext=121mm
+172.100 Encoder=134.90mm ext=125mm
+173.350 Encoder=137.65mm ext=127mm
+175.950 Encoder=140.40mm ext=130mm
+177.250 Encoder=143.16mm ext=133mm
+179.400 Encoder=145.91mm ext=136mm
+180.450 Encoder=148.66mm ext=138mm
+182.450 Encoder=151.42mm ext=141mm
+183.550 Encoder=154.17mm ext=143mm
+185.550 Encoder=156.92mm ext=146mm
+186.750 Encoder=159.67mm ext=148mm
+187.650 Encoder check, ext=150mm
+188.950 Encoder=162.43mm ext=152mm
+190.150 Encoder=165.18mm ext=154mm
+192.400 Encoder=167.93mm ext=157mm
+193.750 Encoder=170.69mm ext=159mm
+195.800 Encoder=173.44mm ext=163mm
+197.950 Encoder=176.19mm ext=165mm
+201.900 Encoder=178.95mm ext=169mm
+211.500 Encoder check, ext=180mm
+229.900 Encoder check, ext=210mm
+229.900 D_FILAMENT_FLOW_STOPPED
+</pre>
+#+END_EXPORT
+
+
+Finished print of 20mm test cube (after filament replaced):
+
+#+BEGIN_EXPORT html
+<pre>
+842.500 D_OW_NO_RESET_PRESENCE
+872.500 TE4 RST E1 T=10
+887.475 TE4 E1 T=130 DT=120 CR=2400 TH=225
+892.450 TE4 E1 T=155 DT=25 CR=500 TH=225
+897.425 TE4 E1 T=178 DT=23 CR=460 TH=200
+902.400 TE4 E1 T=199 DT=21 CR=420 TH=200
+907.375 TE4 E1 T=217 DT=18 CR=360 TH=175
+912.350 TE4 E1 T=234 DT=17 CR=340 TH=175
+1279.600 D_FILAMENT_LENGTH=
+1279.600 106292
+1279.600 TE4 RST E1 T=10
+1291.550 TE4 E1 T=142 DT=132 CR=2640 TH=225
+1296.525 TE4 E1 T=167 DT=25 CR=500 TH=200
+1301.500 TE4 E1 T=189 DT=22 CR=440 TH=200
+1306.475 TE4 E1 T=209 DT=20 CR=400 TH=200
+1316.050 Encoder=2.75mm ext=0mm
+1318.000 Encoder=5.51mm ext=3mm
+1319.000 Encoder=8.26mm ext=5mm
+1320.950 Encoder=11.01mm ext=8mm
+1322.050 Encoder=13.77mm ext=10mm
+1323.900 Encoder=16.52mm ext=13mm
+1325.050 Encoder=19.27mm ext=15mm
+1327.200 Encoder=22.02mm ext=19mm
+1328.400 Encoder=24.78mm ext=21mm
+1330.500 Encoder=27.53mm ext=24mm
+1331.850 Encoder=30.28mm ext=27mm
+1333.600 Encoder check, ext=30mm
+1333.750 Encoder=33.04mm ext=30mm
+1335.100 Encoder=35.79mm ext=32mm
+1337.150 Encoder=38.54mm ext=36mm
+1338.150 Encoder=41.30mm ext=37mm
+1340.050 Encoder=44.05mm ext=41mm
+1341.150 Encoder=46.80mm ext=42mm
+1343.700 Encoder=49.55mm ext=46mm
+1344.900 Encoder=52.31mm ext=48mm
+1347.000 Encoder=55.06mm ext=51mm
+1348.250 Encoder=57.81mm ext=53mm
+1350.350 Encoder=60.57mm ext=57mm
+1351.650 Encoder=63.32mm ext=59mm
+1351.900 Encoder check, ext=60mm
+1353.600 Encoder=66.07mm ext=62mm
+1353.900 Encoder=68.82mm ext=63mm
+1354.400 Encoder=71.58mm ext=63mm
+1355.500 Encoder=74.33mm ext=65mm
+1357.600 Encoder=77.08mm ext=68mm
+1358.550 Encoder=79.84mm ext=70mm
+1360.550 Encoder=82.59mm ext=73mm
+1361.550 Encoder=85.34mm ext=75mm
+1363.450 Encoder=88.10mm ext=78mm
+1364.650 Encoder=90.85mm ext=80mm
+1367.100 Encoder=93.60mm ext=84mm
+1368.250 Encoder=96.36mm ext=86mm
+1370.350 Encoder check, ext=90mm
+1370.400 Encoder=99.11mm ext=90mm
+1371.700 Encoder=101.86mm ext=92mm
+1373.650 Encoder=104.61mm ext=95mm
+1374.900 Encoder=107.37mm ext=97mm
+1376.950 Encoder=110.12mm ext=101mm
+1377.900 Encoder=112.87mm ext=102mm
+1379.900 Encoder=115.63mm ext=106mm
+1380.950 Encoder=118.38mm ext=108mm
+1382.800 Encoder=121.13mm ext=111mm
+1384.000 Encoder=123.88mm ext=113mm
+1386.150 Encoder=126.64mm ext=117mm
+1387.300 Encoder=129.39mm ext=119mm
+1387.900 Encoder check, ext=120mm
+1389.400 Encoder=132.14mm ext=122mm
+1390.750 Encoder=134.90mm ext=124mm
+1391.600 Encoder=137.65mm ext=125mm
+1393.450 Encoder=140.40mm ext=128mm
+1395.350 Encoder=143.16mm ext=130mm
+1397.400 Encoder=145.91mm ext=133mm
+1398.500 Encoder=148.66mm ext=135mm
+1400.550 Encoder=151.42mm ext=138mm
+1401.650 Encoder=154.17mm ext=140mm
+1403.600 Encoder=156.92mm ext=143mm
+1404.850 Encoder=159.67mm ext=145mm
+1407.050 Encoder=162.43mm ext=149mm
+1407.350 Encoder check, ext=150mm
+1408.300 Encoder=165.18mm ext=151mm
+1410.500 Encoder=167.93mm ext=155mm
+1411.900 Encoder=170.69mm ext=157mm
+1413.900 Encoder=173.44mm ext=160mm
+1415.300 Encoder=176.19mm ext=163mm
+1418.600 Encoder=178.95mm ext=166mm
+1420.350 Encoder=181.70mm ext=168mm
+1420.850 Encoder=184.45mm ext=168mm
+1424.200 Encoder=187.20mm ext=171mm
+1426.050 Encoder=189.96mm ext=173mm
+1428.950 Encoder=192.71mm ext=176mm
+1430.200 Encoder=195.46mm ext=178mm
+1431.150 Encoder check, ext=180mm
+1432.450 Encoder=198.22mm ext=182mm
+1433.650 Encoder=200.97mm ext=184mm
+1435.900 Encoder=203.72mm ext=187mm
+1437.250 Encoder=206.48mm ext=190mm
+1439.300 Encoder=209.23mm ext=193mm
+1440.650 Encoder=211.98mm ext=195mm
+1442.750 Encoder=214.73mm ext=198mm
+1443.850 Encoder=217.49mm ext=200mm
+1445.850 Encoder=220.24mm ext=204mm
+1447.000 Encoder=222.99mm ext=205mm
+1448.950 Encoder=225.75mm ext=209mm
+1449.550 Encoder check, ext=210mm
+1450.750 Encoder=228.50mm ext=211mm
+1454.700 Encoder=231.25mm ext=214mm
+1457.000 Encoder=234.01mm ext=216mm
+1460.850 Encoder=236.76mm ext=220mm
+1462.200 Encoder=239.51mm ext=222mm
+1464.250 Encoder=242.26mm ext=225mm
+1465.550 Encoder=245.02mm ext=228mm
+1467.700 Encoder=247.77mm ext=231mm
+1468.800 Encoder=250.52mm ext=233mm
+1470.750 Encoder=253.28mm ext=236mm
+1471.950 Encoder=256.03mm ext=238mm
+1472.950 Encoder check, ext=240mm
+1473.850 Encoder=258.78mm ext=241mm
+1475.150 Encoder=261.54mm ext=243mm
+1477.350 Encoder=264.29mm ext=247mm
+1478.600 Encoder=267.04mm ext=249mm
+1480.800 Encoder=269.79mm ext=252mm
+1483.050 Encoder=272.55mm ext=255mm
+1486.600 Encoder=275.30mm ext=258mm
+1488.950 Encoder=278.05mm ext=260mm
+1489.200 Encoder=280.81mm ext=260mm
+1489.350 Encoder=283.56mm ext=260mm
+1493.100 Encoder=286.31mm ext=264mm
+1494.150 Encoder=289.07mm ext=265mm
+1496.150 Encoder=291.82mm ext=269mm
+1496.750 Encoder check, ext=270mm
+1497.250 Encoder=294.57mm ext=270mm
+1499.200 Encoder=297.32mm ext=274mm
+1500.500 Encoder=300.08mm ext=276mm
+1502.650 Encoder=302.83mm ext=279mm
+1503.950 Encoder=305.58mm ext=281mm
+1506.100 Encoder=308.34mm ext=285mm
+1507.550 Encoder=311.09mm ext=287mm
+1509.550 Encoder=313.84mm ext=290mm
+1510.950 Encoder=316.60mm ext=293mm
+1513.050 Encoder=319.35mm ext=296mm
+1514.100 Encoder=322.10mm ext=298mm
+1515.550 Encoder check, ext=300mm
+1517.100 Encoder=324.85mm ext=301mm
+1519.250 Encoder=327.61mm ext=303mm
+1522.650 Encoder=330.36mm ext=306mm
+1524.800 Encoder=333.11mm ext=308mm
+1525.000 Encoder=335.87mm ext=308mm
+1525.500 Encoder=338.62mm ext=308mm
+1527.600 Encoder=341.37mm ext=312mm
+1528.900 Encoder=344.13mm ext=314mm
+1531.150 Encoder=346.88mm ext=318mm
+1532.500 Encoder=349.63mm ext=320mm
+1534.550 Encoder=352.38mm ext=323mm
+1535.900 Encoder=355.14mm ext=325mm
+1538.000 Encoder=357.89mm ext=329mm
+1538.500 Encoder check, ext=330mm
+1539.050 Encoder=360.64mm ext=330mm
+1541.050 Encoder=363.40mm ext=334mm
+1542.200 Encoder=366.15mm ext=336mm
+1544.100 Encoder=368.90mm ext=339mm
+1545.400 Encoder=371.66mm ext=341mm
+1548.600 Encoder=374.41mm ext=344mm
+1550.600 Encoder=377.16mm ext=346mm
+1551.200 Encoder=379.91mm ext=347mm
+1555.000 Encoder=382.67mm ext=350mm
+1555.250 Encoder=385.42mm ext=350mm
+1555.650 Encoder=388.17mm ext=350mm
+1558.100 Encoder=390.93mm ext=352mm
+1561.700 Encoder=393.68mm ext=356mm
+1563.950 Encoder=396.43mm ext=358mm
+1564.950 Encoder=399.19mm ext=358mm
+1566.300 Encoder check, ext=360mm
+1568.800 Encoder=401.94mm ext=361mm
+1570.400 Encoder=404.69mm ext=363mm
+1574.100 Encoder=407.44mm ext=366mm
+1575.000 Encoder=410.20mm ext=367mm
+1576.400 Encoder=412.95mm ext=368mm
+1577.100 Encoder=415.70mm ext=368mm
+1580.350 Encoder=418.46mm ext=371mm
+1582.650 Encoder=421.21mm ext=373mm
+1586.650 Encoder=423.96mm ext=377mm
+1586.800 Encoder=426.72mm ext=377mm
+1587.250 Encoder=429.47mm ext=377mm
+1589.700 Encoder=432.22mm ext=379mm
+1593.650 Encoder=434.97mm ext=382mm
+1596.500 Encoder=437.73mm ext=385mm
+1600.550 Encoder=440.48mm ext=388mm
+1602.450 Encoder check, ext=390mm
+1603.050 Encoder=443.23mm ext=390mm
+1606.900 Encoder=445.99mm ext=393mm
+1607.050 Encoder=448.74mm ext=394mm
+1607.500 Encoder=451.49mm ext=394mm
+1609.600 Encoder=454.25mm ext=395mm
+1613.150 Encoder=457.00mm ext=399mm
+1615.500 Encoder=459.75mm ext=400mm
+1615.850 Encoder=462.50mm ext=401mm
+1616.250 Encoder=465.26mm ext=401mm
+1619.500 Encoder=468.01mm ext=403mm
+1621.550 Encoder=470.76mm ext=406mm
+1621.750 Encoder=473.52mm ext=406mm
+1621.900 Encoder=476.27mm ext=406mm
+1625.750 Encoder=479.02mm ext=409mm
+1625.900 Encoder=481.77mm ext=409mm
+1626.350 Encoder=484.53mm ext=409mm
+1628.800 Encoder=487.28mm ext=411mm
+1632.750 Encoder=490.03mm ext=415mm
+1634.950 Encoder=492.79mm ext=417mm
+1635.150 Encoder=495.54mm ext=417mm
+1635.600 Encoder=498.29mm ext=417mm
+1638.850 Encoder check, ext=420mm
+1639.550 Encoder=501.05mm ext=420mm
+1641.850 Encoder=503.80mm ext=422mm
+1641.900 Encoder=506.55mm ext=422mm
+1642.100 Encoder=509.30mm ext=422mm
+1645.950 Encoder=512.06mm ext=426mm
+1646.050 Encoder=514.81mm ext=426mm
+1646.500 Encoder=517.56mm ext=426mm
+1648.000 Encoder=520.32mm ext=428mm
+1648.150 Encoder=523.07mm ext=428mm
+1648.750 Encoder=525.82mm ext=428mm
+1652.150 Encoder=528.58mm ext=431mm
+1653.950 Encoder=531.33mm ext=433mm
+1657.950 Encoder=534.08mm ext=436mm
+1658.200 Encoder=536.84mm ext=436mm
+1658.750 Encoder=539.59mm ext=436mm
+1660.550 Encoder=542.34mm ext=438mm
+*ERR WATCHDOG: 6C24*
+1664.500 Encoder=545.09mm ext=442mm
+1667.000 Encoder=547.85mm ext=443mm
+1671.450 Encoder=550.60mm ext=447mm
+1673.850 Encoder=553.35mm ext=449mm
+1674.050 Encoder check, ext=450mm
+1678.000 Encoder=556.11mm ext=453mm
+1678.850 Encoder=558.86mm ext=453mm
+1680.750 Encoder=561.61mm ext=455mm
+1684.550 Encoder=564.36mm ext=458mm
+1686.900 Encoder=567.12mm ext=460mm
+1690.850 Encoder=569.87mm ext=463mm
+1692.950 Encoder=572.62mm ext=465mm
+1696.850 Encoder=575.38mm ext=468mm
+1699.450 Encoder=578.13mm ext=470mm
+1703.350 Encoder=580.88mm ext=474mm
+1705.350 Encoder=583.64mm ext=476mm
+1705.500 Encoder=586.39mm ext=476mm
+1705.950 Encoder=589.14mm ext=476mm
+1710.400 Encoder=591.90mm ext=480mm
+1710.400 Encoder check, ext=480mm
+1712.850 Encoder=594.65mm ext=482mm
+1717.000 Encoder=597.40mm ext=485mm
+1719.750 Encoder=600.15mm ext=487mm
+1723.500 Encoder=602.91mm ext=491mm
+1725.150 Encoder=605.66mm ext=492mm
+1726.050 Encoder=608.41mm ext=493mm
+1729.700 Encoder=611.17mm ext=496mm
+1731.650 Encoder=613.92mm ext=497mm
+1735.050 Encoder=616.67mm ext=501mm
+1737.550 Encoder=619.42mm ext=503mm
+1738.250 Encoder=622.18mm ext=503mm
+1742.000 Encoder=624.93mm ext=506mm
+1742.500 Encoder=627.68mm ext=507mm
+1742.600 Encoder=630.44mm ext=507mm
+1744.350 Encoder=633.19mm ext=508mm
+1745.600 Encoder check, ext=510mm
+1748.650 Encoder=635.94mm ext=512mm
+1748.750 Encoder=638.70mm ext=512mm
+1749.300 Encoder=641.45mm ext=512mm
+1751.600 Encoder=644.20mm ext=514mm
+1755.150 Encoder=646.96mm ext=517mm
+1757.800 Encoder=649.71mm ext=520mm
+1758.000 Encoder=652.46mm ext=520mm
+1758.450 Encoder=655.21mm ext=520mm
+1762.150 Encoder=657.97mm ext=523mm
+1762.800 Encoder=660.72mm ext=523mm
+1764.200 Encoder=663.47mm ext=525mm
+1767.900 Encoder=666.23mm ext=528mm
+1768.100 Encoder=668.98mm ext=528mm
+1768.500 Encoder=671.73mm ext=528mm
+1770.700 Encoder=674.48mm ext=530mm
+1774.150 Encoder=677.24mm ext=533mm
+1776.650 Encoder=679.99mm ext=535mm
+1777.350 Encoder=682.74mm ext=535mm
+1781.150 Encoder=685.50mm ext=539mm
+1782.100 Encoder check, ext=540mm
+1783.450 Encoder=688.25mm ext=541mm
+1787.750 Encoder=691.00mm ext=544mm
+1790.700 Encoder=693.76mm ext=546mm
+1794.300 Encoder=696.51mm ext=550mm
+1796.950 Encoder=699.26mm ext=552mm
+1797.050 Encoder=702.02mm ext=552mm
+1797.500 Encoder=704.77mm ext=552mm
+1801.300 Encoder=707.52mm ext=555mm
+1803.350 Encoder=710.27mm ext=557mm
+1807.050 Encoder=713.03mm ext=560mm
+1807.150 Encoder=715.78mm ext=560mm
+1807.600 Encoder=718.53mm ext=560mm
+1809.200 Encoder=721.29mm ext=562mm
+1809.250 Encoder=724.04mm ext=562mm
+1809.850 Encoder=726.79mm ext=562mm
+1813.050 Encoder=729.54mm ext=565mm
+1813.100 Encoder=732.30mm ext=565mm
+1813.300 Encoder=735.05mm ext=565mm
+1815.400 Encoder=737.80mm ext=567mm
+1818.050 Encoder check, ext=570mm
+1820.350 Encoder=740.56mm ext=571mm
+1822.350 Encoder=743.31mm ext=573mm
+1826.300 Encoder=746.06mm ext=577mm
+1826.550 Encoder=748.82mm ext=577mm
+1827.000 Encoder=751.57mm ext=577mm
+1829.300 Encoder=754.32mm ext=579mm
+1829.500 Encoder=757.08mm ext=579mm
+1830.050 Encoder=759.83mm ext=579mm
+1833.200 Encoder=762.58mm ext=582mm
+1833.300 Encoder=765.33mm ext=582mm
+1833.500 Encoder=768.09mm ext=582mm
+1835.700 Encoder=770.84mm ext=584mm
+1840.500 Encoder=773.59mm ext=588mm
+1842.250 Encoder=776.35mm ext=590mm
+1845.850 Encoder=779.10mm ext=593mm
+1848.300 Encoder=781.85mm ext=595mm
+1852.200 Encoder=784.60mm ext=598mm
+1854.150 Encoder check, ext=600mm
+1854.500 Encoder=787.36mm ext=600mm
+1858.750 Encoder=790.11mm ext=604mm
+1859.400 Encoder=792.86mm ext=604mm
+1861.550 Encoder=795.62mm ext=605mm
+1865.500 Encoder=798.37mm ext=609mm
+1868.450 Encoder=801.12mm ext=611mm
+1872.500 Encoder=803.88mm ext=615mm
+1874.900 Encoder=806.63mm ext=617mm
+1878.900 Encoder=809.38mm ext=620mm
+1879.550 Encoder=812.14mm ext=621mm
+1881.400 Encoder=814.89mm ext=622mm
+1885.050 Encoder=817.64mm ext=625mm
+1886.850 Encoder=820.39mm ext=627mm
+1887.500 Encoder=823.15mm ext=627mm
+1890.600 Encoder check, ext=630mm
+1891.300 Encoder=825.90mm ext=630mm
+1893.400 Encoder=828.65mm ext=632mm
+1893.800 Encoder=831.41mm ext=633mm
+1893.950 Encoder=834.16mm ext=633mm
+1897.700 Encoder=836.91mm ext=636mm
+1897.950 Encoder=839.66mm ext=636mm
+1898.350 Encoder=842.42mm ext=636mm
+1900.000 Encoder=845.17mm ext=638mm
+1900.050 Encoder=847.92mm ext=638mm
+1900.650 Encoder=850.68mm ext=638mm
+1904.600 Encoder=853.43mm ext=642mm
+1906.800 Encoder=856.18mm ext=644mm
+1907.250 Encoder=858.94mm ext=644mm
+1907.650 Encoder=861.69mm ext=644mm
+1911.500 Encoder=864.44mm ext=647mm
+1913.700 Encoder=867.20mm ext=649mm
+1914.150 Encoder=869.95mm ext=649mm
+1917.900 Encoder=872.70mm ext=653mm
+1918.600 Encoder=875.45mm ext=653mm
+1919.950 Encoder=878.21mm ext=654mm
+1920.800 Encoder=880.96mm ext=655mm
+1923.850 Encoder=883.71mm ext=658mm
+1924.150 Encoder=886.47mm ext=658mm
+1924.300 Encoder=889.22mm ext=658mm
+1925.900 Encoder=891.97mm ext=659mm
+1925.950 Encoder check, ext=660mm
+1929.450 Encoder=894.73mm ext=663mm
+1929.600 Encoder=897.48mm ext=663mm
+1930.050 Encoder=900.23mm ext=663mm
+1932.550 Encoder=902.98mm ext=665mm
+1936.300 Encoder=905.74mm ext=668mm
+1939.100 Encoder=908.49mm ext=670mm
+1943.400 Encoder=911.24mm ext=674mm
+1945.900 Encoder=914.00mm ext=676mm
+1949.600 Encoder=916.75mm ext=679mm
+1949.750 Encoder=919.50mm ext=680mm
+1950.200 Encoder=922.26mm ext=680mm
+1952.800 Encoder=925.01mm ext=682mm
+1956.550 Encoder=927.76mm ext=685mm
+1958.500 Encoder=930.51mm ext=687mm
+1958.550 Encoder=933.27mm ext=687mm
+1959.050 Encoder=936.02mm ext=687mm
+1962.350 Encoder check, ext=690mm
+1962.850 Encoder=938.77mm ext=690mm
+1965.050 Encoder=941.53mm ext=692mm
+1968.600 Encoder=944.28mm ext=695mm
+1968.700 Encoder=947.03mm ext=695mm
+1969.150 Encoder=949.79mm ext=695mm
+1971.600 Encoder=952.54mm ext=697mm
+1975.450 Encoder=955.29mm ext=701mm
+1977.500 Encoder=958.04mm ext=703mm
+1978.350 Encoder=960.80mm ext=703mm
+1982.500 Encoder=963.55mm ext=706mm
+1985.050 Encoder=966.30mm ext=709mm
+1988.750 Encoder=969.06mm ext=712mm
+1988.900 Encoder=971.81mm ext=712mm
+1989.350 Encoder=974.56mm ext=712mm
+1991.950 Encoder=977.32mm ext=714mm
+1995.650 Encoder=980.07mm ext=717mm
+1997.400 Encoder=982.82mm ext=719mm
+1997.750 Encoder check, ext=720mm
+2002.050 Encoder=985.57mm ext=722mm
+2003.950 Encoder=988.33mm ext=724mm
+2007.400 Encoder=991.08mm ext=727mm
+2010.000 Encoder=993.83mm ext=730mm
+2014.400 Encoder=996.59mm ext=733mm
+2016.700 Encoder=999.34mm ext=735mm
+2021.100 Encoder=1002.09mm ext=739mm
+2021.300 Encoder=1004.85mm ext=739mm
+2021.850 Encoder=1007.60mm ext=739mm
+2023.950 Encoder=1010.35mm ext=741mm
+2027.550 Encoder=1013.10mm ext=744mm
+2030.300 Encoder=1015.86mm ext=747mm
+2030.950 Encoder=1018.61mm ext=747mm
+2034.100 Encoder check, ext=750mm
+2034.550 Encoder=1021.36mm ext=750mm
+2036.550 Encoder=1024.12mm ext=752mm
+2040.450 Encoder=1026.87mm ext=755mm
+2041.050 Encoder=1029.62mm ext=755mm
+2043.100 Encoder=1032.38mm ext=757mm
+2046.550 Encoder=1035.13mm ext=760mm
+2049.150 Encoder=1037.88mm ext=762mm
+2049.900 Encoder=1040.63mm ext=762mm
+2053.600 Encoder=1043.39mm ext=766mm
+2055.900 Encoder=1046.14mm ext=768mm
+2060.250 Encoder=1048.89mm ext=771mm
+2063.150 Encoder=1051.65mm ext=773mm
+2066.750 Encoder=1054.40mm ext=777mm
+2069.450 Encoder=1057.15mm ext=779mm
+2069.750 Encoder=1059.91mm ext=779mm
+2070.150 Encoder=1062.66mm ext=779mm
+2070.350 Encoder check, ext=780mm
+2073.850 Encoder=1065.41mm ext=782mm
+2075.600 Encoder=1068.16mm ext=784mm
+2075.700 Encoder=1070.92mm ext=784mm
+2075.900 Encoder=1073.67mm ext=784mm
+2079.650 Encoder=1076.42mm ext=787mm
+2080.300 Encoder=1079.18mm ext=788mm
+2081.800 Encoder=1081.93mm ext=789mm
+2082.000 Encoder=1084.68mm ext=789mm
+2082.550 Encoder=1087.44mm ext=789mm
+2085.550 Encoder=1090.19mm ext=792mm
+2085.850 Encoder=1092.94mm ext=793mm
+2086.000 Encoder=1095.69mm ext=793mm
+2087.900 Encoder=1098.45mm ext=794mm
+2092.950 Encoder=1101.20mm ext=798mm
+2094.900 Encoder=1103.95mm ext=800mm
+2098.800 Encoder=1106.71mm ext=804mm
+2099.650 Encoder=1109.46mm ext=804mm
+2101.800 Encoder=1112.21mm ext=806mm
+2102.150 Encoder=1114.96mm ext=806mm
+2102.650 Encoder=1117.72mm ext=806mm
+2105.650 Encoder=1120.47mm ext=809mm
+2105.950 Encoder=1123.22mm ext=809mm
+2106.100 Encoder=1125.98mm ext=809mm
+2106.250 Encoder check, ext=810mm
+2108.100 Encoder=1128.73mm ext=811mm
+2112.950 Encoder=1131.48mm ext=815mm
+2114.650 Encoder=1134.24mm ext=817mm
+2118.350 Encoder=1136.99mm ext=820mm
+2120.850 Encoder=1139.74mm ext=822mm
+2124.600 Encoder=1142.50mm ext=825mm
+2126.900 Encoder=1145.25mm ext=827mm
+2131.200 Encoder=1148.00mm ext=831mm
+2133.850 Encoder=1150.75mm ext=832mm
+2137.850 Encoder=1153.51mm ext=836mm
+2140.850 Encoder=1156.26mm ext=838mm
+2142.100 Encoder check, ext=840mm
+2144.750 Encoder=1159.01mm ext=842mm
+2147.150 Encoder=1161.77mm ext=844mm
+2151.350 Encoder=1164.52mm ext=847mm
+2153.700 Encoder=1167.27mm ext=849mm
+2157.300 Encoder=1170.03mm ext=852mm
+2159.150 Encoder=1172.78mm ext=854mm
+2160.100 Encoder=1175.53mm ext=855mm
+2163.550 Encoder=1178.28mm ext=857mm
+2165.700 Encoder=1181.04mm ext=859mm
+2169.550 Encoder=1183.79mm ext=863mm
+2169.700 Encoder=1186.54mm ext=863mm
+2170.150 Encoder=1189.30mm ext=863mm
+2172.400 Encoder=1192.05mm ext=865mm
+2173.200 Encoder=1194.80mm ext=865mm
+2176.900 Encoder=1197.56mm ext=869mm
+2177.850 Encoder check, ext=870mm
+2179.100 Encoder=1200.31mm ext=871mm
+2183.800 Encoder=1203.06mm ext=874mm
+2186.050 Encoder=1205.81mm ext=876mm
+2186.700 Encoder=1208.57mm ext=877mm
+2189.750 Encoder=1211.32mm ext=880mm
+2189.850 Encoder=1214.07mm ext=880mm
+2190.350 Encoder=1216.83mm ext=880mm
+2191.850 Encoder=1219.58mm ext=881mm
+2192.000 Encoder=1222.33mm ext=881mm
+2192.450 Encoder=1225.08mm ext=882mm
+2196.200 Encoder=1227.84mm ext=885mm
+2196.800 Encoder=1230.59mm ext=885mm
+2198.300 Encoder=1233.34mm ext=887mm
+2201.900 Encoder=1236.10mm ext=890mm
+2202.100 Encoder=1238.85mm ext=890mm
+2202.550 Encoder=1241.60mm ext=890mm
+2204.950 Encoder=1244.36mm ext=892mm
+2208.850 Encoder=1247.11mm ext=895mm
+2211.550 Encoder=1249.86mm ext=897mm
+2214.350 Encoder check, ext=900mm
+2215.850 Encoder=1252.61mm ext=901mm
+2218.350 Encoder=1255.37mm ext=903mm
+2222.150 Encoder=1258.12mm ext=907mm
+2222.250 Encoder=1260.87mm ext=907mm
+2222.700 Encoder=1263.63mm ext=907mm
+2225.250 Encoder=1266.38mm ext=909mm
+2229.050 Encoder=1269.13mm ext=912mm
+2231.500 Encoder=1271.89mm ext=914mm
+2235.400 Encoder=1274.64mm ext=917mm
+2237.450 Encoder=1277.39mm ext=919mm
+2241.000 Encoder=1280.15mm ext=922mm
+2241.100 Encoder=1282.90mm ext=922mm
+2241.550 Encoder=1285.65mm ext=922mm
+2244.100 Encoder=1288.40mm ext=924mm
+2247.850 Encoder=1291.16mm ext=928mm
+2249.700 Encoder check, ext=930mm
+2250.000 Encoder=1293.91mm ext=930mm
+2250.750 Encoder=1296.66mm ext=930mm
+2255.000 Encoder=1299.42mm ext=933mm
+2257.450 Encoder=1302.17mm ext=936mm
+2261.400 Encoder=1304.92mm ext=939mm
+2262.700 Encoder=1307.68mm ext=941mm
+2264.850 Encoder=1310.43mm ext=945mm
+2265.850 Encoder=1313.18mm ext=946mm
+2267.850 Encoder=1315.93mm ext=950mm
+2269.050 Encoder=1318.69mm ext=952mm
+2270.900 Encoder=1321.44mm ext=955mm
+2272.200 Encoder=1324.19mm ext=957mm
+2274.000 Encoder check, ext=960mm
+2274.400 Encoder=1326.95mm ext=960mm
+2275.650 Encoder=1329.70mm ext=962mm
+2277.850 Encoder=1332.45mm ext=966mm
+2279.250 Encoder=1335.20mm ext=968mm
+2281.250 Encoder=1337.96mm ext=971mm
+2282.600 Encoder=1340.71mm ext=974mm
+2284.700 Encoder=1343.46mm ext=977mm
+2285.800 Encoder=1346.22mm ext=979mm
+2287.800 Encoder=1348.97mm ext=982mm
+2287.900 Encoder=1351.72mm ext=982mm
+2288.100 Encoder=1354.48mm ext=982mm
+2289.900 Encoder=1357.23mm ext=984mm
+2293.400 Encoder=1359.98mm ext=987mm
+2295.700 Encoder=1362.73mm ext=989mm
+2296.000 Encoder check, ext=990mm
+2297.900 Encoder=1365.49mm ext=993mm
+2299.150 Encoder=1368.24mm ext=995mm
+2301.300 Encoder=1370.99mm ext=998mm
+2302.700 Encoder=1373.75mm ext=1000mm
+2304.750 Encoder=1376.50mm ext=1004mm
+2306.100 Encoder=1379.25mm ext=1006mm
+2308.250 Encoder=1382.01mm ext=1009mm
+2309.250 Encoder=1384.76mm ext=1011mm
+2311.300 Encoder=1387.51mm ext=1014mm
+2312.400 Encoder=1390.27mm ext=1016mm
+2314.350 Encoder=1393.02mm ext=1019mm
+2314.450 Encoder check, ext=1020mm
+2315.650 Encoder=1395.77mm ext=1022mm
+2317.850 Encoder=1398.52mm ext=1025mm
+2319.100 Encoder=1401.28mm ext=1027mm
+2321.300 Encoder=1404.03mm ext=1031mm
+2323.600 Encoder=1406.78mm ext=1033mm
+2327.250 Encoder=1409.54mm ext=1036mm
+2330.050 Encoder=1412.29mm ext=1038mm
+2332.200 Encoder=1415.04mm ext=1042mm
+2333.200 Encoder=1417.80mm ext=1044mm
+2335.250 Encoder=1420.55mm ext=1047mm
+2336.350 Encoder=1423.30mm ext=1049mm
+2336.900 Encoder check, ext=1050mm
+2338.300 Encoder=1426.05mm ext=1052mm
+2339.550 Encoder=1428.81mm ext=1054mm
+2341.800 Encoder=1431.56mm ext=1058mm
+2343.000 Encoder=1434.31mm ext=1060mm
+2345.200 Encoder=1437.07mm ext=1063mm
+2346.550 Encoder=1439.82mm ext=1065mm
+2348.700 Encoder=1442.57mm ext=1069mm
+2350.000 Encoder=1445.32mm ext=1071mm
+2352.150 Encoder=1448.08mm ext=1074mm
+2353.150 Encoder=1450.83mm ext=1076mm
+2355.250 Encoder=1453.58mm ext=1079mm
+2355.300 Encoder check, ext=1080mm
+2356.350 Encoder=1456.34mm ext=1081mm
+2356.850 Encoder=1459.09mm ext=1082mm
+2359.550 Encoder=1461.84mm ext=1084mm
+2360.250 Encoder=1464.60mm ext=1085mm
+2361.900 Encoder=1467.35mm ext=1086mm
+2365.250 Encoder=1470.10mm ext=1090mm
+2366.500 Encoder=1472.85mm ext=1092mm
+2368.800 Encoder=1475.61mm ext=1096mm
+2370.100 Encoder=1478.36mm ext=1098mm
+2372.200 Encoder=1481.11mm ext=1101mm
+2373.500 Encoder=1483.87mm ext=1103mm
+2375.650 Encoder=1486.62mm ext=1107mm
+2376.700 Encoder=1489.37mm ext=1109mm
+2377.250 Encoder check, ext=1110mm
+2378.750 Encoder=1492.13mm ext=1112mm
+2379.850 Encoder=1494.88mm ext=1114mm
+2381.750 Encoder=1497.63mm ext=1117mm
+2383.000 Encoder=1500.39mm ext=1119mm
+2385.200 Encoder=1503.14mm ext=1123mm
+2386.450 Encoder=1505.89mm ext=1125mm
+2388.750 Encoder=1508.64mm ext=1128mm
+2390.050 Encoder=1511.40mm ext=1130mm
+2393.350 Encoder=1514.15mm ext=1134mm
+2395.800 Encoder=1516.90mm ext=1136mm
+2399.150 Encoder=1519.66mm ext=1139mm
+2399.250 Encoder check, ext=1140mm
+2400.200 Encoder=1522.41mm ext=1141mm
+2402.250 Encoder=1525.16mm ext=1144mm
+2403.350 Encoder=1527.92mm ext=1146mm
+2405.300 Encoder=1530.67mm ext=1149mm
+2406.550 Encoder=1533.42mm ext=1151mm
+2408.850 Encoder=1536.17mm ext=1155mm
+2410.000 Encoder=1538.93mm ext=1157mm
+2412.250 Encoder=1541.68mm ext=1161mm
+2413.600 Encoder=1544.43mm ext=1163mm
+2415.650 Encoder=1547.19mm ext=1166mm
+2417.050 Encoder=1549.94mm ext=1169mm
+2417.650 Encoder check, ext=1170mm
+2419.150 Encoder=1552.69mm ext=1172mm
+2420.200 Encoder=1555.45mm ext=1174mm
+2422.200 Encoder=1558.20mm ext=1177mm
+2423.350 Encoder=1560.95mm ext=1179mm
+2425.300 Encoder=1563.70mm ext=1182mm
+2427.750 Encoder=1566.46mm ext=1184mm
+2431.600 Encoder=1569.21mm ext=1188mm
+2431.850 D_GCODE_END_OF_FILE
+2586.850 $$$
+CMD
+2587.050 sleep
+</pre>
+#+END_EXPORT
+
+After print an information about firmware update is shown. This might mean that the newest firmware version is stored in the gcode file for the printer to display.
+
+* Firmware update
+
+When the update firmware option is selected the USB port becomes active and reports as a Microchip USB HID Bootloader:
+
+#+BEGIN_EXPORT html
+<pre>
+[75486.506468] usb 5-1: new full-speed USB device number 4 using xhci_hcd
+[75486.804247] usb 5-1: New USB device found, idVendor=04d8, idProduct=003c, bcdDevice= 0.02
+[75486.804255] usb 5-1: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+[75486.804259] usb 5-1: Product: USB HID Bootloader
+[75486.804263] usb 5-1: Manufacturer: Microchip Technology Inc.
+[75486.812177] hid-generic 0003:04D8:003C.0005: hiddev96,hidraw4: USB HID v1.11 Device [Microchip Technology Inc. USB HID Bootloader] on usb-0000:10:00.0-1/input0
+</pre>
+#+END_EXPORT
+
+When you run the firmware update mode there is a SETTINGS.BIN file stored on the SD card which is I guess for persisting of settings during interface upgrade. The contents of this file are 
+the following:
+
+#+BEGIN_EXPORT html
+<pre>
+✗ hexdump -C < SETTINGS.BIN 
+00000000  01 00 00 00 5f 5e 56 c0  18 00 00 00              |...._^V.....|
+0000000c
+✗ 
+</pre>
+#+END_EXPORT
+
+When the Cube3D boots and detects the existence of this file it loads it and shows a "Settings restored" message on the LCD screen together with the following messages on the serial console:
+
+#+BEGIN_EXPORT html
+<pre>
+0.000 Cube V2.07
+0.000 Baud:227272
+2.000 $$$
+CMD
+2.150 set u m 0x31
+AOK
+2.175 set w l 5
+AOK
+2.175 save
+Storing in config
+2.175 get mac
+2.200 D_LOAD_SETTINGS_FILE_CHECK_FS
+2.200 D_LOAD_SETTINGS_FILE_CHECK_FILE
+2.200 D_LOAD_SETTINGS_FILE_AND_RENAME
+2.200 D_WRITE_NVM
+Mac Addr=00:06:66:21:f1:46
+2.200 ver
+wifly-GSX Ver 4.00.1, Apr 19 2013 11:48:31 on RN-131
+2.225 exit
+EXIT
+</pre>
+#+END_EXPORT
+
+The serial number of the printer is actually the MAC address of it's wireless card. For me this was 00066621f146.
+
+The bootloader on the device was standard Microchip bootloader. It was properly detected and upgrade after connecting a PICKit3 to the board and running mplabx (mplab_ipe):
+
+#+BEGIN_EXPORT html
+<pre>
+*****************************************************
+
+Connecting to MPLAB PICkit 3...
+
+Currently loaded firmware on PICkit 3
+Firmware Suite Version.....01.28.90 *
+Firmware type..............PIC32MX
+Now Downloading new Firmware for target device: PIC32MX440F256H
+Downloading bootloader
+Bootloader download complete
+Programming download...
+
+Downloading RS...
+RS download complete
+Programming download...
+
+Downloading AP...
+AP download complete
+Programming download...
+
+
+Currently loaded firmware on PICkit 3
+Firmware Suite Version.....01.54.00
+Firmware type..............PIC32MX
+Target voltage detected
+Target device PIC32MX440F256H found.
+Device ID Revision = B4 B6
+
+
+Reading current firmware:
+Reading...
+
+The following memory area(s) will be read:
+program memory: start address = 0x1d000000, end address = 0x1d03ffff
+boot config memory
+configuration memory
+Read complete
+Target device PIC32MX440F256H found.
+Device ID Revision = B4 B6
+</pre>
+#+END_EXPORT
+
+It seems like it updated the bootloader version. Don't know if this will be a problem
+
+Reading memory...
+
+* Links
+
+Forum thread about teardown of cubify cube 3:
+https://openbuilds.com/threads/tear-down-of-cubify-cube-3-3d-printer-convert-to-reprap.5689/page-3
+
+Firmware files are supposed to be found at: http://cubify.s3.amazonaws.com/
+
+
+
+
+

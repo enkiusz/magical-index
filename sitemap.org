@@ -1,0 +1,28 @@
+#+TITLE: A Certain Magical Index
+
+- [[file:index.org][index]]
+- hardware
+  - [[file:hardware/random-led-board.org][A random board of LEDs]]
+  - [[file:hardware/advantech-lcd-module.org][Advantech LCD module]]
+  - [[file:hardware/avantree-audition.org][Avantree Audition]]
+  - [[file:hardware/brother-ds-720d.org][Brother DS-720D]]
+  - [[file:hardware/cubify-cube3d.org][Cubify Cube 3D printer]]
+  - [[file:hardware/dns-320l.org][DNS-320L NAS]]
+  - [[file:hardware/gophert-cps-3205-II.org][GOPHERT CPS-3205 II power supply]]
+  - [[file:hardware/lunadrone.org][Luna Drone]]
+  - [[file:hardware/oneplus-one.org][OnePlus One]]
+  - [[file:hardware/rc-plane.org][Simple RC plane]]
+  - [[file:hardware/uarm.org][The UFactory Uarm]]
+  - [[file:hardware/toshiba-n554.org][Toshiba N554 mouse]]
+  - [[file:hardware/toyota-corolla.org][Toyota Corolla]]
+  - [[file:hardware/wrt-54g.org][WRT-54G]]
+- projects
+  - [[file:projects/archive.org][Archive]]
+  - [[file:projects/fred-the-ripper.org][Fred the Ripper]]
+  - [[file:projects/homeups.org][Home UPS]]
+  - [[file:projects/labeling.org][Labeling scheme]]
+  - [[file:projects/paperworker.org][Paperworker]]
+  - [[file:projects/personalclout.org][Personal Clout]]
+  - [[file:projects/rotor.org][Rotor]]
+  - [[file:projects/whitestar.org][Whitestar]]
+  - [[file:projects/iot-power-meter.org][iot power meter]]

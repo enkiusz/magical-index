@@ -1,0 +1,14 @@
+#+TITLE: Toshiba N554 mouse
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+The Toshiba N554 mouse is a Bluetooth mouse based on the Broadcom BCM2042 chipset.
+
+Some information gathered on the net about this chipset:
+
+[[file:adnk-3043-brbt.pdf][A Bluetooth mouse reference design using the BCM92042MDX-B88 module]]
+
+[[file:AV02-0870EN+AN_5370+13Jul10.pdf][A different mouse reference design with more details, a BOM and PCB layout images]]
+
+The Toshiba mouse seems to use [[file:SPEC-BM2042-V1.0.pdf][this particular module]], at least the layout looks very similar.
+

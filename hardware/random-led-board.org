@@ -1,0 +1,71 @@
+#+TITLE: A random board of LEDs
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="random-led-board/"/>
+#+END_EXPORT
+
+I was a bit sick and bored one day so I decided to look into my junk box for something to do. I found this random board with some dual color LEDs on it that came 
+from a "network appliance" which was basically a 1U server with a logo sticked on it. The box had some additional Ethernet ports at the front and the LEDs here
+were serving as link/activity indication. The board looks as follows:
+
+[[file:board1.jpeg]]
+
+On the back side we see some chips and a USB-A connector that provides the power and control signals. For some reason (probably because of space constraints) 
+they decided to use a funky cable with USB-A on both ends inside the chassis and plug this board with it. Huh...
+
+[[file:board2.jpeg]]
+
+The chips are nothing out of the ordinary, a PIC MCU driving some shift registers, connected to USB via a FT245BM RS232<->USB converter:
+
+[[file:chips2.jpeg]]
+
+[[file:chips1.jpeg]]
+
+I thought that figuring out how this works will be a one evening challenge even in my current fuzzy state of mind and I was not wrong :). By first observing that
+the entire state of the board requires 18 bits I figured that it would be easiest if I just start sending in random 3 byte strings to the device and see if anything
+lights up. This was a success and I found one of the 3 byte sequences that lit up some of the LEDs. By messing around with all the bits I found what the layout 
+was like. In all 3 bytes two most significant bits need to be fixed, they likely select which shift register chip we're programming. The rest (6 bits) contains 
+the state of the particular LEDs. 3 x 6 == 18 so everything looks OK.
+
+#+begin_src
+A command sent via the serial port with 115200 8N1 contains 3 bytes
+Cmd := byte1 byte2 byte3
+
+The bits for control bytes are as follows:
+
+byte1
+00xxxxxx
+|||||||`-- 1: LED1 (green)
+||||||`--- 1: LED1 (yellow)
+|||||`---- 1: LED2 (green)
+||||`----- 1: LED2 (yellow)
+|||`------ 1: LED3 (green)
+||`------- 1: LED3 (yellow)
+|`-------- 0
+`--------- 0
+
+byte2
+01xxxxxx
+|||||||`-- 1: LED4 (green)
+||||||`--- 1: LED4 (yellow)
+|||||`---- 1: LED5 (green)
+||||`----- 1: LED5 (yellow)
+|||`------ 1: LED6 (green)
+||`------- 1: LED6 (yellow)
+|`-------- 1
+`--------- 0
+
+byte3
+10xxxxxx
+|||||||`-- 1: LED7 (green)
+||||||`--- 1: LED7 (yellow)
+|||||`---- 1: LED8 (green)
+||||`----- 1: LED8 (yellow)
+|||`------ 1: LED9 (green)
+||`------- 1: LED9 (yellow)
+|`-------- 0
+`--------- 1
+#+end_src
+

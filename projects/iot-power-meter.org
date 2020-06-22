@@ -1,0 +1,31 @@
+#+TITLE: iot power meter
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+#+FILETAGS: noexport
+
+* Hackable
+
+bootloader access (unlocking)
+- screw inside case -> nonremovable, you use a screwdriver to destroy a via
+- PCB where pencil is used -> removable
+
+IR on cellphone for comms
+- is local 
+- can be under a sticker
+- is isolated
+UART over IR
+
+RF for hacking enablement interface is not secure
+
+Low-level early packetized protocol
+<SYNC><TAG><DATA><TRAILER>
+
+SYNC - for autobauding AA
+TRAILER - \n (optional) or \r\n
+DATA - string || binary base64 encoded (when data contains \n)
+TAG - 2 bits ver + 4 bits code (6 bits for ASCII character)
+code:
+1 bit - 0-LEN, 1-TRAILER (\n)
+3 bits - LEN->data length in 8 byte blocks, TRAILER->not used
+
+

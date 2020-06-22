@@ -1,0 +1,19 @@
+#+TITLE: Toyota Corolla
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="toyota-corolla/"/>
+#+END_EXPORT
+
+It's my car. It currently hosts the [[file:../../projects/whitestar/][whitestar]] equipment. It's a 2006 Toyota Corolla with a 1.4L Diesel engine. I have been collecting fuel consumption
+data for a while now and I have compiled a chart to summarize the fuel economy of the car as a variable of the average speed for each trip. This allows to
+easily distinguish between in-city and highway driving.
+
+[[file:fuel-corolla-public-metric.png]]
+
+Also there is an MPG chart more useful for US-based viewers:
+
+[[file:fuel-corolla-public-mpg.png]]
+
+In the interest of full disclosure there is also the [[file:fuel-corolla.dat][input data]] and [[file:fuel-corolla-public.gnuplot][gnuplot script]] to generate the charts.

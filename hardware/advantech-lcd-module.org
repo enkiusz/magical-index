@@ -1,0 +1,91 @@
+#+TITLE: Advantech LCD module
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="advantech-lcd-module/"/>
+#+END_EXPORT
+
+* Intro
+
+The Advantech LCD manipulator is a simple module which contains a text LCD, a keypad all connected to a controller board. [[https://www.advantech.com/][Advantech]] is a industrial and embedded computer
+manufacturer. Unfortunately there are no labels or P/N information on the module or the board so it's not possible to exactly identify this part.
+The controller has a PIC processor and an RS-232 interface chip which drives an interface connecting to a PC mainboard. This module was installed in some 
+kind of networking appliance which I disasembled some time ago and I decided to reverse engineer the communication protocol in order to be able to use the module in my 
+own projects. The module front looks like this:
+
+[[file:module.jpg][file:thumb-module.jpg]]
+
+The module back reveals the controller board and connectors:
+
+[[file:module-back.jpg][file:thumb-module-back.jpg]]
+
+* Hardware
+
+*** Chips
+
+|-------+-----------+------------------------------|
+| Label | Type      | Notes                        |
+|-------+-----------+------------------------------|
+| U1    | PIC16F873 | Placed in a precision socket |
+| U2    | ADM213    |                              |
+|-------+-----------+------------------------------|
+
+Both chips and their surroundings have been documented on the photos below:
+
+[[file:U1-closeup.jpg][file:thumb-U1-closeup.jpg]]
+[[file:U2-closeup.jpg][file:thumb-U2-closeup.jpg]]
+
+** Interfaces
+
+The RS-232 interface runs at 2400 bps with 8n1 configuration. This interface uses RS-232 voltage levels therefore can't be connected directly to a microcontroller. When the 
+module boots it sends out an "ADVANTECH CORP" string:
+
+#+BEGIN_SRC
+--- Miniterm on /dev/ttyUSB0  2400,8,N,1 ---
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+ ADVANTECH CORP
+
+#+END_SRC
+
+Each keypress generates a 2 byte packet transmitted from the module. The keys map to the packets in the following way:
+
+|----------+-----------|
+| Keypress | Packet    |
+|----------+-----------|
+| UP       | 0xFD 0x41 |
+| DOWN     | 0xFD 0x42 |
+| LEFT     | 0xFD 0x44 |
+| RIGHT    | 0xFD 0x48 |
+| ENTER    | 0xFD 0x50 |
+|----------+-----------|
+
+
+The display protocol is also very simple. In order to display text on the LCD you need to send a string of 80 bytes to the serial port. The way the string needs to be built
+is show in the following code:
+
+#+BEGIN_SRC python
+#!/usr/bin/env python3
+
+import serial, sys
+
+serial_port = sys.argv[1]
+line1 = sys.argv[2]
+line2 = sys.argv[3]
+
+ser = serial.Serial(port=serial_port, baudrate=2400)
+
+ser.write(bytes("{}{:<16}{}{:<16}".format("\x00" * 24, line1, "\x00" * 24, line2), 'ascii'))
+#+END_SRC
+
+For example, by running the command:
+
+#+BEGIN_SRC
+➜  advantech-lcd-module git:(master) ✗ python3 lcd_update.py /dev/ttyUSB0 'this is a test' '12345678'
+#+END_SRC
+
+We get the following result:
+
+[[file:test-lines-displayed.jpg][file:thumb-test-lines-displayed.jpg]]
+
+

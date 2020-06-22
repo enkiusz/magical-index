@@ -1,0 +1,206 @@
+#+TITLE: Fred the Ripper
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="fred-the-ripper/"/>
+#+END_EXPORT
+
+Fred the Ripper (FtR) is a CD-ripping (or recording if you want) robot based largely on the acrylic [[https://www.kickstarter.com/projects/ufactory/uarm-put-a-miniature-industrial-robot-arm-on-your]["kickstarter"]] version of the UFactory's Uarm 4-axis desktop robot.
+I added a few parts and other tricks to make a robot that can pretty robustly chew through a box of CDs archiving them complete with cover photos. To summarize 
+the current fatures are:
+
+- archives Audio-CDs and Data CDs, as well as other data discs (like DVDs with ISO filesystem on them)
+- uses a camera to make photos of the cover of the disc to make your archive more easily searchable
+- can detect and correct a certain amount of problems in it's own operation
+- generates metadata for each archived disc
+- has sensors to detect that there are no more discs to archive to automatically stop
+- detects discs that failed to archive and puts them away on a special tray to be manually checked. All information and logs from the failed operation is retained
+
+
+* Rationale
+
+The reason for this project was to learn how to use the UArm, OpenCV and flex my diy muscles while making something that will be actually useful. The usefullness part
+is me getting rid of two boxes full of old Audio CDs, archives and god-knows-what CD-R discs. 
+
+** Hardware
+
+*** Overview
+
+The robot consists of 5 subsystems:
+
+ - the power supplies
+ - the arm (and connected sensors)
+ - the vision subsystem
+ - the drive subsystem
+ - the controller + display
+ - the debugcam
+
+these will be described in detail in the following chapters. An overview of the subsystem connections is shown on the diagram below:
+
+[[file:block-schematics.svg]]
+
+| [[file:overview1.jpg][file:thumb-overview1.jpg]] | [[file:overview2.jpg][file:thumb-overview2.jpg]] | [[file:overview3.jpg][file:thumb-overview3.jpg]] |
+ 
+*** The power supplies
+
+The supplies are a small [[https://microdream.co.uk/delta-electronics-dps-111ab-a-146-6w-psu-power-supply.html][Newton Power Ltd DPS-111AB]] 146W ATX power supply together with an [[https://www.instructables.com/id/The-Introduction-of-XL6009-Step-up-Power-Module-DC/][XL6009]] step up DC-DC converter to provide 19V for the controller PC. A stable 5V supply with a high current
+capability (the UArm peak working current is 3.5A according to the datasheet!) is critical for this project, therefore I settled with a quite overpowered ATX supply after many attempts with smaller
+ones. It's pretty annoying when your arm, camera, etc. do random resets when the voltage dips too low.
+
+*** The disc trays
+
+The robot has three disc trays:
+- the "SOURCE" tray from which discs are picked up. This tray also contains one of the disc presence sensors (the working one).
+- the "DONE" tray to which discs which have been successfuly ripped are dropped
+- the "FAIL" tray to which discs which haven't been successfuly ripped are dropped
+
+As a protip it's good to make the job of picking up discs easier by cutting two slots in the "DONE" and "FAIL" trays:
+
+[[file:done-tray-slot.jpg][file:thumb-done-tray-slot.jpg]] [[file:failed-tray-slot.jpg][file:thumb-failed-tray-slot.jpg]]
+
+*** The arm
+
+The UArm I used was perfect for the task as it had a vacuum pump and suction cup which made it possible to easily grab and manipulate big flat items :). Because the arm is the only place where I have 
+digital output GPIOs and ADC inputs available, this is where I decided to connect the disc presence sensor circuits. These allow the robot to know if there are any more discs to archive or if the destination
+tray is full. This task is achieved thanks to [[file:https://www.vishay.com/docs/83752/tcrt1000.pdf][TCRT1000]] reflective optical sensors and as CDs are pretty reflective this works rather well :). The connection schematics for a single sensor are show below:
+
+[[file:disc-presence-sensor.png][file:thumb-disc-presence-sensor.png]]
+
+In the above circuit the ADC voltage across the 180k resistor will be proportional to the current flowing through the phototransistor and thus the amount of light reflected. The disc detection is simple: 
+little light reflected means there is no disc in the tray, a lot of light reflected means there is a disc present. Unfortunately the simple approach doesn't work beacuse of current generated in the 
+phototransistor due to ambient light. Depending on the conditions this can easily cause false positives in disc detection. In order to combat this we need to take two measurements - one with the IR 
+LED on and the other with the LED off to measure the ambient amount of light. By subtracting these two values we get a useful signal which can detect the disc reliably.
+
+Also, due to some quirks of the firmware that I didn't have time to resolve I couldn't use one of the 2 spare servo connectors on the controller shield in the UArm. Each servo controller header has a
+digital output used to provide the PWM signal and an analog input to read the servo's position so I figured that it would be trivial to use the digital output to drive the LED on/off and the analog
+ADC input to read the phototransistor current. This was not the case however and the spare servo headers were not working properly, the analog input was constantly pulled up to Vcc. 
+Therefore I had to disconnect the analog feedback from the servo used to rotate the suction cup head assembly and use it's analog input together with the spare digital output. 
+I left the head rotation servo power and control intact so the servo would lock in place and not freely rotate.
+
+The initial idea was to have two sensors, one for detecting if the source tray contains any discs and the other to halt the archival operation when the "Done" tray is almost full. Unfortunately, due to the
+ADC problems described above I could connect only one of the sensors. I chose the sensor in the source tray as it will be filled much more often due to it's smaller size.
+
+*** The drive subsystem
+
+The drive subsystem uses an [[https://www.cnet.com/products/sony-optiarc-ad-5260s-dvdrw-r-dl-drive-serial-ata-internal/specs/][Sony Optiarc DVD RW AD-5260S]] drive connected with a [[http://www.jmicron.com/PDF/brief/jm20337.pdf][JMicron JM20337]] SATA<->USB bridge to the controller PC. The type of drive used is the limiting factor when it comes to
+the types of discs that can be archive using FtR. It can't read Bluerays for example. One pesky bug that I found in the JM20337 bridge is that it takes it a while (usually around 30 seconds)
+to realize that the drive is connected and power has been detected. I'm not sure if this is something caused by the logic in the bridge itself or is the drive sluggish to bring up it's SATA link for example.
+
+*** The vision subsystem
+
+The vision subsystem is used to make photos of archived discs in order to obtain the cover photo of every disc encountered. This greatly helps in later identification of a particular disc. The camera is a 
+Canon DIGITAL IXUS 70 (also known as Canon Powershot SD1000) and supports the alternative [[http://chdk.wikia.com/wiki/CHDK][CHDK]] firmware. The CHDK firmware allows to transfer a photo directly via PTP to the controller PC, something that 
+is not easily possible with the stock firmware. Kudos to CHDK! 
+
+The camera is situated above the robot working surface, the holder was built using an old Soviet desk lamp, some wood and a camera-compatible screw that I found laying around. 
+
+[[file:camera-holder.jpg][file:thumb-camera-holder.jpg]]
+
+The fact that a stock lamp is used greatly helps with disassembly and transportation of the robot. 
+
+Even though the place in which the user needs to attach the vision subsystem to the base board is clearly marked, the robot uses a simple automatic calibration procedure to detect where exactly the camera
+is pointing at. To achieve this a pair of [[https://docs.opencv.org/3.1.0/d5/dae/tutorial_aruco_detection.html][ARuCO]] markers was printed and put on the working plane. One is situated on where the center of the disc is located when the drive tray opens, the other one is on
+the edge of the tray. Both are used to calculate the position of the disc cover on the image as well as it's diameter. 
+
+There are two tricky things about the camera. First is the power supply. When you try to power the camera from the USB port it automatically switches to playback mode and can't be used to acquire photos. 
+Because of this I had to build a "fake battery" which was providing USB 5V power directly from the USB port:
+
+| [[file:fake-battery1.jpg][file:thumb-fake-battery1.jpg]] | [[file:fake-battery2.jpg][file:thumb-fake-battery2.jpg]] |
+
+*** The controller
+
+The Ftr uses a kektop ([[http://www.ntt.pl/index.php?c=1279][NTT HOME W 300P]] net-top style PC) with an Intel Atom 230 CPU (1.6 GHz), 1 GB of RAM and a small 16GB internal SSD. It's currently running Debian.
+
+The controller has a LCD4USB off of Aliexpress connected to it in order to display various status and debugging information. This display is driven by lcd4linux where it's supported out-of-the-box 
+by the 'LCD4USB' driver.
+
+[[file:lcd-display.jpg][file:thumb-lcd-display.jpg]]
+
+*** The debugcam
+
+The debugcam is a simple webcam recording every rip operation for debugging of mechanical faults. The resolution and frame rates are quite low (320x240 and 10 FPS) but it's enough to figure out what
+happened when you find a disk next to the drive in a place it's not supposed to be. Its launched as a separate unit by using systemd-run so that the logs can be easily gathered using journalctl.
+
+[[file:debugcam.jpg][file:thumb-debugcam.jpg]]
+
+An example video from the debugcam:
+
+[[https://vimeo.com/257405811]]
+
+** Software
+
+The software is currently written in Python and can be downloaded from [[https://github.com/mgrela/fred-the-ripper][github repository]]:
+
+The code structure is based around the 'brain.py' script together with a bunch of external python modules (roughly one per subsystem) as well as one or two shell scripts. The information on how the 
+scripts are configured and deployed on a plain Debian system is maintained in an Ansible playbook which can be used to deploy the code onto a fresh OS if required. The ansible playbook and
+inventory files using this role should look similar to this:
+
+#+BEGIN_EXPORT html
+<pre>
+(ansible-venv) ➜  provision cat rippers.yml 
+---
+- hosts: rippers
+
+  become: yes
+
+  roles:
+    - ripper
+
+(ansible-venv) ➜  provision cat production 
+[rippers]
+fred.provnet0.local ansible_user=enki ansible_host=192.168.10.79
+
+(ansible-venv) ➜  provision 
+</pre>
+#+END_EXPORT
+
+Remember to leave the become:yes in the playbook as most actions require root. The playbook sets up everything to run for ansible_user on the ripper machine.
+
+The Python code attempts to detect (and sometimes correct) a few failure modes that were discovered during testing:
+
+- the SATA<->USB bridge not powering up quick enough, there is an attempt at opening and closing of the drive tray before archival is started to try to make sure that the drive works
+- the arm move functions which are used for grabbing discs can detect if there is no item to be grabbed at the current position and prevent the arm to go places where it might damage itself
+- the ARuCO markers are used to detect if the camera is switched on and pointed in the right direction
+
+
+** Tests 
+
+See the robot in action on the [[https://vimeo.com/254591558][video]]. This is a test run containing one short mode1 data cd and an empty CD-R to simulate a disc that can't be read and this goes to the "FAILED" tray.
+
+
+*** "Production" runs
+
+After some inital tests when I was reasonably confident that the entire systems works as expected I began "production" runs where I would leave the robot on it's own for a number of hours 
+with a bunch of disks in the source tray. During each production runs fixes and adjustements were made to improve reliability or to provide better data collection.
+
+|---------+-------------------+-----------------+-------------------+------------------+--------------+----------------------------------------------------------------------------------|
+| Run     | Start time        | Number of discs | End time          | Successful disks | Failed disks | Remarks                                                                          |
+|---------+-------------------+-----------------+-------------------+------------------+--------------+----------------------------------------------------------------------------------|
+| Prod #1 | 2018-02-17T13:46Z |              14 |                   |               14 |            0 | One unexpected mechanical fault, had to restart manually, end time not recorded. |
+| Prod #2 | 2018-02-23T23:37Z |              15 | 2018-02-24T07:25Z |               11 |            4 |                                                                                  |
+| Prod #3 | 2018-02-25T21:45Z |              13 | 2018-02-25T23:56Z |                7 |            6 |                                                                                  |
+| Prod #4 | 2018-03-04T18:29Z |              14 | 2018-03-04T20:14Z |               10 |            4 |                                                                                  |
+| Prod #5 | 2018-03-09T23:02Z |               7 | 2018-03-16T12:47Z |                5 |            2 | Many disks with L-EC errors, mechanical + camera faults                          |
+|---------+-------------------+-----------------+-------------------+------------------+--------------+----------------------------------------------------------------------------------|
+
+The information gathered during the production runs has been summarized using the 'summarize-rip.sh' scripts and plotted using gnuplot:
+
+#+begin_src gnuplot :var datastream="cat /mnt/tank/cd-dumps/production-run-*/summary.dat"
+set terminal png
+set output 'fred-the-ripper/production-runs-summary.png'
+
+set xlabel "Size [MB]"
+set ylabel "Rip time [min]"
+
+plot '<'.datastream.'| grep -F audio-cd' using ($4/1000000):($7/60) with points title 'audio-cd', '<'.datastream.'| grep -F type-1-data' using ($4/1000000):($7/60) with points title 'type-1-data'
+
+#+end_src
+
+#+RESULTS:
+
+[[file:production-runs-summary.png]]
+
+As you can see the ripping speed of Audio-CDs is much less than for data CDs (more time on the vertical axis). The reason for this is unclear as of now, it may be just that the Audio-CD 
+disks are much more worn out causing the drive to work harder with error correction.
+

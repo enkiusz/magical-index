@@ -1,0 +1,66 @@
+#+TITLE: The UFactory Uarm
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="uarm/"/>
+#+END_EXPORT
+
+The [[https://www.kickstarter.com/projects/ufactory/uarm-put-a-miniature-industrial-robot-arm-on-your][UFactory Uarm]] is an acrylic desktop 4-axis robot arm which was funded on Kickstarter. There is some information as well as tools on the manufacturer side ([[http://ufactory.cc/]]), however here
+I'd like to gather some of the less obvious pieces of information that I found while playing with this device.
+
+[[file:uArm_Metal_Detail_Info&Specifications_en.pdf]]
+
+[[file:uArm-Metal-Developer-Guide.pdf]]
+
+These are both manuals for the metal version of the original UArm sold via Kickstarter. The second one (the developer guide) comes from the ufactory.cc site directly, but I decided to mirror it just in case.
+
+The UArm Metal is different than the one I have but it's mechanically very similar and basically has an upgraded controller board which is more integrated and not just an Arduino + shield
+sandwitch. You can find information about the servo parameters which is useful if you need to find replacements. I had to because one of my servos got damaged and I couldn't find 
+the exact servo that they used. 
+
+* Servos
+
+The servos used (marked UFactory US D150A) are identical to popular TowerPro MG945 servos (TowerPro may be an OEM for those) and can be successfuly replaced with them. See photo below:
+
+[[file:uarm-servos.jpg][file:thumb-uarm-servos.jpg]]
+
+The hub has an identical size and amount of teeth so even the original acrylic arm fits perfectly:
+
+[[file:uarm-servos.jpg][file:thumb-servo-replaced.jpg]]
+
+* Documents
+
+** From the original Support site
+
+ |-----------------------------------------------------------------------------------+----------------------------------------------------+-------|
+ | Original URI                                                                      | Mirror URI                                         | Notes |
+ |-----------------------------------------------------------------------------------+----------------------------------------------------+-------|
+ | [[http://download.ufactory.cc/docs/en/uArm-Metal-Getting-Started-Guide.pdf]]          | [[file:uArm-Metal-Getting-Started-Guide.pdf]]          |       |
+ | [[http://download.ufactory.cc/docs/en/uArm-Metal-Developer-Guide.pdf]]                | [[file:uArm-Metal-Developer-Guide.pdf]]                |       |
+ | [[http://download.ufactory.cc/docs/en/uarm_gcode_communication_protocol_v1.0_en.pdf]] | [[file:uarm_gcode_communication_protocol_v1.0_en.pdf]] |       |
+ | [[http://download.ufactory.cc/docs/en/uArm-Metal-Packing-List_standard-Kit.pdf]]      | [[file: uArm-Metal-Packing-List_standard-Kit.pdf]]     |       |
+ |-----------------------------------------------------------------------------------+----------------------------------------------------+-------|
+ | Software (Linux)                                                                  |                                                    |       |
+ |-----------------------------------------------------------------------------------+----------------------------------------------------+-------|
+ | [[http://download.ufactory.cc/tools/linux/pro/uclient_v2.0.zip]]                      | [[file:uclient_v2.0.zip]]                              |       |
+ | [[http://download.ufactory.cc/tools/linux/pro/uarm_assistant_v1.0.zip]]               | [[file:uarm_assistant_v1.0.zip]]                       |       |
+ |-----------------------------------------------------------------------------------+----------------------------------------------------+-------|
+
+** Other places
+
+  |-----------------------------------------------------------------------------------------------------+--------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | Original URI                                                                                        | Mirror URI                                             | Notes                                                                                                                                                        |
+  |-----------------------------------------------------------------------------------------------------+--------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | [[https://cdn.thingiverse.com/assets/dc/ae/c2/94/d0/Latest_greatest_uArm_Assembly_Instructions_v1.pdf]] | [[file:Latest_greatest_uArm_Assembly_Instructions_v1.pdf]] | Assembly instructions for the original Kickstarter UArm                                                                                                      |
+  | [[https://cdn.sparkfun.com/datasheets/Robotics/uArm_Vacuum_System_User_Guide.pdf]]                      | [[file:uArm_Vacuum_System_User_Guide.pdf]]                 | Useful information about the proper use of the vacuum pump. Applies to all UArms AFAIK.                                                                      |
+  | [[https://cdn.sparkfun.com/datasheets/Robotics/uArm_Learning_Mode_Instructions_v1.0.pdf]]               | [[file:uArm_Learning_Mode_Instructions_v1.0.pdf]]          | Information about an autonomous movement learning & repeat mode. Also has information how to start the calibration mode without the uArm Assistant software. |
+  | [[http://www.ufactory.cc/downloads/source_files/UF_uArm_libraries_beta5.zip]]                           |                                                        | Non working link with uArm control software sources. Looking for this...                                                                                     |
+  | [[https://dl.dropboxusercontent.com/u/37860507/UF_uArmSG.zip]]                                          |                                                        | A mirror or rebuild of the above code.                                                                                                                       |
+  | [[https://www.thingiverse.com/thing:320004]]                                                            |                                                        | An attempt at reverse engineering the UArm mechanics.                                                                                                        |
+  | [[https://github.com/46bit/uarm-quickstart]]                                                            | [[https://github.com/mgrela/uarm-quickstart]]              | This looks to be like the original firmware for the robot.                                                                                                   |
+  | [[https://github.com/uArm-Developer/UArmForArduino]]                                                    | [[https://github.com/mgrela/UArmForArduino]]               | The most recent source code for the UArm Metal                                                                                                               |
+  |-----------------------------------------------------------------------------------------------------+--------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+
+  Those files that I could find I archived for your convenience so that they won't suffer the same fate like the source code from ufactory.cc which is already MIA.
+

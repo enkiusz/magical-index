@@ -1,0 +1,80 @@
+#+TITLE: Home UPS
+#+EMAIL: enki@fsck.pl
+#+LANGUAGE: en
+#+CREATOR: Emacs 26.3 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="homeups/"/>
+#+END_EXPORT
+
+* Overview
+
+A UPS which can power my entire home is built using a Schrack [[http://image.schrack.com/datenblaetter/h_usdd_en.pdf][GENIO Online USDD400]] UPS connected to four customized stock battery boxes. The battery boxes are retired [[https://www.apc.com/shop/us/en/products/APC-Symmetra-LX-Battery-Module/P-SYBT5][APC SYBT5]] which
+originally are 120 Vdc nominal and contain 10 x 12V 9Ah sealed lead-acid batteries. The total energy capacity of one unit is a little over 1kWh. 
+
+* HV DC side
+
+** Battery boxes
+
+A single SYBT5 battery box can be seen below:
+
+[[file:sybt5.jpg][file:thumb-sybt5.jpg]]
+
+After lifting the cover the internals are revealed:
+
+[[file:sybt5-no-cover.jpg][file:thumb-sybt5-no-cover.jpg]]
+
+Apart from the batteries themselves the unit contains:
+
+- a safety DC switch used to disconnect the battery string and allow for safe work on the pack
+- a backplane connector
+- a controller board with a DC fuse
+
+In order for the battery box to work with my UPS I needed to remove a single battery from the string leaving 9 x 12V 9Ah and a 108 Vdc nominal voltage. The rewiring process was a breeze thanks to the 
+well engineered internal layout and excellent quality of the internal cables and connectors. Kudos APC!
+
+** Safety switch
+
+A single feature worth mentioning for the safety switch is that it contains two pairs of contacts - high current where the batteries are connected and control contacts. The control contacts are connected 
+to the controller board to sense the state of the switch. I have left them connected there for now.
+
+[[file:sybt5-dc-switch.jpg][file:thumb-sybt5-dc-switch.jpg]]
+
+** Backplane connector
+
+After some digging around I highly suspect that the backplane connector is an Anderson Power Products [[https://www.andersonpower.com/content/dam/app/ecommerce/product-pdfs/DS-PP1545.pdf][Powerpole PP15-45 Finger Proof]] hermaphroditic connector. The jagged edge on the connector means
+it's a Finger Proof variant. I wanted to buy some of these connectors and make myself a proper plug however I couldn't find any reasonable priced offers in my country. So I got rid of the connectors
+and just connected my own cables.
+
+[[file:sybt5-backplane-connector.jpg][file:thumb-sybt5-backplane-connector.jpg]]
+
+** Controller board
+
+The controller board contains a beefy fuse (no wonder, the battery unit is rated for UPSes up to 14 kVA), a current sense shunt and a PIC microcontroller.
+
+[[file:sybt5-controller-board.jpg][file:thumb-sybt5-controller-board.jpg]]
+
+I had no use for the controller board so I just left it as it is in the case as it allowed me to just use the original DC fuse.
+
+** Wiring box
+
+I decided to wire up all 4 battery boxes in parallel and connect them to the original UPS battery input. The image below shows the junction box I used with just the screw terminals so that you can 
+see better. I took care to carefully color-code all of the terminals and cables as a mistake at this point when all of the batteries are charged would have drastic consequences. 
+
+[[file:wiring-box1.jpg][file:thumb-wiring-box1.jpg]]
+
+The 4 boards on the left are 4 current sense boards using the [[https://www.allegromicro.com/en/Products/Sense/Current-Sensor-ICs/Fifty-To-Two-Hundred-Amp-Integrated-Conductor-Sensor-ICs/ACS758][ACS758]] Hall-effect sensor IC to monitor the current going in and out for all battery packs. 
+
+* Inverter
+
+The inverter is a 4 kVA single-phase inverter made by Schrack. Unfortunately, I was only able to find a manual for it in [[https://image.schrackcdn.com/bedienungsanleitungen/a_usdd400xxx_pl.pdf][Polish]]. The manual contains
+(apart from the usual stuff) a pinout for the RS-232 connector with I/O controlling UPS shutdown or indicating running on battery power.
+The UPS can be controlled by a piece of software called PowerShield but I was not yet able to find or download it. The UPS has a manual bypass switch
+which allows for on-line battery replacement, this is described [[https://image.schrackcdn.com/bedienungsanleitungen/a_usddbe_en.pdf][here]].
+
+* AC side
+
+As my entire house is wired with 3-phase AC grid power I needed a way to supply all 3 phases using a single-phase inverter. Fortunately, as I do not power any equipment which actually requires proper
+3-phase power I can get away with simply feeding all phases from one source - the inverter. This is achieved using a custom-made C19 to standard 3-phase 16A plug cable. I have also added a [[http://lechacal.com/modwrt/pzem-016_pzem014_user_manual.pdf][PZEM-016]] 
+power meter to monitor how much kW my inverter is producing and feeding back into the house. It's current sense transformer can be seen as well as 2 thin wires going into the 3-phase plug to sense the 
+voltage.

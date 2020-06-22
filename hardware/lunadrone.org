@@ -1,0 +1,16 @@
+#+TITLE: Luna Drone
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+This is a description of my attempts at hacking or improving the Luna Drone.
+
+The drone is powered by a 7.4V 2S LiPo 1800 mAh labeled as "FOREVER" with no specific model number. The battery size is 70x35x20 mm with a weight of 94 g. 
+The connectors are JST for discharge and JST-XH for balanced charging using a generic li-ion plug-in charger.
+
+When I got the drone the battery was badly swollen so I needed to order a replacement one. A good candidate was [[https://www.aliexpress.com/item/32850087307.html]]. The size is 
+almost identical, the capacity is a bit smaller (1500 mAh vs 1800 mAh in the original one) however I have my doubts whether the original capacity was indeed as high as on the 
+label.
+
+The transmitter is based on a [[http://www.panchip.com/products_135/220.html][XN297LCU]] chip from Panchip connected to a [[https://pdf1.alldatasheet.com/datasheet-pdf/view/853177/SKYWORKS/RFX2401C.html][RFX2401C]] chip which looks to be an RF frontend.
+
+I did find some limited information about this chip on baidu ([[https://wenku.baidu.com/view/7de442460640be1e650e52ea551810a6f424c878.html]] and [[https://wenku.baidu.com/view/c40ec2d629ea81c758f5f61fb7360b4c2e3f2adc.html]])

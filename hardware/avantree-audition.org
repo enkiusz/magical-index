@@ -1,0 +1,40 @@
+#+TITLE: Avantree Audition
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+These are BT 4.0 headphones. I have noticed one problem with them - they work very well when connected to my One plus One phone but the sound is skipping when
+connecting to a PC. At the same time my journal was being spammed with messages like these:
+
+#+begin_src
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 9074 us (= 1600 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 13077 us (= 2304 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 10090 us (= 1776 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 8097 us (= 1428 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 7073 us (= 1244 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 8091 us (= 1424 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 12095 us (= 2132 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 7078 us (= 1248 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 9080 us (= 1600 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 9083 us (= 1600 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 9084 us (= 1600 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 11086 us (= 1952 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 8090 us (= 1424 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 10094 us (= 1780 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 8074 us (= 1424 bytes) in audio stream
+lut 02 20:59:12 shoggoth pulseaudio[4905]: [bluetooth] module-bluez5-device.c: Skipping 11072 us (= 1952 bytes) in audio stream
+#+end_src
+
+I think the reason for this is that I was using an el-cheapo old BT 2.0 dongle while my local 2.4 GHz spectrum is a bit crowded 
+(I counted more than 100 802.11 networks when I last ran Kismet)! So now I need to buy a BT 4.0 dongle and test out my hypothesis.
+
+Update @2016-03-20:
+
+I was correct in my initial assesment. The new el-cheapo BT 4.0 dongle from Aliexpress.com works like a charm!
+
+History of this item:
+
+|  Timestamp | Event                               |
+|------------+-------------------------------------|
+| 2016-01-29 | Purchased on [[http://archive.is/http://allegro.pl/show_item.php?item=5024625346][Allegro]] for 229.95 PLN |
+|------------+-------------------------------------|
+

@@ -1,0 +1,13 @@
+#+TITLE: OnePlus One
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+This is a description of the OnePlus One phone. 
+
+History of this item:
+
+|  Timestamp | Event                                            |
+|------------+--------------------------------------------------|
+| 2015-12-11 | Purchased on [[http://www.allegro.pl/]] for 1190 PLN |
+
+
