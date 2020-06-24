@@ -75,6 +75,11 @@ which allows for on-line battery replacement, this is described [[https://image.
 * AC side
 
 As my entire house is wired with 3-phase AC grid power I needed a way to supply all 3 phases using a single-phase inverter. Fortunately, as I do not power any equipment which actually requires proper
-3-phase power I can get away with simply feeding all phases from one source - the inverter. This is achieved using a custom-made C19 to standard 3-phase 16A plug cable. I have also added a [[http://lechacal.com/modwrt/pzem-016_pzem014_user_manual.pdf][PZEM-016]] 
-power meter to monitor how much kW my inverter is producing and feeding back into the house. It's current sense transformer can be seen as well as 2 thin wires going into the 3-phase plug to sense the 
-voltage.
+3-phase power I can get away with simply feeding all phases from one source - the inverter. This is achieved using a custom-made C19 to standard 3-phase 16A plug cable. 
+
+[[file:inverter-3phase-connection.jpg][file:thumb-inverter-3phase-connection.jpg]]
+
+The wires are colored according to [[https://en.wikipedia.org/wiki/IEC_60446][IEC 60446]] with blue being the neutral, green/yellow the PE and blue is neutral.
+
+I have also added a [[http://lechacal.com/modwrt/pzem-016_pzem014_user_manual.pdf][PZEM-016]] power meter to the mix to monitor how much kW my inverter is producing and feeding back into the house. 
+
