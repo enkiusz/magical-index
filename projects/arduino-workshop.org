@@ -1,0 +1,9 @@
+#+TITLE: Arduino workshops
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+#+FILETAGS: noexport
+
+Buttons - state machines
+While loops - potentiometers and leds
+for loops - servos and audio
+
