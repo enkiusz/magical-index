@@ -1,4 +1,4 @@
-#+TITLE: Fornius Symo 6.0-3-M inverter
+#+TITLE: Fronius Symo 6.0-3-M inverter
 #+LANGUAGE: en
 #+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
 
@@ -6,7 +6,7 @@
 <base href="fronius-symo-6.0-3-M/"/>
 #+END_EXPORT
 
-The [[https://www.fronius.com/en-gb/uk/photovoltaics/products/all-products/inverters/fronius-symo/fronius-symo-6-0-3-m][Fornius Symo 6.0-3-M]] is a 6 kW 3-phase grid-tie inverter that is currently a part of my home PV setup. This is a repository of all of the 
+The [[https://www.fronius.com/en-gb/uk/photovoltaics/products/all-products/inverters/fronius-symo/fronius-symo-6-0-3-m][Fronius Symo 6.0-3-M]] is a 6 kW 3-phase grid-tie inverter that is currently a part of my home PV setup. This is a repository of all of the 
 information I was able to gather on this device, some easy, some other a bit harder to find.
 
 * Interfaces
