@@ -1,0 +1,10 @@
+#+TITLE: PZEM-016 energy monitor
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="pzem-016/"/>
+#+END_EXPORT
+
+PZEM-016 is a 100 A capable single-phase power and energy monitor from Aliexpress. The interface is MODBUS over RS-485 and is documented [[http://lechacal.com/modwrt/pzem-016_pzem014_user_manual.pdf][here]]. It can also be used with
+openwrt's MODWRT ([[http://lechacal.com/wiki/index.php/Use_PZEM-016_with_MODWRT][here]]). There are examples for [[http://evertdekker.com/?p=1307][Arduino]]. Apparently the meter is [[https://community.openenergymonitor.org/t/pzem-016-single-phase-modbus-energy-meter/7780/6][not isolated]].
