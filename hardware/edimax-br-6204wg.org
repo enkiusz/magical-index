@@ -5,7 +5,7 @@ The random Edimax router found in the junk box will serve as a garage 802.11 AP.
 
 * Hardware
 
-The router is built based on the RTL8186 SoC with 2 MB of Flash and 16 MB of RAM. 
+The router is built based on the [[https://www.linux-mips.org/wiki/Realtek_SOC#Realtek_RTL8186][RTL8186]] SoC with 2 MB of Flash and 16 MB of RAM. 
 
 The device exposes a serial console with 3.3 V levels and 38400 8n1 setup. There are also JTAG pins exposed.
 
@@ -586,3 +586,7 @@ PS_PORT1NAME=''
 PS_PORT2NAME=''
 # 
 #+END_SRC
+
+* Alternative Firmware
+
+There are alternative firmware projects for the RTL8186-based routers. The most known one seems to be Wive-NG. I have not tried to install them however as I need only very basic AP functionality. 

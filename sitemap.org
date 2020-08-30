@@ -14,6 +14,7 @@
   - [[file:hardware/lunadrone.org][Luna Drone]]
   - [[file:hardware/oneplus-one.org][OnePlus One]]
   - [[file:hardware/pzem-016.org][PZEM-016 energy monitor]]
+  - [[file:hardware/random-edimax.org][Random Edimax router]]
   - [[file:hardware/rc-plane.org][Simple RC plane]]
   - [[file:hardware/uarm.org][The UFactory Uarm]]
   - [[file:hardware/toshiba-n554.org][Toshiba N554 mouse]]
