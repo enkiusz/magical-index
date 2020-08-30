@@ -8,6 +8,7 @@
   - [[file:hardware/brother-ds-720d.org][Brother DS-720D]]
   - [[file:hardware/cubify-cube3d.org][Cubify Cube 3D printer]]
   - [[file:hardware/dns-320l.org][DNS-320L NAS]]
+  - [[file:hardware/edimax-br-6204wg.org][Edimax BR-6204Wg]]
   - [[file:hardware/fronius-symo-6.0-3-M.org][Fornius Symo 6.0-3-M inverter]]
   - [[file:hardware/gophert-cps-3205-II.org][GOPHERT CPS-3205 II power supply]]
   - [[file:hardware/lunadrone.org][Luna Drone]]

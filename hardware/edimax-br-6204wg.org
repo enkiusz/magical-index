@@ -1,0 +1,588 @@
+#+TITLE: Edimax BR-6204Wg
+#+LANGUAGE: en
+
+The random Edimax router found in the junk box will serve as a garage 802.11 AP.
+
+* Hardware
+
+The router is built based on the RTL8186 SoC with 2 MB of Flash and 16 MB of RAM. 
+
+The device exposes a serial console with 3.3 V levels and 38400 8n1 setup. There are also JTAG pins exposed.
+
+I have had this router without a case so it was not obvious at first what it was. By searching for the string '1244-00000401-01Z' 
+silkscreened on the PCB on [[https://wikidevi.wi-cat.ru][wikidevi]] I found out that it's an [[https://wikidevi.wi-cat.ru/Edimax_BR-6204Wg_/_BR-6304Wg_/_EW-7209APg_v1][Edimax BR-6204Wg]] or identical (as documented on wikidevi the device
+is sold under many different brands).
+
+* Bootloader
+
+The bootloader can be activated by pressing the "RESET" button and holding it while the device power is turned on. This process is described
+on the [[https://sourceforge.net/p/rtl8186/discussion/586129/thread/46e0f4ec/#5ece/a86e][rtl8186 forums on sourceforge]]
+
+The serial log of this is below:
+
+#+BEGIN_SRC Javascript
+UART1 output test ok
+Uart init
+mfid=000000c2 devid=00002249
+Found 1 x 2M flash memory
+
+---RealTek(RTL8186)at 2005.06.06-11:22+0800 version 1.3c [32bit](180MHz)
+
+UART1 output test ok
+Uart init
+mfid=000000c2 devid=00002249
+Found 1 x 2M flash memory
+
+---RealTek(RTL8186)at 2005.06.06-11:22+0800 version 1.3c [32bit](180MHz)
+
+---Escape booting by user
+<RealTek>help
+----------------- COMMAND MODE HELP ------------------
+HELP (?)				    : Print this help message
+D <Address> <Len>
+EW <Address> <Value1> <Value2>...
+EH <Address> <Value1> <Value2>...
+EB <Address> <Value1> <Value2>...
+EC <Address> <Value1> <Length>...
+CMP: CMP <dst><src><length>
+IPCONFIG:<TargetAddress>
+J: Jump to <TargetAddress>
+FLW: FLW <dst><src><length>
+FLR: FLR <dst><src><length>
+LOADADDR: <Load Address>
+AUTOBURN: 0/1
+<RealTek>
+
+#+END_SRC
+
+* Original firmware
+
+The original firmware boot serial log:
+
+#+BEGIN_SRC Javascript
+UART1 output test ok
+Uart init
+mfid=000000c2 devid=00002249
+Found 1 x 2M flash memory
+
+---RealTek(RTL8186)at 2005.06.06-11:22+0800 version 1.3c [32bit](180MHz)
+Jump to image start=0x80800000...
+early printk enabled 
+Determined physical RAM map:
+ memory: 01000000 @ 00000000 (usable)
+Initial ramdisk at: 0x801d3000 (5242880 bytes)
+On node 0 totalpages: 4096
+zone(0): 4096 pages.
+zone(1): 0 pages.
+zone(2): 0 pages.
+Kernel command line: root=/dev/ram console=0 ramdisk_start=0 single
+Calibrating delay loop... 179.40 BogoMIPS
+Memory: 8984k/16384k available (1664k kernel code, 7400k reserved, 5248k data, 56k init, 0k highmem)
+Dentry-cache hash table entries: 2048 (order: 2, 16384 bytes)
+Inode-cache hash table entries: 1024 (order: 1, 8192 bytes)
+Mount-cache hash table entries: 512 (order: 0, 4096 bytes)
+Buffer-cache hash table entries: 1024 (order: 0, 4096 bytes)
+Page-cache hash table entries: 4096 (order: 2, 16384 bytes)
+check_wait... unavailable.
+POSIX conformance testing by UNIFIX
+Linux NET4.0 for Linux 2.4
+Based upon Swansea University Computer Society NET3.039
+Initializing RT netlink socket
+Starting kswapd
+pty: 256 Unix98 ptys configured
+Serial driver version 6.02 (2003-03-12) with no serial options enabled
+ttyS00 at 0x00c3 (irq = 3) is a rtl_uart1
+state->flags=00000000
+HDLC line discipline: version $Revision: 1.1.1.1 $, maxframe=4096
+N_HDLC line discipline registered.
+block: 64 slots per queue, batch=16
+RAMDISK driver initialized: 16 RAM disks of 6144K size 1024 blocksize
+PPP generic driver version 2.4.1
+Cronyx Ltd, Synchronous PPP and CISCO HDLC (c) 1994
+Linux port (c) 1998 Building Number Three Ltd & Jan "Yenya" Kasprzak.
+HDLC support module revision 1.02 for Linux 2.4
+RealTek E-Flash System Driver. (C) 2002 RealTek Corp.
+Found 1 x 2M Byte MXIC MX29LV160AB at 0xbe000000
+RTL8180/RTL8185 driver version 1.8 (2005-09-23)
+8186NIC Ethernet driver v0.0.2 (Jan 30, 2004)
+eth0: RTL8186-NIC at 0xbd200000, 00:01:02:03:04:05, IRQ 4
+eth1: RTL8186-NIC at 0xbd300000, 04:05:06:07:08:09, IRQ 5
+NET4: Linux TCP/IP 1.0 for NET4.0
+IP Protocols: ICMP, UDP, TCP
+IP: routing cache hash table of 512 buckets, 4Kbytes
+TCP: Hash tables configured (established 1024 bind 2048)
+ip_conntrack version 2.1 (128 buckets, 1024 max) - 360 bytes per conntrack
+ip_tables: (C) 2000-2002 Netfilter core team
+ipt_recent v0.2.3: Stephen Frost <sfrost@snowman.net>.  http://snowman.net/projects/ipt_recent/
+ipt_time loading
+NET4: Unix domain sockets 1.0/SMP for Linux NET4.0.
+NET4: Ethernet Bridge 008 for NET4.0
+RAMDISK: ext2 filesystem found at block 0
+RAMDISK: Loading 5120 blocks [1 disk] into ram disk... done.
+Freeing initrd memory: 5120k freed
+VFS: Mounted root (ext2 filesystem).
+Freeing unused kernel memory: 56k freed
+mount /proc file system ok!
+serial console detected.  Disabling virtual terminals.
+
+
+BusyBox v1.00-pre8 (2005.07.08-09:10+0000) Built-in shell (ash)
+Enter 'help' for a list of built-in commands.
+
+Sat Jan  1 00:00:00 UTC 2000
+create flash.inc
+Initialize WLAN interface
+SIOCGIFFLAGS: No such device
+bridge br0 doesn't exist; can't delete it
+Setup bridge...
+device eth0 entered promiscuous mode
+eth0:phy is 8305
+SIOCDELRT: No such process
+device eth1 entered promiscuous mode
+eth1:phy is 8305
+SIOCDELRT: No such process
+device wlan0 entered promiscuous mode
+SIOCDELRT: No such process
+br0: port 3(wlan0) entering listening state
+br0: port 2(eth1) entering listening state
+br0: port 3(wlan0) entering learning state
+br0: port 3(wlan0) entering forwarding state
+br0: topology change detected, propagating
+br0: port 1(eth0) entering listening state
+br0: port 2(eth1) entering learning state
+br0: port 2(eth1) entering forwarding state
+br0: topology change detected, propagating
+br0: port 1(eth0) entering learning state
+br0: port 1(eth0) entering forwarding state
+br0: topology change detected, propagating
+SIOCDELRT: No such process
+SIOCDELRT: No such process
+Restart WLAN **********
+br0: port 3(wlan0) entering disabled state
+br0: port 3(wlan0) entering listening state
+br0: port 3(wlan0) entering learning state
+br0: port 3(wlan0) entering forwarding state
+br0: topology change detected, propagating
+run Diagd **********
+setting: port: 31727 
+running in daemon mode
+run GaTest **********
+/bin/init.sh: 326: /bin/agent: not found
+killall: radiusd: no process killed
+RADIUS server disable !!
+Restart wlanapp.sh **********
+Restart WLAN **********
+br0: port 3(wlan0) entering disabled state
+br0: port 3(wlan0) entering listening state
+br0: port 3(wlan0) entering learning state
+br0: port 3(wlan0) entering forwarding state
+br0: topology change detected, propagating
+
+
+
+
+         Please enter your Name and Password
+
+
+
+ User Name   :
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+<TAB> Select                     <ESC> Exit                     <Enter> Enter
+
+#+END_SRC
+
+
+There is a password prompt but it can be easily bypassed with Ctrl-C giving us a root shell:
+
+#+BEGIN_SRC Javascript
+ User Name   :
+# ls -l /
+drwxr-xr-x    2 root     0            2048 Nov  8  2005 bin
+drwxr-xr-x    3 root     0            1024 Nov  8  2005 dev
+drwxr-xr-x    6 root     0            1024 Nov  8  2005 etc
+drwxr-xr-x    2 root     0            1024 Nov  8  2005 lib
+lrwxrwxrwx    1 root     0              11 Nov  8  2005 linuxrc -> bin/busybox
+drwx------    2 root     0           12288 Nov  8  2005 lost+found
+dr-xr-xr-x   23 root     0               0 Jan  1 00:00 proc
+drwxr-xr-x    2 root     0            1024 Nov  8  2005 sbin
+drwxr-xr-x    3 root     0            1024 Nov  8  2005 share
+drwxr-xr-x    2 root     0            1024 Nov  8  2005 tmp
+drwxr-xr-x    5 root     0            1024 Nov  8  2005 usr--------------------
+drwxr-xr-x    1 root     0               0 Jan  1 00:00 var     <Enter> Enter
+drwxr-xr-x    2 root     0            1024 Nov  8  2005 var.radius
+drwxr-xr-x    3 root     0            1024 Nov  8  2005 web
+# ps -ef
+  PID  Uid     VmSize Stat Command
+    1 root        256 S   init        
+    2 root            SW  [keventd]
+    3 root            RWN [ksoftirqd_CPU0]
+    4 root            SW  [kswapd]
+    5 root            SW  [bdflush]
+    6 root            SW  [kupdated]
+    7 root            SW  [mtdblockd]
+    8 root        336 S   -sh 
+  320 root        192 S   /bin/diagd -d 
+  382 root        340 S   webs 
+  385 root        240 R   ps -ef 
+# 
+#+END_SRC
+
+There are some useful commands here, one of them is 'flash' which allows to access the configuration variables, for example in the router I had:
+
+#+BEGIN_SRC Javascript
+# flash all
+HW_BOARD_ID=2
+HW_NIC0_ADDR=000e2e7ce223
+HW_NIC1_ADDR=000e2e7ce224
+HW_WLAN_ADDR=000e2e7ce223
+HW_REG_DOMAIN=3
+HW_RF_TYPE=7
+HW_TX_POWER_CCK=0c0c0c0d0d0d0d0d0d0e0e0e0e0e
+HW_TX_POWER_OFDM=17171717171717171717171717170e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e
+HW_ANT_DIVERSITY=1
+HW_TX_ANT=0
+HW_CCA_MODE=0
+HW_WLAN_LED_TYPE=2
+HW_INIT_GAIN=4
+DHCP_CLIENT_START='192.168.2.100'
+DHCP_CLIENT_END='192.168.2.200'
+LICENCE=0
+RSER_ENABLED=0
+RSER_CLT_TBL_NUM=0
+RSER_USR_TBL_NUM=0
+WLAN_TRAN_RATE='auto'
+WLAN_RATE_MODE=0
+WLAN_CTS=0
+WLAN_BURST=0
+WEP152_KEY1=00000000000000000000000000000000
+WEP152_KEY2=00000000000000000000000000000000
+WEP152_KEY3=00000000000000000000000000000000
+WEP152_KEY4=00000000000000000000000000000000
+DOT1X_MODE=0
+ELAN_MAC_ADDR=000000000000
+WLAN_MAC_ADDR=000000000000
+SSID='INTERFERENCJA'
+CHANNEL=13
+WEP=2
+WEP64_KEY1=0000000000
+WEP64_KEY2=0000000000
+WEP64_KEY3=0000000000
+WEP64_KEY4=0000000000
+WEP128_KEY1=686973746572657a6177656273
+WEP128_KEY2=00000000000000000000000000
+WEP128_KEY3=00000000000000000000000000
+WEP128_KEY4=00000000000000000000000000
+WEP_DEFAULT_KEY=0
+WEP_KEY_TYPE=0
+FRAG_THRESHOLD=2346
+SUPPORTED_RATES=15
+BEACON_INTERVAL=256
+PREAMBLE_TYPE=0
+BASIC_RATES=3
+RTS_THRESHOLD=2347
+AUTH_TYPE=0
+HIDDEN_SSID=1
+WLAN_DISABLED=0
+INACTIVITY_TIME=30000
+RATE_ADAPTIVE_ENABLED=1
+DTIM_PERIOD=3
+NETWORK_TYPE=0
+IAPP_DISABLED=1
+PROTECTION_DISABLED=1
+MACCLONE_ENABLED=0
+BAND=3
+FIX_RATE=1
+WPA2_PRE_AUTH=0
+WPA2_CIPHER_SUITE=0
+WLAN_SET_TX=0
+AP_MODE=2
+SECURITY_MODE=0
+CLIENT_IP_DISABLED=0
+WLAN_BLOCK_RELAY=0
+AUTO_MAC_CLONE=0
+OP_MODE=0
+WISP_WAN_ID=0
+STA_SSID=''
+STA_SEC_MODE=0
+ADHOC_SEC_MODE=0
+STA_ENCRYPT=0
+STA_WPA_AUTH=0
+STA_AUTH_TYPE=0
+STA_WPA_CIPHER_SUITE=0
+STA_WEP=0
+STA_WEP64_KEY1=0000000000
+STA_WEP64_KEY2=0000000000
+STA_WEP64_KEY3=0000000000
+STA_WEP64_KEY4=0000000000
+STA_WEP128_KEY1=00000000000000000000000000
+STA_WEP128_KEY2=00000000000000000000000000
+STA_WEP128_KEY3=00000000000000000000000000
+STA_WEP128_KEY4=00000000000000000000000000
+STA_WEP_DEFKEY=0
+STA_WEP_KEY_TYPE=0
+STA_PSK_FORMAT=0
+STA_WPA_PSK=''
+WLAN_BSSID=000000000000
+STA_ENRADIUS=0
+STA_EAP_TYPE=0
+STA_ENCLT_CER=0
+STA_ENSER_CER=0
+CLT_CER_FILE=0
+SER_CER_FILE=0
+STA_ID=''
+STA_PASS=''
+STA_PROTOCOL=''
+STA_EAP_ID=''
+STA_EAP_PASS=''
+STA_CLIENT_PASS=''
+STA_SERVER_PASS=''
+STA_RTS=0
+STA_FRAGMENT=0
+STA_PREAMBLE=0
+WL_LINKMAC1=000000000000
+WL_LINKMAC2=000000000000
+WL_LINKMAC3=000000000000
+WL_LINKMAC4=000000000000
+WL_LINKMAC5=000000000000
+WL_LINKMAC6=000000000000
+WDS_ENABLED=0
+WDS_ENCRYPT=0
+WDS_WEP_FORMAT=0
+WDS_WEP_KEY=''
+WDS_PSK_FORMAT=0
+WDS_PSK=''
+WLAN_ENCRYPT=0
+WLAN_ENABLE_SUPP_NONWPA=0
+WLAN_SUPP_NONWPA=0
+WLAN_WPA_AUTH=2
+WLAN_WPA_CIPHER_SUITE=1
+WLAN_WPA_PSK=''
+WLAN_WPA_GROUP_REKEY_TIME=86400
+MAC_AUTH_ENABLED=0
+RS_IP='0.0.0.0'
+RS_PORT=1812
+RS_PASSWORD=''
+RS_MAXRETRY=3
+RS_INTERVAL_TIME=5
+ACCOUNT_RS_ENABLED=0
+ACCOUNT_RS_IP='0.0.0.0'
+ACCOUNT_RS_PORT=1813
+ACCOUNT_RS_PASSWORD=''
+ACCOUNT_RS_UPDATE_ENABLED=0
+ACCOUNT_RS_UPDATE_DELAY=60
+ACCOUNT_RS_MAXRETRY=3
+ACCOUNT_RS_INTERVAL_TIME=5
+WLAN_ENABLE_1X=0
+WLAN_PSK_FORMAT=0
+IP_ADDR='192.168.9.18'
+DHCPGATEWAYIP_ADDR='0.0.0.0'
+DHCPNAMESERVER_ADDR='0.0.0.0'
+DOMAIN_NAME=''
+LAN_LEASE_TIME=946080000
+SUBNET_MASK='255.255.255.0'
+DEFAULT_GATEWAY='0.0.0.0'
+DHCP=0
+STP_ENABLED=0
+WLAN_MACAC_NUM=1
+WLAN_MACAC_ENABLED=1
+WLAN_MACAC_ADDR1=0020a64f1641,"Baza"
+SUPER_NAME='super'
+SUPER_PASSWORD='APR@xuniL'
+USER_NAME='admin'
+USER_PASSWORD='hister'
+REPEATER_ENABLED=0
+REPEATER_SSID=''
+PS_ENABLE=0
+PS_IPPENABLE=0
+PS_LPRENABLE=0
+PS_NAME=''
+PS_PORT1NAME=''
+PS_PORT2NAME=''
+# 
+#+END_SRC
+
+The configuration can be reset allowing normal AP access.
+
+#+BEGIN_SRC Javascript
+# flash reset
+# flash default
+# flash all
+HW_BOARD_ID=2
+HW_NIC0_ADDR=000e2e7ce223
+HW_NIC1_ADDR=000e2e7ce224
+HW_WLAN_ADDR=000e2e7ce223
+HW_REG_DOMAIN=3
+HW_RF_TYPE=7
+HW_TX_POWER_CCK=0c0c0c0d0d0d0d0d0d0e0e0e0e0e
+HW_TX_POWER_OFDM=17171717171717171717171717170e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e
+HW_ANT_DIVERSITY=1
+HW_TX_ANT=0
+HW_CCA_MODE=0
+HW_WLAN_LED_TYPE=2
+HW_INIT_GAIN=4
+DHCP_CLIENT_START='192.168.2.100'
+DHCP_CLIENT_END='192.168.2.200'
+LICENCE=0
+RSER_ENABLED=0
+RSER_CLT_TBL_NUM=0
+RSER_USR_TBL_NUM=0
+WLAN_TRAN_RATE='auto'
+WLAN_RATE_MODE=0
+WLAN_CTS=0
+WLAN_BURST=0
+WEP152_KEY1=00000000000000000000000000000000
+WEP152_KEY2=00000000000000000000000000000000
+WEP152_KEY3=00000000000000000000000000000000
+WEP152_KEY4=00000000000000000000000000000000
+DOT1X_MODE=0
+ELAN_MAC_ADDR=000000000000
+WLAN_MAC_ADDR=000000000000
+SSID='default'
+CHANNEL=11
+WEP=0
+WEP64_KEY1=0000000000
+WEP64_KEY2=0000000000
+WEP64_KEY3=0000000000
+WEP64_KEY4=0000000000
+WEP128_KEY1=00000000000000000000000000
+WEP128_KEY2=00000000000000000000000000
+WEP128_KEY3=00000000000000000000000000
+WEP128_KEY4=00000000000000000000000000
+WEP_DEFAULT_KEY=0
+WEP_KEY_TYPE=1
+FRAG_THRESHOLD=2346
+SUPPORTED_RATES=15
+BEACON_INTERVAL=100
+PREAMBLE_TYPE=0
+BASIC_RATES=3
+RTS_THRESHOLD=2347
+AUTH_TYPE=2
+HIDDEN_SSID=0
+WLAN_DISABLED=0
+INACTIVITY_TIME=30000
+RATE_ADAPTIVE_ENABLED=1
+DTIM_PERIOD=3
+NETWORK_TYPE=0
+IAPP_DISABLED=0
+PROTECTION_DISABLED=1
+MACCLONE_ENABLED=0
+BAND=3
+FIX_RATE=0
+WPA2_PRE_AUTH=0
+WPA2_CIPHER_SUITE=0
+WLAN_SET_TX=0
+AP_MODE=0
+SECURITY_MODE=0
+CLIENT_IP_DISABLED=0
+WLAN_BLOCK_RELAY=0
+AUTO_MAC_CLONE=0
+OP_MODE=0
+WISP_WAN_ID=0
+STA_SSID=''
+STA_SEC_MODE=0
+ADHOC_SEC_MODE=0
+STA_ENCRYPT=0
+STA_WPA_AUTH=0
+STA_AUTH_TYPE=0
+STA_WPA_CIPHER_SUITE=0
+STA_WEP=0
+STA_WEP64_KEY1=0000000000
+STA_WEP64_KEY2=0000000000
+STA_WEP64_KEY3=0000000000
+STA_WEP64_KEY4=0000000000
+STA_WEP128_KEY1=00000000000000000000000000
+STA_WEP128_KEY2=00000000000000000000000000
+STA_WEP128_KEY3=00000000000000000000000000
+STA_WEP128_KEY4=00000000000000000000000000
+STA_WEP_DEFKEY=0
+STA_WEP_KEY_TYPE=0
+STA_PSK_FORMAT=0
+STA_WPA_PSK=''
+WLAN_BSSID=000000000000
+STA_ENRADIUS=0
+STA_EAP_TYPE=0
+STA_ENCLT_CER=0
+STA_ENSER_CER=0
+CLT_CER_FILE=0
+SER_CER_FILE=0
+STA_ID=''
+STA_PASS=''
+STA_PROTOCOL=''
+STA_EAP_ID=''
+STA_EAP_PASS=''
+STA_CLIENT_PASS=''
+STA_SERVER_PASS=''
+STA_RTS=0
+STA_FRAGMENT=0
+STA_PREAMBLE=0
+WL_LINKMAC1=000000000000
+WL_LINKMAC2=000000000000
+WL_LINKMAC3=000000000000
+WL_LINKMAC4=000000000000
+WL_LINKMAC5=000000000000
+WL_LINKMAC6=000000000000
+WDS_ENABLED=0
+WDS_ENCRYPT=0
+WDS_WEP_FORMAT=0
+WDS_WEP_KEY=''
+WDS_PSK_FORMAT=0
+WDS_PSK=''
+WLAN_ENCRYPT=0
+WLAN_ENABLE_SUPP_NONWPA=0
+WLAN_SUPP_NONWPA=0
+WLAN_WPA_AUTH=2
+WLAN_WPA_CIPHER_SUITE=1
+WLAN_WPA_PSK=''
+WLAN_WPA_GROUP_REKEY_TIME=86400
+MAC_AUTH_ENABLED=0
+RS_IP='0.0.0.0'
+RS_PORT=1812
+RS_PASSWORD=''
+RS_MAXRETRY=3
+RS_INTERVAL_TIME=5
+ACCOUNT_RS_ENABLED=0
+ACCOUNT_RS_IP='0.0.0.0'
+ACCOUNT_RS_PORT=1813
+ACCOUNT_RS_PASSWORD=''
+ACCOUNT_RS_UPDATE_ENABLED=0
+ACCOUNT_RS_UPDATE_DELAY=60
+ACCOUNT_RS_MAXRETRY=3
+ACCOUNT_RS_INTERVAL_TIME=5
+WLAN_ENABLE_1X=0
+WLAN_PSK_FORMAT=0
+IP_ADDR='192.168.2.1'
+DHCPGATEWAYIP_ADDR='0.0.0.0'
+DHCPNAMESERVER_ADDR='0.0.0.0'
+DOMAIN_NAME=''
+LAN_LEASE_TIME=946080000
+SUBNET_MASK='255.255.255.0'
+DEFAULT_GATEWAY='0.0.0.0'
+DHCP=0
+STP_ENABLED=0
+WLAN_MACAC_NUM=0
+WLAN_MACAC_ENABLED=0
+SUPER_NAME='super'
+SUPER_PASSWORD='APR@xuniL'
+USER_NAME='admin'
+USER_PASSWORD='1234'
+REPEATER_ENABLED=0
+REPEATER_SSID=''
+PS_ENABLE=0
+PS_IPPENABLE=0
+PS_LPRENABLE=0
+PS_NAME=''
+PS_PORT1NAME=''
+PS_PORT2NAME=''
+# 
+#+END_SRC
