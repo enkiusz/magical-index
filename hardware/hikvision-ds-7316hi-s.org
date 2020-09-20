@@ -1,0 +1,885 @@
+#+TITLE: HIKVISION DS-7316HI-S
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="hikvision-ds-7316hi-s/"/>
+#+END_EXPORT
+
+* Symptoms
+
+The [[https://www.hikvision.com/UploadFile/image/US-Technical%20Specification%20of%20DS-7304HI-S_7308HI-S_7316HI-S.pdf][HIKVISION DS-7316HI-S]] is an NVR supporting analog CCTV cameras which I got for free. It was declared to be broken and indeed was failing to boot. The console output was providing the following hints:
+
+#+BEGIN_SRC Javascript
+
+U-Boot 1.2.0 (Nov 28 2009 - 10:58:12)
+
+DRAM:  256 MB
+AMD Flash devid:0x227e id3:0x2221 id4:0x2201 
+ARM Clock : 364MHz
+DDR Clock : 310MHz
+Hit ctrl+u to stop autoboot:  0 
+### JFFS2 loading 'uImage' to 0x80700000
+jffs2: scanning filesystem . done.
+jffs2: cannot find inode(uImage)
+### JFFS2 load uImage error(0)
+## Booting image at 80700000 ...
+Bad Magic Number
+HKVS # 
+#+END_SRC
+
+** RS-232 interface fix
+
+The bootloader is U-Boot but the console did not work. It would print the above messages but did not accept any input. After investigating this I found out that the RS-232 interface 
+receive path seemed to be broken so I replaced the [[https://pdf.datasheetcatalog.com/datasheet/sipex/SP310ECT_TR.pdf][SP2020EEN]] chip that was responsible. After this the boot process could be stopped and the U-Boot console accessed. Some discovery follows:
+
+#+BEGIN_SRC Javascript
+
+U-Boot 1.2.0 (Nov 28 2009 - 10:58:12)
+
+DRAM:  256 MB
+AMD Flash devid:0x227e id3:0x2221 id4:0x2201 
+ARM Clock : 364MHz
+DDR Clock : 310MHz
+Hit ctrl+u to stop autoboot:  0 
+HKVS # help                                              
+?       - alias for 'help'
+bootd   - boot default, i.e., run 'bootcmd'
+bootm   - boot application image from memory
+cmp     - memory compare
+cp      - memory copy
+crc32   - checksum calculation
+format  - format nand except bootloader area
+fsinfo	- print information about filesystems
+fsload	- load binary file from a filesystem image
+go      - start application at address 'addr'
+help    - print online help
+ls	- list files in a directory (default /)
+md      - memory display
+mm      - memory modify (auto-incrementing)
+mtest   - simple RAM test
+mw      - memory write (fill)
+nand    - NAND sub-system
+nboot   - boot from NAND device
+ping	- send ICMP ECHO_REQUEST to network host
+pready  - set panel to ready
+printenv- print environment variables
+reset   - Perform RESET of the CPU
+saveenv - save environment variables to persistent storage
+setenv  - set environment variables
+tftpboot- boot image via network using TFTP protocol
+update  - update digicap.dav
+updateb - update uboot(u-boot.bin) to nor
+updatebl- update ubl(ubl_646x.bin) to nand
+updatefs- update filesystem(davinci.img) to nand
+updatek - update kernel(uImage) to nand
+updates - serial update kernel or filesys
+HKVS # printenv
+bootargs=console=ttyS0,115200n8 initrd=2g,1 root=/dev/ram
+bootdelay=3
+baudrate=115200
+ipaddr=192.0.0.64
+serverip=192.0.0.128
+bootfile="uImage"
+netmask=255.255.255.0
+bootcmd=fsload 0x80700000 uImage;bootm
+ethaddr=00:40:48:38:15:07
+
+Environment size: 230/131068 bytes
+HKVS # fsinfo
+### filesystem type is JFFS2
+jffs2: scanning filesystem . done.
+Compression: NONE
+	frag count: 1569
+	compressed sum: 6204344
+	uncompressed sum: 6204344
+Compression: ZERO
+	frag count: 0
+	compressed sum: 0
+	uncompressed sum: 0
+Compression: RTIME
+	frag count: 0
+	compressed sum: 0
+	uncompressed sum: 0
+Compression: RUBINMIPS
+	frag count: 0
+	compressed sum: 0
+	uncompressed sum: 0
+Compression: COPY
+	frag count: 0
+	compressed sum: 0
+	uncompressed sum: 0
+Compression: DYNRUBIN
+	frag count: 0
+	compressed sum: 0
+	uncompressed sum: 0
+Compression: ZLIB
+	frag count: 352
+	compressed sum: 591484
+	uncompressed sum: 1422185
+HKVS # ls
+ -rwxrwxrwx   711436 Thu Jan 01 00:00:00 1970 rootfs.img
+ -rwxrwxrwx   829440 Thu Jan 01 00:00:00 1970 720.422
+ -rwxrwxrwx   269846 Thu Jan 01 00:00:00 1970 ds8062_fpga.rbf
+ -rwxrwxrwx      267 Thu Jan 01 00:00:00 1970 initrun.sh
+ -rwxrwxrwx  4297989 Thu Jan 01 00:00:00 1970 guirc.tar.gz
+ -rwxrwxrwx  1510288 Thu Jan 01 00:00:00 1970 webs.tar.gz
+HKVS # 
+#+END_SRC
+
+We can see what is wrong here, the 'bootcmd' contains instructions to load the uImage from jffs2 but there is no file named uImage there so the boot process fails. 
+
+** Firmware restore
+
+I found a firmware image and a user's manual on a [[https://down.dipol.com.pl/Cctv/M76080/][Polish CCTV shop download site]] (old-skool plain file server!). In order to perform the update you need to setup a TFTP server responding to the
+IP address 192.0.0.128. I used dnsmasq for this and a simple config file:
+
+#+BEGIN_SRC Javascript
+interface = enx00248c007801
+enable-tftp
+tftp-root=/srv/tftp
+#+END_SRC 
+
+This config uses a USB Ethernet device enx00248c007801 and /srv/tftp as the location where files are served from. The file we need from the firmware is digicap.dav. The 'update' commands in 
+the U-Boot console triggers the update:
+
+#+BEGIN_SRC Javascript
+
+U-Boot 1.2.0 (Nov 28 2009 - 10:58:12)
+
+DRAM:  256 MB
+AMD Flash devid:0x227e id3:0x2221 id4:0x2201 
+ARM Clock : 364MHz
+DDR Clock : 310MHz
+Hit ctrl+u to stop autoboot:  0 
+HKVS # help    
+?       - alias for 'help'
+bootd   - boot default, i.e., run 'bootcmd'
+bootm   - boot application image from memory
+cmp     - memory compare
+cp      - memory copy
+crc32   - checksum calculation
+format  - format nand except bootloader area
+fsinfo	- print information about filesystems
+fsload	- load binary file from a filesystem image
+go      - start application at address 'addr'
+help    - print online help
+ls	- list files in a directory (default /)
+md      - memory display
+mm      - memory modify (auto-incrementing)
+mtest   - simple RAM test
+mw      - memory write (fill)
+nand    - NAND sub-system
+nboot   - boot from NAND device
+ping	- send ICMP ECHO_REQUEST to network host
+pready  - set panel to ready
+printenv- print environment variables
+reset   - Perform RESET of the CPU
+saveenv - save environment variables to persistent storage
+setenv  - set environment variables
+tftpboot- boot image via network using TFTP protocol
+update  - update digicap.dav
+updateb - update uboot(u-boot.bin) to nor
+updatebl- update ubl(ubl_646x.bin) to nand
+updatefs- update filesystem(davinci.img) to nand
+updatek - update kernel(uImage) to nand
+updates - serial update kernel or filesys
+HKVS # update
+TFTP from server 192.0.0.128; our IP address is 192.0.0.64
+Filename 'digicap.dav'.
+Load address: 0x81200000
+Loading: #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 #################################################################
+	 ####
+done
+Bytes transferred = 10000988 (989a5c hex)
+jffs2: add update file(uImage)...(1569292B->1580004B)done.
+jffs2: add update file(rootfs.img)...(714721B->722692B)done.
+jffs2: add update file(720.422)...(829440B->75324B)done.
+jffs2: add update file(ds8062_fpga.rbf)...(269846B->231764B)done.
+jffs2: add update file(initrun.sh)...(459B->396B)done.
+jffs2: add update file(preAllocMem)...(4704B->2388B)done.
+jffs2: add update file(waitAllocMem)...(3232B->1556B)done.
+jffs2: add update file(guirc.tar.gz)...(5072087B->5145416B)done.
+jffs2: add update file(webs.tar.gz)...(1536747B->1563068B)done.
+Un-Protect Flash space
+Un-Protected 122 sectors
+erase Flash space
+
+ Erase Operation Completed.
+Erased 122 sectors
+Writing jffs2 to Flash.../done
+Re-Protect Flash space
+Protected 122 sectors
+HKVS # 
+#+END_SRC
+
+After the update process the NVR now boots successfuly:
+
+#+BEGIN_SRC Javascript
+U-Boot 1.2.0 (Nov 28 2009 - 10:58:12)
+
+DRAM:  256 MB
+AMD Flash devid:0x227e id3:0x2221 id4:0x2201 
+ARM Clock : 364MHz
+DDR Clock : 310MHz
+Hit ctrl+u to stop autoboot:  0 
+### JFFS2 loading 'uImage' to 0x80700000
+jffs2: scanning filesystem . done.
+### JFFS2 load complete: 1569292 bytes loaded to 0x80700000
+## Booting image at 80700000 ...
+   Image Name:   Linux-2.6.10_mvl401-davinci_evm
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    1569228 Bytes =  1.5 MB
+   Load Address: 80008000
+   Entry Point:  80008000
+   Verifying Checksum ... OK
+OK
+
+Starting kernel ...
+
+Uncompressing Linux... done, booting the kernel.
+
+
+BusyBox v1.2.1 (2009.08.25-02:50+0000) Built-in shell (ash)
+Enter 'help' for a list of davinci system commands.
+
+Creating initial udev device nodes ... done.
+mount jffs2 filesystem done.
+before allocArmMemory
+after allocArmMemory, vAddr:0x0x40065000, pAddr:0x0x83000000
+waiting allocate memory...
+start compress.
+waiting decompression...
+bootParms.encodeChans 16
+bootParms.decodeChans 1
+devHardInfo.encodeChans 16
+devHardInfo.decodeChans 1
+devHardInfo.alarmInNums = 16
+devHardInfo.alarmOutNums = 4
+devHardInfo.ataCtrlNums = 2
+devHardInfo.decodeChans = 16
+devHardInfo.dspSoftwareBuildDate = 0x0
+devHardInfo.dspSoftwareVersion = 0x0
+devHardInfo.encodeChans = 16
+devHardInfo.hardwareVersion = 0xc100
+devHardInfo.networkNums = 1
+devHardInfo.panelVersion = 0
+devHardInfo.ramSize = 256
+devHardInfo.softwareBuildDate = 0x0
+devHardInfo.softwareVersion = 0x0
+devModel = DS-7316HI-S
+prodNo = 402151991
+magicNumber = 1212897107
+voNums = 3
+ipcChans = 0
+paraChecksum = 2119
+paraLength = 244
+language = 1
+device_class = 2
+oemCode = 1
+encodeChans = 16
+decodeChans = 16
+picFormat = 2
+devHigh = 2
+cpuFreq = 4
+dspFreq = 4
+zone = 3
+webSupport = 1
+voipSupport = 0
+usbNums = 2
+lcdSupport = 0
+vtSupport = 1
+videoMaxtrix = 0
+extendedDecoder = 1
+extendedIVS = 1
+extendedAlarmOut = 1
+devType = 0x50ef
+ubootAdrs = 0x0
+ubootSize = 0
+ubootCheckSum = 0
+tinyKernelAdrs	= 0x0
+tinyKernelSize = 0
+tinyKernelCheckSum = 0
+open /home/hik/netOsd.bin OK !
+readDevParam open devCfg.bin fd 7
+before freeArmMemory
+after freeArmMemory
+write 1 byte to FIFO_FROM_PAM success.
+read 1 byte from FIFO_FROM_PAM, memStat:2
+memset dspMem  0
+chan 0 rec buffer virtAddr = 0x478d4000 phyAddr = 0x8c000000
+chan 0 net buffer virtAddr = 0x47a54000 phyAddr = 0x81300000
+chan 0 sub net buffer virtAddr = 0x47ad4000 phyAddr = 0x81380000
+chan 1 rec buffer virtAddr = 0x47af4000 phyAddr = 0x8c180000
+chan 1 net buffer virtAddr = 0x47c74000 phyAddr = 0x81400000
+chan 1 sub net buffer virtAddr = 0x47cf4000 phyAddr = 0x813a0000
+chan 2 rec buffer virtAddr = 0x47d14000 phyAddr = 0x8c300000
+chan 2 net buffer virtAddr = 0x47e94000 phyAddr = 0x81480000
+chan 2 sub net buffer virtAddr = 0x47f14000 phyAddr = 0x813c0000
+chan 3 rec buffer virtAddr = 0x47f34000 phyAddr = 0x8c480000
+chan 3 net buffer virtAddr = 0x480b4000 phyAddr = 0x81500000
+chan 3 sub net buffer virtAddr = 0x48134000 phyAddr = 0x813e0000
+chan 4 rec buffer virtAddr = 0x48154000 phyAddr = 0x8c600000
+chan 4 net buffer virtAddr = 0x482d4000 phyAddr = 0x81580000
+chan 4 sub net buffer virtAddr = 0x48354000 phyAddr = 0x81600000
+chan 5 rec buffer virtAddr = 0x48374000 phyAddr = 0x8c780000
+chan 5 net buffer virtAddr = 0x484f4000 phyAddr = 0x81680000
+chan 5 sub net buffer virtAddr = 0x48574000 phyAddr = 0x81640000
+chan 6 rec buffer virtAddr = 0x48594000 phyAddr = 0x8c900000
+chan 6 net buffer virtAddr = 0x48714000 phyAddr = 0x81700000
+chan 6 sub net buffer virtAddr = 0x48794000 phyAddr = 0x81660000
+chan 7 rec buffer virtAddr = 0x487b4000 phyAddr = 0x8ca80000
+chan 7 net buffer virtAddr = 0x48934000 phyAddr = 0x81780000
+chan 7 sub net buffer virtAddr = 0x489b4000 phyAddr = 0x81800000
+chan 8 rec buffer virtAddr = 0x489d4000 phyAddr = 0x8cc00000
+chan 8 net buffer virtAddr = 0x48b54000 phyAddr = 0x81880000
+chan 8 sub net buffer virtAddr = 0x48bd4000 phyAddr = 0x81820000
+chan 9 rec buffer virtAddr = 0x48bf4000 phyAddr = 0x8cd80000
+chan 9 net buffer virtAddr = 0x48d74000 phyAddr = 0x81900000
+chan 9 sub net buffer virtAddr = 0x48df4000 phyAddr = 0x81840000
+chan 10 rec buffer virtAddr = 0x48e14000 phyAddr = 0x8cf00000
+chan 10 net buffer virtAddr = 0x48f94000 phyAddr = 0x81980000
+chan 10 sub net buffer virtAddr = 0x49014000 phyAddr = 0x81860000
+chan 11 rec buffer virtAddr = 0x49034000 phyAddr = 0x8d080000
+chan 11 net buffer virtAddr = 0x491b4000 phyAddr = 0x81a00000
+chan 11 sub net buffer virtAddr = 0x49234000 phyAddr = 0x81a80000
+chan 12 rec buffer virtAddr = 0x49254000 phyAddr = 0x8d200000
+chan 12 net buffer virtAddr = 0x493d4000 phyAddr = 0x81b00000
+chan 12 sub net buffer virtAddr = 0x49454000 phyAddr = 0x81aa0000
+chan 13 rec buffer virtAddr = 0x49474000 phyAddr = 0x8d380000
+chan 13 net buffer virtAddr = 0x495f4000 phyAddr = 0x81b80000
+chan 13 sub net buffer virtAddr = 0x49674000 phyAddr = 0x81ac0000
+chan 14 rec buffer virtAddr = 0x49694000 phyAddr = 0x8d500000
+chan 14 net buffer virtAddr = 0x49814000 phyAddr = 0x81c00000
+chan 14 sub net buffer virtAddr = 0x49894000 phyAddr = 0x81ae0000
+chan 15 rec buffer virtAddr = 0x498b4000 phyAddr = 0x8d680000
+chan 15 net buffer virtAddr = 0x49a34000 phyAddr = 0x81c80000
+chan 15 sub net buffer virtAddr = 0x49ab4000 phyAddr = 0x81d00000
+mapbuf0: len=1572864,offset=84000000
+mapbuf1: len=1572864,offset=84180000
+mapbuf2: len=1572864,offset=84300000
+count = 0 visig=0 vi is ok
+ (gxy)------->ky6467 bufparam bufaddr=0x85743c00,yuvH=288,yuvW=352
+ (lkt)------>ky6467 bufparam audio addr[0]=0x8586cc80,addr[1]=0x8586d1a4,addr[2]=0x8586d6c8
+The read of ISCSI_VERSION_FILE is 2.0-869 
+# [0]ky2009_sdram =0x49fce000
+viDevice:10
+FH streambuf:0x87000000
+ -  - -- - - --logPrintAddr = 0x81190000
+dsp_share_mem->magic1 = bad3126a
+dsp_share_mem->magic2 = 312df654
+DSP(0) initialization success.
+retry = 2856
+bootInfo = 100
+DSP START OK
+name = eth0 speed = 0, duplex = 0, and autoneg = 1
+=============set mtu[1500] OK!!!===========
+=============set ipaddr OK!!!===========
+=============set netmask OK!!!===========
+=============set ipaddr OK!!!===========
+eth0 1
+=============set gateway OK!!!===========
+sensorType = 0x0
+send a heartbeat to panel
+startHttpServer!!!
+channel 1 start video capture
+channel 2 start video capture
+channel 3 start video capture
+channel 4 start video capture
+channel 5 start video capture
+channel 6 start video capture
+channel 7 start video capture
+channel 8 start video capture
+channel 9 start video capture
+channel 10 start video capture
+channel 11 start video capture
+channel 12 start video capture
+channel 13 start video capture
+channel 14 start video capture
+channel 15 start video capture
+channel 16 start video capture
+!!!!!!!!!!! mainout = 3, auxout = 1
+######## w = 1024, h = 768
+video_w = 1024, video_h = 768, video_bpp = 32
+--------end of InitGAL--------
+open mouse success!!
+~~~~~~~ ctrlname: calendar_bk_bmp 2
+viLostProc:Chan 1 VI lost.
+viLostProc:Chan 2 VI lost.
+viLostProc:Chan 3 VI lost.
+viLostProc:Chan 4 VI lost.
+viLostProc:Chan 5 VI lost.
+viLostProc:Chan 6 VI lost.
+viLostProc:Chan 7 VI lost.
+viLostProc:Chan 8 VI lost.
+viLostProc:Chan 9 VI lost.
+viLostProc:Chan 10 VI lost.
+viLostProc:Chan 11 VI lost.
+viLostProc:Chan 12 VI lost.
+viLostProc:Chan 13 VI lost.
+viLostProc:Chan 14 VI lost.
+viLostProc:Chan 15 VI lost.
+viLostProc:Chan 16 VI lost.
+~~~~~~~ ctrlname: cancel 2
+End of InitGUI!!
+Panel Version:0xa
+Panel Type:0x301c05
+Shuttle:1
+DoubledDigit:0
+F1/F2:0
+
+#+END_SRC
+
+Fortunately, the console connection exposes us with a root shell:
+
+#+BEGIN_SRC Javascript
+# ps w
+  PID  Uid     VmSize Stat Command
+    1 root        276 S   init      
+    2 root            SW< [ksoftirqd/0]
+    3 root            SW< [desched/0]
+    4 root            SW< [events/0]
+    5 root            SW< [khelper]
+   10 root            SW< [kthread]
+   21 root            SW< [kblockd/0]
+   44 root            SW  [khubd]
+  108 root            SW  [pdflush]
+  109 root            SW  [pdflush]
+  111 root            SW< [aio/0]
+  110 root            SW  [kswapd0]
+  219 root            SW  [kseriod]
+  259 root            SW  [mtdblockd]
+  280 root            SW< [vbi]
+  293 root            SW< [vbi]
+  315 root            SW< [iscsi_eh]
+  336 root        300 S   /bin/inetd 
+  337 root        392 S   -sh 
+  360 root            SWN [jffs2_gcd_mtd2]
+  377 root        260 S < udevd 
+  391 root      10092 S   ./hicore 
+  393 root      10092 S   ./hicore 
+  394 root      10092 S   ./hicore 
+  397 root      10092 S   ./hicore 
+  413 root        200 S   ./execSystemCmd 
+  415 root        576 S < ./iscsid 
+  426 root      10092 S   ./hicore 
+  427 root      10092 S   ./hicore 
+  428 root      10092 S   ./hicore 
+  429 root      10092 S   ./hicore 
+  430 root      10092 S   ./hicore 
+  431 root      10092 S   ./hicore 
+  432 root      10092 S   ./hicore 
+  433 root      10092 S   ./hicore 
+  434 root      10092 S   ./hicore 
+  435 root      10092 S   ./hicore 
+  436 root      10092 S   ./hicore 
+  437 root      10092 S   ./hicore 
+  438 root      10092 S   ./hicore 
+  439 root      10092 S   ./hicore 
+  440 root      10092 S   ./hicore 
+  441 root      10092 S   ./hicore 
+  442 root      10092 S   ./hicore 
+  443 root      10092 S   ./hicore 
+  444 root      10092 S   ./hicore 
+  445 root      10092 S   ./hicore 
+  446 root      10092 S   ./hicore 
+  447 root      10092 S   ./hicore 
+  448 root      10092 S   ./hicore 
+  449 root      10092 S   ./hicore 
+  450 root      10092 S   ./hicore 
+  451 root      10092 S   ./hicore 
+  452 root      10092 S   ./hicore 
+  453 root      10092 S   ./hicore 
+  454 root      10092 S   ./hicore 
+  455 root      10092 S   ./hicore 
+  456 root      10092 S   ./hicore 
+  457 root      10092 S   ./hicore 
+  458 root      10092 S   ./hicore 
+  460 root      10092 S   ./hicore 
+  461 root      10092 S   ./hicore 
+  462 root      10092 S   ./hicore 
+  463 root      10092 S   ./hicore 
+  464 root      10092 S   ./hicore 
+  465 root      10092 S   ./hicore 
+  466 root      10092 S   ./hicore 
+  468 root      10092 S   ./hicore 
+  469 root      10092 S   ./hicore 
+  470 root      10092 S   ./hicore 
+  471 root      10092 S   ./hicore 
+  472 root      10092 S   ./hicore 
+  473 root      10092 S   ./hicore 
+  474 root      10092 S   ./hicore 
+  475 root      10092 S   ./hicore 
+  476 root      10092 S   ./hicore 
+  477 root      10092 S   ./hicore 
+  478 root      10092 S   ./hicore 
+  479 root      10092 S   ./hicore 
+  480 root      10092 S   ./hicore 
+  482 root      10092 S   ./hicore 
+  483 root      10092 S   ./hicore 
+  484 root      10092 S   ./hicore 
+  485 root      10092 S   ./hicore 
+  486 root      10092 S   ./hicore 
+  489 root        304 R   ps w 
+# whoami
+-sh: whoami: not found
+# id -a
+id: illegal option -- a
+BusyBox v1.2.1 (2009.08.25-02:50+0000) multi-call binary
+
+Usage: id [OPTIONS]... [USERNAME]
+
+Print information for USERNAME or the current user
+
+Options:
+	-g	prints only the group ID
+	-u	prints only the user ID
+	-n	print a name instead of a number
+	-r	prints the real user ID instead of the effective ID
+
+# id -ur   
+0
+# dmesg   
+<4>Linux version 2.6.10_mvl401-davinci_evm (root@localhost.localdomain)
+<4>(gcc version 3.4.3 (MontaVista 3.4.3-25.0.104.0600975 2006-07-06))
+<4>#111 Fri Oct 29 05:41:05 CST 2010
+<4>CPU: ARM926EJ-Sid(wb) [41069265] revision 5 (ARMv5TEJ)
+<4>CPU0: D VIVT write-back cache
+<4>CPU0: I cache: 16384 bytes, associativity 4, 32 byte lines, 128 sets
+<4>CPU0: D cache: 8192 bytes, associativity 4, 32 byte lines, 64 sets
+<4>Machine: DaVinci-DM6467
+<4>boardtype is 0xc100
+<4>Memory policy: ECC disabled, Data cache writeback
+<7>On node 0 totalpages: 16384
+<7>  DMA zone: 16384 pages, LIFO batch:4
+<7>  Normal zone: 0 pages, LIFO batch:1
+<7>  HighMem zone: 0 pages, LIFO batch:1
+<4>Kernel command line: console=ttyS0,115200n8 initrd=2g,1 root=/dev/ram  ip=192.0.0.64:::255.255.255.0 eth=00:40:48:38:15:07 mem=64M
+<4>TI DaVinci EMAC: Kernel Boot params Eth address: 00:40:48:38:15:07
+<4>PID hash table entries: 512 (order: 9, 8192 bytes)
+<4>Console: colour dummy device 80x30
+<4>Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
+<4>Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
+<6>Memory: 64MB = 64MB total
+<5>Memory: 61328KB available (2585K code, 622K data, 116K init)
+<7>Calibrating delay loop... 181.86 BogoMIPS (lpj=909312)
+<4>Mount-cache hash table entries: 512 (order: 0, 4096 bytes)
+<6>CPU: Testing write buffer coherency: ok
+<4>spawn_desched_task(00000000)
+<4>desched cpu_callback 3/00000000
+<4>ksoftirqd started up.
+<4>desched cpu_callback 2/00000000
+<4>desched thread 0 started up.
+<6>NET: Registered protocol family 16
+<6>Registering platform device 'serial8250.0'. Parent at platform
+<6>Registering platform device 'nand_davinci.0'. Parent at platform
+<6>Registering platform device 'nor_davinci.0'. Parent at platform
+<6>DaVinci: 48 gpio irqs
+<6>Registering platform device 'i2c'. Parent at platform
+<5>SCSI subsystem initialized
+<6>usbcore: registered new driver usbfs
+<6>usbcore: registered new driver hub
+<6>musb_hdrc: version 2.2a/db-0.4.8 [pio] [host] [debug=0]
+<6>Registering platform device 'musb_hdrc'. Parent at platform
+<7>musb_hdrc: ConfigData=0x06 (UTMI-8, dyn FIFOs, SoftConn)
+<7>musb_hdrc: MHDRC RTL version 1.500 
+<7>musb_hdrc: setup fifo_mode 4
+<6>musb_hdrc: USB Host mode controller at c4800000 using PIO, IRQ 13
+<6>musb_hdrc musb_hdrc: new USB bus registered, assigned bus number 1
+<6>hub 1-0:1.0: USB hub found
+<6>hub 1-0:1.0: 1 port detected
+<4>CDCE906 driver registered.
+<4><duhao>----->pinmux_sw(0)
+<4>load boot params from flash[420a8000] ok.
+<4>Successfully initialized hikio module
+<6>Registering platform device 'dm_spi.0'. Parent at platform
+<6>JFFS2 version 2.2. (C) 2001-2003 Red Hat, Inc.
+<4>yaffs Oct 29 2010 05:42:52 Installing. 
+<6>Initializing Cryptographic API
+<4>eeprom driver init(0),magic=0x484b5753,vo_mode=0x00,tc_mode=0x00
+<4>register cmem driver successed.
+<0>rtc: [2020-09-20 16:18:26],week is 0
+<6>Serial: 8250/16550 driver $Revision: 1.90 $ 4 ports, IRQ sharing disabled
+<6>Registering platform device 'serial8250'. Parent at platform
+<4>ttyS0 at MMIO 0x1c20000 (irq = 40) is a ST16654
+<4>ttyS1 at MMIO 0x1c20400 (irq = 41) is a ST16654
+<4>ttyS2 at MMIO 0x1c20800 (irq = 42) is a ST16654
+<6>io scheduler noop registered
+<4>RAMDISK driver initialized: 1 RAM disks of 4096K size 1024 blocksize
+<6>loop: loaded (max 8 devices)
+<6>Registering platform device 'ti_davinci_emac'. Parent at platform
+<4>TI DaVinci EMAC: MAC address is 00:40:48:38:15:07
+<4>TI DaVinci EMAC Linux version updated 5.0
+<4>TI DaVinci EMAC: Installed 1 instances.
+<6>PPP generic driver version 2.4.2
+<6>PPP Deflate Compression module registered
+<6>PPP BSD Compression module registered
+<6>NET: Registered protocol family 24
+<6>SLIP: version 0.8.4-NET3.019-NEWTTY (dynamic channels, max=256).
+<6>i2c /dev entries driver
+<6>elevator: using noop as default io scheduler
+<5>DaVinci flash: probing 16-bit flash bus
+<6>DaVinci flash: Found 1 x16 devices at 0x0 in 16-bit bank
+<7>DaVinci flash: Found an alias at 0x1000000 for the chip at 0x0
+<4> Amd/Fujitsu Extended Query Table at 0x0040
+<4>DaVinci flash: CFI does not contain boot bank location. Assuming top.
+<5>number of CFI chips: 1
+<5>cfi_cmdset_0002: Disabling erase-suspend-program due to code brokenness.
+<5>Creating 3 MTD partitions on "DaVinci flash":
+<5>0x00000000-0x000a0000 : "bootloader"
+<5>0x000a0000-0x000c0000 : "params"
+<5>0x000c0000-0x01000000 : "filesystem"
+<6>Linux video capture interface: v1.00
+<6>tvp5158A driver registered.
+<6>tvp5158B driver registered.
+<6>usb 1-1: new high speed USB device using musb_hdrc and address 2
+<6>hub 1-1:1.0: USB hub found
+<6>hub 1-1:1.0: 4 ports detected
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,58
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<7>i2c: NACK detected,59
+<4>tvp5158 chipnum is.......................0
+<6>Registering platform device 'vpif capture.1'. Parent at platform
+<6>tvp5154A driver registered.
+<6>tvp5154B driver registered.
+<6>tvp5154C driver registered.
+<6>tvp5154D driver registered.
+<4>display: set ddr2 VBPR to 0x10
+<6>Registering platform device 'vpif display.1'. Parent at platform
+<4>mount filesystem ok.
+<4>load_yaffs2_file 768
+<4>load fpga filesize is 269846
+<4>load_yaffs2_file 787
+<4>load logo filesize is 829440
+<7>i2c: NACK detected,69
+<7>i2c: NACK detected,69
+<7>i2c: NACK detected,69
+<4>cdce906: hardware not present
+<4>set default video output to PAL
+<4>loading rootfs ... done.
+<4><duhao>----->pinmux_sw(2)
+<7>dm6467 pci config done.
+<4>pci: cpld disk count is 4
+<6>PCI: bus0: Fast back to back transfers disabled
+<4>SiI3114: register driver done.
+<6>Uniform Multi-Platform E-IDE driver Revision: 7.00alpha2
+<6>ide: Assuming 33MHz system bus speed for PIO modes; override with idebus=xx
+<6>SiI3114 Serial ATA: IDE controller at PCI slot 0000:00:00.0
+<4>PCI: enabling device 0000:00:00.0 (0140 -> 0143)
+<6>SiI3114 Serial ATA: chipset revision 2
+<6>SiI3114 Serial ATA: 100% native mode on irq 50
+<6>    ide0: MMIO-DMA , BIOS settings: hda:pio, hdb:pio
+<4>init ide0!!!!,No 0
+<6>    ide1: MMIO-DMA , BIOS settings: hdc:pio, hdd:pio
+<4>init ide1!!!!,No 1
+<6>    ide2: MMIO-DMA , BIOS settings: hde:pio, hdf:pio
+<4>init ide2!!!!,No 2
+<6>    ide3: MMIO-DMA , BIOS settings: hdg:pio, hdh:pio
+<4>init ide3!!!!,No 3
+<7>Probing IDE interface ide0...
+<7>Probing IDE interface ide1...
+<7>Probing IDE interface ide2...
+<7>Probing IDE interface ide3...
+<4>ide is not exist
+<6>Loading iSCSI transport class v2.0-869.
+<5>iscsi: registered transport (tcp)
+<6>Initializing USB Mass Storage driver...
+<6>usbcore: registered new driver usb-storage
+<6>USB Mass Storage support registered.
+<6>usbcore: registered new driver usbhid
+<6>drivers/usb/input/hid-core.c: v2.6:USB HID core driver
+<6>mice: PS/2 mouse device common for all mice
+<6>NET: Registered protocol family 2
+<6>IP: routing cache hash table of 512 buckets, 4Kbytes
+<6>TCP: Hash tables configured (established 4096 bind 8192)
+<6>NET: Registered protocol family 1
+<6>NET: Registered protocol family 17
+<4>------------->phy_alive_status=512
+<4>IP-Config: Complete:
+<4>      device=eth0, addr=192.0.0.64, mask=255.255.255.0, gw=255.255.255.255,
+<4>     host=192.0.0.64, domain=, nis-domain=(none),
+<4>     bootserver=255.255.255.255, rootserver=255.255.255.255, rootpath=
+<5>RAMDISK: Compressed image found at block 0
+<4>VFS: Mounted root (minix filesystem).
+<6>Freeing init memory: 116K
+<4><duhao>----->pinmux_sw(0)
+<4>----->[MAP]size=0x1000000,phy=0x83000000,virt=0x40065000
+<4>dsplinkk: no version for "struct_module" found: kernel tainted.
+<4>dsplinkk: module license 'DSP/BIOS(TM) LINK' taints kernel.
+<1>DSPLINK Module (1.50) created on Date: Jan 21 2009 Time: 11:20:30
+<0><KY09> :Compiled Time: Nov 30 2009 at 10:30:07
+<0><KY09> :---------------------------------Module init!------------------------------
+<0><KY09> :vendor=0x3086
+<0><KY09> : <switch to PCI bus!!>
+<0><KY09> :pci device [3086:0101] probed
+<4>PCI: enabling device 0000:00:02.0 (0140 -> 0142)
+<0><KY09> :set DSP in PCI master mode
+<0><KY09> :device (dsp0) resource -  [PCI physical base address, size, type]
+<0><KY09> :               sdram:      [ 0x90000000, 0x2000000, 0x1208 ]
+<0><KY09> :               DDR_CFG:	   [ 0x93000000, 0x400000, 0x1208 ]
+<0><KY09> :               Reg_CFG:	   [ 0x92000000, 0x1000000, 0x0200 ]
+<0><KY09> :ky2009_probe(): ky2009_nums = 1
+<0><KY09> :1 device (dsp) found totally
+<4>
+<0><KY09> :ky2009_install_dev(): device minor number 0.
+<0><KY09> :vSdramBase:		0xc7900000
+<0><KY09> :vDDR_CFG_base:		0xc9980000
+<0><KY09> :vReg_CFG_base:		0xc9e00000
+<0><KY09> :*****0)**************************dsp_handle->logBufAddr=0x81190000
+<0><KY09> :Setup ky2009 DSP(0)
+<0><KY09> :HOST_CMD0 val=0
+<0><KY09> :KY2009[0] init ok.
+<0><KY09> :read file size=518408
+<0><KY09> :start to download firmware...
+<0><KY09> :... ... verify download date OK !
+<0><KY09> :DSP[0]:download_dsp_program success!
+<4>
+<4><duhao>----->pinmux_sw(0)
+<7>watchdog start,clk is 182250000,time is 25(s),f92db90,1
+<4><duhao>----->pinmux_sw(2)
+<4>----->[FREE]size=0x1000000,phy=0x83000000,virt=0x40065000
+<4>----->[MAP]size=0x80000,phy=0x81300000,virt=0x47a54000
+<4>----->[MAP]size=0x20000,phy=0x81380000,virt=0x47ad4000
+<4>----->[MAP]size=0x80000,phy=0x81400000,virt=0x47c74000
+<4>----->[MAP]size=0x20000,phy=0x813a0000,virt=0x47cf4000
+<4>----->[MAP]size=0x80000,phy=0x81480000,virt=0x47e94000
+<4>----->[MAP]size=0x20000,phy=0x813c0000,virt=0x47f14000
+<4>----->[MAP]size=0x80000,phy=0x81500000,virt=0x480b4000
+<4>----->[MAP]size=0x20000,phy=0x813e0000,virt=0x48134000
+<4>----->[MAP]size=0x80000,phy=0x81580000,virt=0x482d4000
+<4>----->[MAP]size=0x20000,phy=0x81600000,virt=0x48354000
+<4>----->[MAP]size=0x80000,phy=0x81680000,virt=0x484f4000
+<4>----->[MAP]size=0x20000,phy=0x81640000,virt=0x48574000
+<4>----->[MAP]size=0x80000,phy=0x81700000,virt=0x48714000
+<4>----->[MAP]size=0x20000,phy=0x81660000,virt=0x48794000
+<4>----->[MAP]size=0x80000,phy=0x81780000,virt=0x48934000
+<4>----->[MAP]size=0x20000,phy=0x81800000,virt=0x489b4000
+<4>----->[MAP]size=0x80000,phy=0x81880000,virt=0x48b54000
+<4>----->[MAP]size=0x20000,phy=0x81820000,virt=0x48bd4000
+<4>----->[MAP]size=0x80000,phy=0x81900000,virt=0x48d74000
+<4>----->[MAP]size=0x20000,phy=0x81840000,virt=0x48df4000
+<4>----->[MAP]size=0x80000,phy=0x81980000,virt=0x48f94000
+<4>----->[MAP]size=0x20000,phy=0x81860000,virt=0x49014000
+<4>----->[MAP]size=0x80000,phy=0x81a00000,virt=0x491b4000
+<4>----->[MAP]size=0x20000,phy=0x81a80000,virt=0x49234000
+<4>----->[MAP]size=0x80000,phy=0x81b00000,virt=0x493d4000
+<4>----->[MAP]size=0x20000,phy=0x81aa0000,virt=0x49454000
+<4>----->[MAP]size=0x80000,phy=0x81b80000,virt=0x495f4000
+<4>----->[MAP]size=0x20000,phy=0x81ac0000,virt=0x49674000
+<4>----->[MAP]size=0x80000,phy=0x81c00000,virt=0x49814000
+<4>----->[MAP]size=0x20000,phy=0x81ae0000,virt=0x49894000
+<4>----->[MAP]size=0x80000,phy=0x81c80000,virt=0x49a34000
+<4>----->[MAP]size=0x20000,phy=0x81d00000,virt=0x49ab4000
+<4>devfreq is 729000000
+<4>adv7343 driver is already initialized..
+<4>vobuftype=1,voStd=2
+<4>vo phys buf=84000000
+<4>vo phys buf=84180000
+<4>vo phys buf=84300000
+<7><duhao>----->pinmux0 in PCI,cpld_reset(1) not valid.
+<0><KY09> :[ky2009_mmap-0]: vsize = 0x2000000, offs = 0x0 
+<0><KY09> :[ky2009_mmap-0]: vsize = 0x400000, offs = 0x0 
+<6>device eth0 entered promiscuous mode
+# 
+
+#+END_SRC
+
+The repair seems to be successful as the boot splashscreen appears on the connected VGA monitor and the NVR can be reached via telnet and FTP.
