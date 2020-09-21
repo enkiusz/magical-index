@@ -9,11 +9,11 @@
 ** Long term current capability (LTC)
 
 Procedure:
-- test the reed switch
-- turn on current
-- wait Time
-- turn off current
-- test the reed switch
+1. test the reed switch
+1. turn on current
+1. wait Time
+1. turn off current
+1. test the reed switch
 
 |------------+------+--------+-------------+----------+-------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Article no | Test | Before | Current [A] | Time [s] | After | Notes                                                                                                                                                                                                                                       |
@@ -28,10 +28,10 @@ Procedure:
 
 Procedure:
 1. test the reed switch
-2. turn on current
-3. wait Time or until circuit breaks (which is the expected result)
-4. turn off current
-5. test the reed switch
+1. turn on current
+1. wait Time or until circuit breaks (which is the expected result)
+1. turn off current
+1. test the reed switch
 
 |------------+------+--------+-------------+----------+-------+-------------------------------------------------------------------------------------|
 | Article no | Test | Before | Current [A] | Time [s] | After | Notes                                                                               |
