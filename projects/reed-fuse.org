@@ -4,21 +4,17 @@
 #+FILETAGS: noexport
 
 #+BEGIN_EXPORT html
-<base href="fronius-symo-6.0-3-M/"/>
+<base href="reed-fuse/"/>
 #+END_EXPORT
 
-- long term current capability (LTC)
-- flash current capability (FCC)
-- current breaking capability (CBC)
-
-Test article 1
+** Long term current capability (LTC)
 
 Procedure:
-1. test the reed switch
-2. turn on current
-3. wait Time
-4. turn off current
-5. test the reed switch
+- test the reed switch
+- turn on current
+- wait Time
+- turn off current
+- test the reed switch
 
 |------------+------+--------+-------------+----------+-------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Article no | Test | Before | Current [A] | Time [s] | After | Notes                                                                                                                                                                                                                                       |
@@ -28,4 +24,21 @@ Procedure:
 |          2 | LTC  | NOK    |             |          |       | DOA                                                                                                                                                                                                                                         |
 |          3 | FCC  | OK     |           5 |      600 | NOK   | heat generated, sleeve swelling observed after 1 min, case melts, smoke appears after 3 min, hole appears in case and sleeve after 4 min, constant smoke after 5 min. After test the reed is shorted (doesn't disconnect on magnetic field) |
 |------------+------+--------+-------------+----------+-------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+
+** Flash current capability (FCC)
+
+Procedure:
+1. test the reed switch
+2. turn on current
+3. wait Time or until circuit breaks (which is the expected result)
+4. turn off current
+5. test the reed switch
+
+|------------+------+--------+-------------+----------+-------+-------------------------------------------------------------------------------------|
+| Article no | Test | Before | Current [A] | Time [s] | After | Notes                                                                               |
+|------------+------+--------+-------------+----------+-------+-------------------------------------------------------------------------------------|
+|          4 | FCC  | OK     |          17 | < 10     | NOK   | The reed switch became NO after < 10 s, the magnetic sleeve no longer activates it. |
+|------------+------+--------+-------------+----------+-------+-------------------------------------------------------------------------------------|
+
+** Current breaking capability (CBC)
 
