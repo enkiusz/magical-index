@@ -1,0 +1,82 @@
+#+TITLE: IBOX FMT2BT Car FM transmitter
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="ibox-fmt2bt/"/>
+#+END_EXPORT
+
+* The device
+
+This is a "cup-shaped" car FM transmitter that supports:
+
+- bluetooth speakerphone
+- MP3 playback from microsd
+- MP3 playback from USB sticks
+
+It's OEM'd by IBOX ([[https://www.ibox.pl/akcesoria-samochodowe/2050-fmt2.html]]) and 
+available in many electronics stores in Poland.
+
+[[file:device.jpg][file:thumb-device.jpg]]
+
+* The internals
+
+The internals consist of only 1 PCB with all of the connectors and buttons. There is a vertically mounted 5 V power supply which has been unsoldered to make better view of the board.
+The board has "AD-BT-A23 V1.0" and "2016.11.21" silkscreened on it. The PCB photos with all of the important parts highlighted:
+
+[[file:pcb1.jpg][file:thumb-pcb1.jpg]]
+
+[[file:pcb2.jpg][file:thumb-pcb2.jpg]]
+
+[[file:pcb3.jpg][file:thumb-pcb3.jpg]]
+
+|-------------+---------+---------------------------------+--------------------+---------------------------------------------------------+----------------------------------|
+| Designation | Label   | Description                     | Type               | Datasheet                                               | Notes                            |
+|-------------+---------+---------------------------------+--------------------+---------------------------------------------------------+----------------------------------|
+|           1 | 5V/2.1A | External power output           | USB-A connector    |                                                         |                                  |
+|           2 |         | 7-segment 3.5 digit display     |                    |                                                         | Transmit frequency               |
+|           3 | PLAY    | USB stick for MP3 playback      | USB-A connector    |                                                         |                                  |
+|           4 |         | Micro-SD card slot              |                    |                                                         |                                  |
+|           5 | LED9    | Status LED                      |                    |                                                         |                                  |
+|           6 |         | FM trasnmitter                  | QN8027             | http://down.cosou.com/xintechsz.com/QN8027.pdf ([[file:QN8027.pdf][mirror]]) |                                  |
+|           7 |         | Bluetooth Antenna               |                    |                                                         | Can transmit RDS                 |
+|           8 | U1      | Main SoC                        | JL AC1749DEP587-01 |                                                         | LQFP-48, [[http://www.zh-jieli.com/][ZhuHai JieLi (珠海杰理)]] |
+|           9 |         | Power supply input (unsoldered) |                    |                                                         |                                  |
+|          10 | C22     | RF coupling capacitor           |                    |                                                         |                                  |
+|          11 |         | Microphone connector            |                    |                                                         |                                  |
+|-------------+---------+---------------------------------+--------------------+---------------------------------------------------------+----------------------------------|
+
+I was unable to find any information about the particular SoC when searching for the exact mark on it. This is likely because JieLi makes a number of chip "families"
+marketed towards different products and then makes a unique label on each chip based on the exact customer/product it's supposed to go. 
+
+By looking at their site I figured that for my device the closest one should be the [[http://www.zh-jieli.com/product/68-cn.html][Jerry Bluetooth series chip AC690N/AC692N]]. 
+
+I found some AC6921A chips on aliexpress http://aliexpress.com/i/4001141547298.html which had the same case and a pinout diagram in the auction:
+
+file:AC6921A-pinout.png
+
+As well as AC6901 chips [[http://aliexpress.com/i/10000054405573.html]] with similar pinout diagrams:
+
+file:AC6901A-pinout.png
+
+I tried to match both of these chips to what I was seeing on the board but unfortunately none of them match. The pinout that I was able to verify so far:
+
+file:AC1749-pinout.png
+
+
+Some other links discovered during research:
+
+https://github.com/christian-kramer/JieLi-AC690X-Familiarization
+
+This is information about the AC690X Bluetooth chip from the same company. This one is different (different package) but things like flashing protocol and so on can be
+similar.
+
+
+[[http://aliexpress.com/item/10000071259356.html][JL Bluetooth development board chip AC692N series 6925A/6926A/6925B dual mode 5.0 Audio BLE]]
+
+A development board for the 692X series chips. The development board description provides a convenient link to download an SDK and documentation for the development board: https://drive.google.com/drive/folders/1_rg1CTtwDWYpuCx29A9cRrXnMHIq35l0 ([[file:AC692X development board-20201101T105419Z-001.zip][mirror]])
+
+
+[[https://www.aliexpress.com/item/4000014316275.html][JL Development Board Support JL 690X Whole System Jieli Bluetooth Development Board]]
+
+A development board for the 690X chip, this one unfortunately doesn't come with a SDK download link.
