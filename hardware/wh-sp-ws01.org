@@ -1,0 +1,41 @@
+#+TITLE: WH-SP-WS01 Wind speed sensor (anemometer)
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="wh-sp-ws01/"/>
+#+END_EXPORT
+
+
+This is an anemometer for a very popular weather station sold on aliexpress (https://www.aliexpress.com/item/4001089508787.html)
+
+[[file:anemometer.jpg][file:thumb-anemometer.jpg]]
+
+The box is labeled that the anemometer is a wind speed sensor for WH2081 which is I assume the weather station model.
+
+[[file:box1.jpg][file:thumb-box1.jpg]]
+
+A different label on the back of the box:
+
+[[file:box2.jpg][file:thumb-box2.jpg]]
+
+It has an RJ-11 connector with a short cable:
+
+[[file:cable.jpg][file:thumb-cable.jpg]]
+
+
+The way in which pulses from the anemometer can be converted into wind speed has been documented in one of the aliexpress offers https://www.aliexpress.com/item/4000352147677.html
+
+Quote:
+
+Wind speed is passive switch quantity, wind speed sensor, turn 1 turns, 2 pulse =2HZ.
+Formula for wind speed: m/s=wind speed Hz * 0.34
+
+Rainfall is passive switch, rain bucket reverses once = 0.33mm
+
+Wind direction: resistance network, equivalent to stepping potentiometer, the user connected to a 10K pull-up resistance voltage, SCM AD can detect the voltage.
+The wind direction is marked with NSWE direction. 
+
+There is also a connection schematic on the same site:
+
+file:conn.png
