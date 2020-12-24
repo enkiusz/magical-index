@@ -14,3 +14,5 @@ label.
 The transmitter is based on a [[http://www.panchip.com/products_135/220.html][XN297LCU]] chip from Panchip connected to a [[https://pdf1.alldatasheet.com/datasheet-pdf/view/853177/SKYWORKS/RFX2401C.html][RFX2401C]] chip which looks to be an RF frontend.
 
 I did find some limited information about this chip on baidu ([[https://wenku.baidu.com/view/7de442460640be1e650e52ea551810a6f424c878.html]] and [[https://wenku.baidu.com/view/c40ec2d629ea81c758f5f61fb7360b4c2e3f2adc.html]])
+
+The Android application for drone connection is [[file:lunadrone/Luna_Drone_v1.5_apkpure.com.apk][mirrored here]]

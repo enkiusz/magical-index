@@ -21,6 +21,7 @@
   - [[file:hardware/toshiba-n554.org][Toshiba N554 mouse]]
   - [[file:hardware/toyota-corolla.org][Toyota Corolla]]
   - [[file:hardware/wrt-54g.org][WRT-54G]]
+  - [[file:hardware/wh-sp-ws01.org][Wind speed sensor (anemometer) for the WH2081 weather station]]
 - projects
   - [[file:projects/archive.org][Archive]]
   - [[file:projects/arduino-workshop.org][Arduino workshops]]
