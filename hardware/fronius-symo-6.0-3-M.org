@@ -15,6 +15,7 @@ Aside the obvious DC and AC inputs the inverter has a number of interfaces for m
 
 ** DATCOM
 
+The DATCOM bus is RS-485 based and documented in [[https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42,0410,0968.pdf][Fronius DATCOM Detail]].
 
 ** The Datamanager card
 
@@ -35,8 +36,13 @@ The card has an ordinary 100MBit RJ-45 socket.
 **** Fronius Solar JSON API
 
 The Datamanager card exposes a JSON API which is used by the inverter management page to which you can browse on port 80 of the Datamanager card's IP.
-The JSON API [[https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2012.pdf][documentation]] is freely available on the Fronius site under the document ID 42,0410,2012. Fortunately Fronius seems to be well-organized
-in that regard and all of the docs have identifiers which are easily found with a simple web search.
+There are two versions of the API which provide slightly different features:
+
+- V0 ([[https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2011.pdf][documentation]])
+- V1 ([[https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2012.pdf][documentation]])
+
+The different APIs are supported based on the software version on the inverter as described in [[https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2020.pdf][Fronius Solar API Compatibility]].
+Fortunately Fronius seems to be well-organized in that regard and all of the docs have identifiers which are easily found with a simple web search.
 
 Many people have been using the JSON API to integrate Fronius with OpenHab ([[https://community.openhab.org/t/reading-fronius-inverters-symo-15-0-3-m-with-modbus-binding/26351/21]]),
 and [[https://community.home-assistant.io/t/fronius-inverter-integration/19274/2][Home Assistant]].
@@ -64,16 +70,20 @@ I found some references to using MODBUS for Fronius inverter monitoring in the E
 
 * References
 
-|--------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
-| Fronius ref  | Description                                                               | Link                                                                                                                       | Notes |
-|--------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
-| 42,0410,2012 | Fronius Solar API V1                                                      | [[https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2012.pdf]]                           |       |
-| 42,0410,2049 | Fronius Datamanager Modbus TCP & RTU                                      | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2049.pdf                           |       |
-|              | SETTING UP THE LOCAL FTP SERVER                                           | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/SE_OI_Setting_up_the%20local_FTP_server_EN.pdf |       |
-| 42,0426,0169 | Fronius Datamanager                                                       | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0426%2C0169%2CEA.pdf                      |       |
-| 42,0410,2108 | Fronius Datamanager 2.0 Modbus RTU Quickstart Guide                       | https://fronius.com/~/downloads/Solar%20Energy/User%20Information/42,0410,2108.pdf                                         |       |
-|--------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
-|              | Numeric fault codes                                                       | https://review.solar/fronius-inverter-fault-codes/                                                                         |       |
-|--------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
-|              | Storage capacity sharing over virtual neighbourhoods of energy ecosystems | https://cordis.europa.eu/project/id/731285                                                                                 |       |
-|--------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
+|-----------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
+| Fronius ref     | Description                                                               | Link                                                                                                                       | Notes |
+|-----------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
+| 42,0410,2011    | Fronius Solar API V0                                                      | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2011.pdf                           |       |
+| 42,0410,2012    | Fronius Solar API V1                                                      | [[https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2012.pdf]]                           |       |
+| 42,0410,2049    | Fronius Datamanager Modbus TCP & RTU                                      | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2049.pdf                           |       |
+|                 | SETTING UP THE LOCAL FTP SERVER                                           | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/SE_OI_Setting_up_the%20local_FTP_server_EN.pdf |       |
+| 42,0426,0169    | Fronius Datamanager                                                       | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0426%2C0169%2CEA.pdf                      |       |
+| 42,0410,2108    | Fronius Datamanager 2.0 Modbus RTU Quickstart Guide                       | https://fronius.com/~/downloads/Solar%20Energy/User%20Information/42,0410,2108.pdf                                         |       |
+| 42,0426,0191,EA | Fronius Datamanager 2.0 / Fronius Datamanager Box 2.0                     | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42,0426,0191,EA.pdf                            |       |
+| 42,0410,2020    | Fronius Solar API Compatibility                                           | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42%2C0410%2C2020.pdf                           |       |
+| 42,0410,0968    | Fronius DATCOM Detail                                                     | https://www.fronius.com/~/downloads/Solar%20Energy/Operating%20Instructions/42,0410,0968.pdf                               |       |
+|-----------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
+|                 | Numeric fault codes                                                       | https://review.solar/fronius-inverter-fault-codes/                                                                         |       |
+|-----------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
+|                 | Storage capacity sharing over virtual neighbourhoods of energy ecosystems | https://cordis.europa.eu/project/id/731285                                                                                 |       |
+|-----------------+---------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------+-------|
