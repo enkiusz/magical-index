@@ -1,6 +1,4 @@
 #+TITLE: Rotor
-#+LANGUAGE: en
-#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
 #+FILETAGS: noexport
 
 * Detection of I2C memory using bus pirate

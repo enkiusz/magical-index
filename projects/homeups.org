@@ -1,7 +1,4 @@
 #+TITLE: Home UPS
-#+EMAIL: enki@fsck.pl
-#+LANGUAGE: en
-#+CREATOR: Emacs 26.3 (Org mode 9.1.13)
 
 #+BEGIN_EXPORT html
 <base href="homeups/"/>

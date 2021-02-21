@@ -1,6 +1,4 @@
 #+TITLE: Labeling scheme
-#+LANGUAGE: en
-#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
 #+FILETAGS: noexport
 
 * Intro

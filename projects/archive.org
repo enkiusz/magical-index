@@ -1,6 +1,4 @@
 #+TITLE: Archive
-#+LANGUAGE: en
-#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
 
 #+BEGIN_EXPORT html
 <base href="archive/"/>
