@@ -1,0 +1,60 @@
+#+TITLE: Communications equipment UPS
+#+FILETAGS: noexport
+
+#+BEGIN_EXPORT html
+<base href="comm-ups/"/>
+#+END_EXPORT
+
+* Overview
+
+I have decided to build a UPS that would power my home network equipment rack using lithium-ion 18650 cells.
+
+- image of rack
+  
+First let's lay out some basic design considerations
+- should fit the equipment rack in a 1U format
+- it should provide 12V DC, 5V DC as well as 230V for the switch
+
+The current list of devices that need to be powered by the UPS together with their nameplate voltage and power consumption information:
+
+|----------------+---------+---------------+-------------+----------------------------------------------------------|
+| Device         | Voltage | Current (max) | Power (max) | Notes                                                    |
+|----------------+---------+---------------+-------------+----------------------------------------------------------|
+| Router         | 19V     | 2 A           | 38 W        | A small form factor PC                                   |
+| 16-port switch | 230V AC | 0.1 A         | 22.5 W      | Rated at 22.5 W in the [[https://www.cnet.com/products/3com-baseline-plus-switch-2920-switch-16-ports-managed-desktop-series/][technical specs]]                   |
+| AP             | 230V AC | 0.02 A        | 6.5 W       | Rated at 6.5 W (see [[https://dl.ui.com/datasheets/unifi/UniFi_AC_APs_DS.pdf][datasheet]]), powered via PoE injector |
+| Raspberry Pi   | 5 V     | 2 A           | 10 W        |                                                          |
+| GPON modem     | 12 V    | 0.5 A         | 6 W         |                                                          |
+|----------------+---------+---------------+-------------+----------------------------------------------------------|
+
+As can be seen there is a large amount of different voltages required in order to power all of the devices, therefore some modifications and compromises will have to be made:
+
+- The UPS will provide stabilized 12 V and 5 V power rails
+- The 19V for the router will be provided by a dedicated step-up dc-dc converter based on the very popular MT3608 chip from aliexpress
+- The 230V AC will be temporarily provided by a small car 12V -> 230V inverter
+- The PoE injector is scheduled to be replaced by an PoE injector which can be powered from 12V
+- The router will be replaced in the future with a Mikrotik Routerboard or a PFsense appliance that both can run directly off 12 V
+- The switch power supply will be replaced with one that can be powered from 12V or directly from the battery pack
+
+The 1U case that I want to use for this is a case from a switch:
+
+... empty case photo ...
+
+I have removed everything from the switch case except the colling fan and the LED board. The LED board I intend to use to provide visual status information about the UPS
+(such as battery level and load). The fan will come in handy to get rid of heat.
+
+The case has 1U dimensions, to be exact xx . xx . xx mm.
+
+The case size puts a limit on the size and shape of two biggest internal components - the battery pack and the 230V AC power supply. I have devised the following placement
+for these main components.
+
+... layout with battery ...
+
+The battery pack layout will be 4s8p which means that there are 4 blocks connected in series with each block having 8 x 18650 cells. In order to package the cells I have
+reused battery holders from disassembled hoverboard batteries. This is not strictly required, the cells can be glued together just as well if you don't care about
+serviceability.
+
+The 4s battery pack layout means that the battery pack voltage will be 4 * 4.2 = 16.8 V when the battery is fully charged and 4 * 3 = 12 V when the battery is fully discharged.
+
+
+
