@@ -1,5 +1,4 @@
 #+TITLE: Communications equipment UPS
-#+FILETAGS: noexport
 
 #+BEGIN_EXPORT html
 <base href="comm-ups/"/>
@@ -55,6 +54,4 @@ reused battery holders from disassembled hoverboard batteries. This is not stric
 serviceability.
 
 The 4s battery pack layout means that the battery pack voltage will be 4 * 4.2 = 16.8 V when the battery is fully charged and 4 * 3 = 12 V when the battery is fully discharged.
-
-
 
