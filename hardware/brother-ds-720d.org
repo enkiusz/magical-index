@@ -9,15 +9,15 @@
 The Brother DS-720D is a color duplex roll scanner with Letter maximum paper width. It works with Linux using binary-only SANE backend files.
 I mirrored them here in case they become unavailable sometime in the future together with the scanner docs:
 
-[[file:cv_ds620_ase_qsg.pdf][Quick Start Guide]] [[file:cv_ds620_ase_usr.pdf][User Manual]]
+[[http://ipfs.io/ipfs/QmWFvtM9X99CJJvR52oj2kk3byXRKsuf9Vryx4nBPqzZZF?filename=cv_ds620_ase_qsg.pdf][Quick Start Guide]] [[http://ipfs.io/ipfs/QmWqs9k4FZbNi8xX8ic8EWP5B4MQPXwFAiasP94sv4Hna8?filename=cv_ds620_ase_usr.pdf][User Manual]]
 
-[[file:drivers/linux/libsane-dsseries_1.0.5-1_amd64.deb][libsane-dsseries_1.0.5-1_amd64.deb]]
+[[http://ipfs.io/ipfs/QmRqm6Aduy8Tez796tzKmrAjZNhemEhn1647F8iR8SmnhK?filename=libsane-dsseries_1.0.5-1_amd64.deb][libsane-dsseries_1.0.5-1_amd64.deb]]
 
-[[file:drivers/linux/libsane-dsseries_1.0.5-1_i386.deb][libsane-dsseries_1.0.5-1_i386.deb]]
+[[http://ipfs.io/ipfs/QmYAvoCyruxT5H6FqS6fv6XoGr5jiKKr7KvPibvU2mkJ2e?filename=libsane-dsseries_1.0.5-1_i386.deb][libsane-dsseries_1.0.5-1_i386.deb]]
 
-[[file:drivers/linux/libsane-dsseries-1.0.5-1.i586.rpm][libsane-dsseries-1.0.5-1.i586.rpm]]
+[[http://ipfs.io/ipfs/QmNS6PUm9mmGm7ciMUQZMcJem8CpwXmyPJk6WEK3mGbE2B?filename=libsane-dsseries-1.0.5-1.i586.rpm][libsane-dsseries-1.0.5-1.i586.rpm]]
 
-[[file:drivers/linux/libsane-dsseries-1.0.5-1.x86_64.rpm][libsane-dsseries-1.0.5-1.x86_64.rpm]]
+[[http://ipfs.io/ipfs/QmQkakZPax52BtBPxdL61VRGqGFzVvktQHSEoJRNs27yUK?filename=libsane-dsseries-1.0.5-1.x86_64.rpm][libsane-dsseries-1.0.5-1.x86_64.rpm]]
 
 History of this item:
 
