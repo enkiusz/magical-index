@@ -15,4 +15,9 @@ The transmitter is based on a [[http://www.panchip.com/products_135/220.html][XN
 
 I did find some limited information about this chip on baidu ([[https://wenku.baidu.com/view/7de442460640be1e650e52ea551810a6f424c878.html]] and [[https://wenku.baidu.com/view/c40ec2d629ea81c758f5f61fb7360b4c2e3f2adc.html]])
 
-The Android application for drone connection is [[file:lunadrone/Luna_Drone_v1.5_apkpure.com.apk][mirrored here]]
+The Android application versions available on apkpure.com for the drone are mirrored below:
+
+- [[https://ipfs.io/ipfs/QmYQg7RcWA265dnPmNu7ihUGwLqNrssokXq9bfDpotZgMw?filename=Luna_Drone_v1.5_apkpure.com.apk][Luna_Drone_v1.5_apkpure.com.apk]]
+- [[https://ipfs.io/ipfs/Qmebo7LNN41VLt88VVkqqRXtTnfYcWUyg72je3yTd39R6s?filename=Luna_Drone_v2.2_apkpure.com.apk][Luna_Drone_v2.2_apkpure.com.apk]]
+- [[https://ipfs.io/ipfs/QmSqYNj18bBEJMRZH9veV8xF1HM2XgsVBZtkMh4wuzrriH?filename=Luna_Drone_v3.0_apkpure.com.apk][Luna_Drone_v3.0_apkpure.com.apk]]
+- [[https://ipfs.io/ipfs/QmXz1nZJVkUJEyJ9CaFCesP5QTszw9xPtgvfFBDgtAWrMT?filename=Luna_Drone_v3.21_apkpure.com.apk][Luna_Drone_v3.21_apkpure.com.apk]]
