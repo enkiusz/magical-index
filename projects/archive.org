@@ -1,38 +1,38 @@
 #+TITLE: Archive
 
 #+BEGIN_EXPORT html
-<base href="archive/"/>
+<base href="https://ipfs.io/ipfs/"/>
 #+END_EXPORT
 
 This is a place where I store random tarballs with my very old code as well as other stuff found on the internet. It might come in handy some day for someone.
 
-- [[file:dbug.tar.bz2][Early attempt at log4c]]
-- [[file:fence-vbox.tar.xz][Red Hat Cluster Services fencing agent using the Virtualbox WSDL API]]
-- [[file:gentoo-install.tar.xz][My attempt at building an automated Gentoo installer]]
-- [[file:gentoo-redhat-cluster.tar.xz][Instruction and some configuration file for installing and setup of Red Hat Cluster Suite on Gentoo]]
-- [[file:gg2jisp-1.0.tar.gz][Convert Polish Gadu-Gadu ICQ clone iconsets to standard Jabber JISP icon packages]]
-- [[file:ida.tar.xz][Some random IDA scripts]]
-- [[file:lutownica-soft.tar.xz][Firmware for a MSP430-based temperature controlled soldering station]]
-- [[file:mail2xmpp-1.1.tar.xz][Simple email -> XMPP gateway]]
-- [[file:oes.tar.bz2][My own OS v0.00001]]
-- [[file:public_html.tar.xz][My *very* old website]]
-- [[file:xilinx-wrappers.tar.xz][Wrapper scripts for Xlinx FPGA toolchain to make them more similar to GCC workflow]]
-- [[file:update-worlds.tar.xz][Ansible before there was Ansible]]
-- [[file:tunl.tar.gz][SSH2 tunnel management helper scripts]]
-- [[file:total-statistics.tar.xz][System monitoring (battery level, CPU frequency, temperatures, etc.) & logging scripts. Now would use collectd for that]]
-- [[file:gather-acpi][Gather ACPI information and make a tarball out of it]]
-- [[file:swfparse.cpp][Random SWF parser code]]
-- [[file:qrenc2.html][QR Encoder in Javascript and HTML]]
-- [[file:at91sam7s64.tar.xz][Some SDK and example code for AT91SAM7S64]]
-- [[file:HTTP-1.0-response][WISP Access Gateway protocol example request]]
-- [[file:lurker-filters.tar.xz][Script used to filter out interesting packets out of LAN pcaps]]
-- [[file:dwmstatus.sh][DWM Window Manager status script]]
-- [[file:gentoo.txt][Gentoo Filesystem Layout respecting FHS standards]]
-- [[file:measurement.ods][Random USB charger current measurement results]]
-- [[file:pajonk-lutek.tar.bz2][Flying spider blimp drone hardware & firmware]]
-- [[file:clonevm.py][Tool used to clone VMX files on VMWARE ESXi via SSH connection (ansible)]]
-- [[file:provision-datastores.txt][VMware ESXi datastore provisioning via SSH using Ansible playbook]]
+- [[file:QmRfgSfXFWtvVPUeCaPs2G2kdW1QFKeZd4oBZLzT5Pe8t6?filename=dbug.tar.bz2][Early attempt at log4c]
+- [[file:Qmcv7qJxHhUmTdc9fdT5MmMt2CdVfqD7fdmxmenxRDrZZz?filename=fence-vbox.tar.xz][Red Hat Cluster Services fencing agent using the Virtualbox WSDL API]
+- [[file:QmTUgZQW6CzWdRJYChHamiszid1izuYatQNvXVEzaBFnUQ?filename=gentoo-install.tar.xz][My attempt at building an automated Gentoo installer]
+- [[file:QmaUtA5YcWpiEvfwGXRX1SM1ZEUnHoJTVdf8QB76yVGScR?filename=gentoo-redhat-cluster.tar.xz][Instruction and some configuration file for installing and setup of Red Hat Cluster Suite on Gentoo]
+- [[file:QmTXGQPnEB6xRnAKAdmkbrdbY1qbZ3sHDXrGgSY6KpsPHm?filename=gg2jisp-1.0.tar.gz][Convert Polish Gadu-Gadu ICQ clone iconsets to standard Jabber JISP icon packages]
+- [[file:QmU5d8Zs1K4PFzSfnxELKXbGbUgTRnrGYDzNcNVGNPaRQp?filename=ida.tar.xz][Some random IDA scripts]
+- [[file:QmPq286R3a9kKNQWuFGxKXNPkcQeKUvsoHxGPPgvQbe8wC?filename=lutownica-soft.tar.xz][Firmware for a MSP430-based temperature controlled soldering station]
+- [[file:QmaY3o1GUkdiPEksk35ZSpqmJQRRK5nNYaX3PV8SdEUYfB?filename=mail2xmpp-1.1.tar.xz][Simple email -> XMPP gateway]
+- [[file:QmfMiCscfDV4KEgzzztJNWJt7eskPbkHGnkaw2C64uhewh?filename=oes.tar.bz2][My own OS v0.00001]
+- [[file:QmPrfSLdfcNog7xsyCFUbM3JJDcf7C9QHYdL2vFHD7gn1S?filename=public_html.tar.xz][My *very* old website]
+- [[file:QmejJycSm2vi5133LvxpapHVHPiwX6YzGvE3peGW8afLKT?filename=xilinx-wrappers.tar.xz][Wrapper scripts for Xlinx FPGA toolchain to make them more similar to GCC workflow]
+- [[file:QmYaBs6uivPvcpKe6wsigeZS4hLqsd2Z2M5zcNrsAtNG8E?filename=update-worlds.tar.xz][Ansible before there was Ansible]
+- [[file:QmQunENZdvEEjt3W5miU7KQWYqJh4yc4W2EWe38gPS46Cw?filename=tunl.tar.gz][SSH2 tunnel management helper scripts]
+- [[file:Qmdf5pWUXyTfCvX7ojpFmDDuvQXHVdZqryQYgoMsn3oBkR?filename=total-statistics.tar.xz][System monitoring (battery level, CPU frequency, temperatures, etc.) & logging scripts. Now would use collectd for that]
+- [[file:QmWVpYKy78AYzVPKARrQDoMRsfqKahKDXkxS7F1gXtgPEr?filename=gather-acpi][Gather ACPI information and make a tarball out of it]
+- [[file:QmZyFTX5UuwJN4VGhzmEZaKMcc85tNoPoTqf1vZWW52KNY?filename=swfparse.cpp][Random SWF parser code]
+- [[file:QmfDNiYq6dNdgsfFW1NaRB5CRXUEmb1eYD4NDSr1KuCE6E?filename=qrenc2.html][QR Encoder in Javascript and HTML]
+- [[file:QmQTm7MCW2D9jzof1EW9Ej3HVXCXn36wMvEKDLB8vMBEjr?filename=at91sam7s64.tar.xz][Some SDK and example code for AT91SAM7S64]
+- [[file:Qmbs9ftLvpg6jgHFXZmo8URqwNqPR7KA4e3GTXdXrhPh7s?filename=HTTP-1.0-response][WISP Access Gateway protocol example request]
+- [[file:QmYQF2bGNatnMHwGjAi64hf9U7dfGbTDKEhUVVVAC59wSP?filename=lurker-filters.tar.xz][Script used to filter out interesting packets out of LAN pcaps]
+- [[file:QmZ2jws52Fa5w9YU3VTVue3XPZiwBnnGvhXXL9F8Pu8AqG?filename=dwmstatus.sh][DWM Window Manager status script]
+- [[file:Qmd2NhmoScDSoA3y8auVGVhNwzSaYmieCwbxpzp6kfy7Lx?filename=gentoo.txt][Gentoo Filesystem Layout respecting FHS standards]
+- [[file:QmUX7YLAapZLHqtrpAwMFsCyQ1efhaJQhcgjbT43SUQD2G?filename=measurement.ods][Random USB charger current measurement results]
+- [[file:QmQ7CLbgmcUKnSk1kwbGV3qhnkaxqnBkQ3rP1FL5D8RZfU?filename=pajonk-lutek.tar.bz2][Flying spider blimp drone hardware & firmware]
+- [[file:Qmbmue1cCiGEQgTLvTcoEdad6sVk5dpMPDtZ9UTkyB4tGn?filename=clonevm.py][Tool used to clone VMX files on VMWARE ESXi via SSH connection (ansible)]
+- [[file:QmPJz9y7wKkgh1kviNfZrnoJRZhurLxUp4C9AaVs3d5Gvg?filename=provision-datastores.txt][VMware ESXi datastore provisioning via SSH using Ansible playbook]
 
 Stuff other people wrote
 
-- [[file:ntlmdecoder.py][NTLM decoder for packets sent via HTTP headers]]
+- [[file:QmQskmtQcUZnRshTsRFMYdZTWXWa23ZaYakevCxU5vhRmG?filename=ntlmdecoder.py][NTLM decoder for packets sent via HTTP headers]
