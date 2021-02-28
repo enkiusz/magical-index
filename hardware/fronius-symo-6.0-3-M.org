@@ -64,6 +64,7 @@ for Push Service and find a [[https://www.fronius.com/~/downloads/Solar%20Energy
 
 The inverter also has a USB port used for firmware update. This process has been already documented by others for example on [[https://www.youtube.com/watch?v=y7abDHGdV5E][Youtube]].
 
+I have managed to download the currently available firmware files and they appear to be encrypted. They are mirrored [[https://ipfs.io/ipfs/QmdERpnDLY8aKZ1BBBKZJa27nV8FJoVqRtactJbgqRxFpU?filename=fronius-datamanager-fw-20210226.zip][here]].
 * Other
 
 I found some references to using MODBUS for Fronius inverter monitoring in the EU [[https://cordis.europa.eu/project/id/731285][SHAR-Q project paper]].
