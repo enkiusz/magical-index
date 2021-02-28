@@ -25,10 +25,10 @@
 - projects
   - [[file:projects/archive.org][Archive]]
   - [[file:projects/arduino-workshop.org][Arduino workshops]]
+  - [[file:projects/comm-ups.org][Communications equipment UPS]]
   - [[file:projects/fred-the-ripper.org][Fred the Ripper]]
   - [[file:projects/homeups.org][Home UPS]]
   - [[file:projects/labeling.org][Labeling scheme]]
-  - [[file:projects/comm-ups.org][Network equipment UPS]]
   - [[file:projects/paperworker.org][Paperworker]]
   - [[file:projects/personalclout.org][Personal Clout]]
   - [[file:projects/reed-fuse.org][Reed switches as cell fuses]]

@@ -49,9 +49,5 @@ for these main components.
 
 ... layout with battery ...
 
-The battery pack layout will be 4s8p which means that there are 4 blocks connected in series with each block having 8 x 18650 cells. In order to package the cells I have
-reused battery holders from disassembled hoverboard batteries. This is not strictly required, the cells can be glued together just as well if you don't care about
-serviceability.
-
-The 4s battery pack layout means that the battery pack voltage will be 4 * 4.2 = 16.8 V when the battery is fully charged and 4 * 3 = 12 V when the battery is fully discharged.
+power supply: https://www.aliexpress.com/item/33042313383.html
 
