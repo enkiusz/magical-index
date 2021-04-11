@@ -1,7 +1,7 @@
-#+TITLE: Communications equipment UPS
+#+TITLE: Second Life UPS
 
 #+BEGIN_EXPORT html
-<base href="comm-ups/"/>
+<base href="secondlife-ups/"/>
 #+END_EXPORT
 
 * Overview
@@ -14,26 +14,29 @@ First let's lay out some basic design considerations
 - should fit the equipment rack in a 1U format
 - it should provide 12V DC, 5V DC as well as 230V for the switch
 
-The current list of devices that need to be powered by the UPS together with their nameplate voltage and power consumption information:
+The current list of devices that need to be powered by the UPS together with their nameplate voltage and current consumption information:
 
-|----------------+---------+---------------+-------------+----------------------------------------------------------|
-| Device         | Voltage | Current (max) | Power (max) | Notes                                                    |
-|----------------+---------+---------------+-------------+----------------------------------------------------------|
-| Router         | 19V     | 2 A           | 38 W        | A small form factor PC                                   |
-| 16-port switch | 230V AC | 0.1 A         | 22.5 W      | Rated at 22.5 W in the [[https://www.cnet.com/products/3com-baseline-plus-switch-2920-switch-16-ports-managed-desktop-series/][technical specs]]                   |
-| AP             | 230V AC | 0.02 A        | 6.5 W       | Rated at 6.5 W (see [[https://dl.ui.com/datasheets/unifi/UniFi_AC_APs_DS.pdf][datasheet]]), powered via PoE injector |
-| Raspberry Pi   | 5 V     | 2 A           | 10 W        |                                                          |
-| GPON modem     | 12 V    | 0.5 A         | 6 W         |                                                          |
-|----------------+---------+---------------+-------------+----------------------------------------------------------|
+|----------------+-------------+-------------------+-----------------+---------------------------------------------------------------------|
+| Device         | Voltage [V] | Current (max) [A] | Power (max) [W] | Notes                                                               |
+|----------------+-------------+-------------------+-----------------+---------------------------------------------------------------------|
+| Router         |          19 |                 2 |              38 | A small form factor PC                                              |
+| 16-port switch |     230V AC |               0.1 |            22.5 | Rated at 22.5 W in the [[https://www.cnet.com/products/3com-baseline-plus-switch-2920-switch-16-ports-managed-desktop-series/][technical specs]]                              |
+| AP             |          24 |              0.25 |             6.5 | Rated at 6.5 W (see [[https://dl.ui.com/datasheets/unifi/UniFi_AC_APs_DS.pdf][datasheet]]), passive 24V PoE Mode B (230V/0.02A) |
+| Raspberry Pi   |           5 |               2.1 |              10 |                                                                     |
+| GPON modem     |          12 |               0.5 |               6 |                                                                     |
+|----------------+-------------+-------------------+-----------------+---------------------------------------------------------------------|
+| Total          |             |                   |             83. |                                                                     |
+|----------------+-------------+-------------------+-----------------+---------------------------------------------------------------------|
+#+TBLFM: @>$4=vsum(@2..@-1)
 
 As can be seen there is a large amount of different voltages required in order to power all of the devices, therefore some modifications and compromises will have to be made:
 
 - The UPS will provide stabilized 12 V and 5 V power rails
-- The 19V for the router will be provided by a dedicated step-up dc-dc converter based on the very popular MT3608 chip from aliexpress
+- The 19V for the router will be provided by a dedicated step-up dc-dc converter based on the very popular XL6009 chip from aliexpress
 - The 230V AC will be temporarily provided by a small car 12V -> 230V inverter
-- The PoE injector is scheduled to be replaced by an PoE injector which can be powered from 12V
-- The router will be replaced in the future with a Mikrotik Routerboard or a PFsense appliance that both can run directly off 12 V
-- The switch power supply will be replaced with one that can be powered from 12V or directly from the battery pack
+- The PoE injector is scheduled to be replaced by an PoE injector which can be powered from DC
+- The router will be replaced in the future with a Mikrotik Routerboard or a PFsense appliance from https://teklager.se/en/pfsense-hardware/ that both can be powered from DC
+- The switch will be modded to have a DC power supply
 
 The 1U case that I want to use for this is a case from a switch:
 
