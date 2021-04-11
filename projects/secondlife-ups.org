@@ -4,12 +4,12 @@
 <base href="secondlife-ups/"/>
 #+END_EXPORT
 
-* Overview
+* Design overview
 
 I have decided to build a UPS that would power my home network equipment rack using lithium-ion 18650 cells.
 
-- image of rack
-  
+[[file:rack.jpg][file:thumb-rack.jpg]]
+
 First let's lay out some basic design considerations
 - should fit the equipment rack in a 1U format
 - it should provide 12V DC, 5V DC as well as 230V for the switch
@@ -27,7 +27,7 @@ The current list of devices that need to be powered by the UPS together with the
 |----------------+-------------+-------------------+-----------------+---------------------------------------------------------------------|
 | Total          |             |                   |             83. |                                                                     |
 |----------------+-------------+-------------------+-----------------+---------------------------------------------------------------------|
-#+TBLFM: @>$4=vsum(@2..@-1)
+#+TBLFM: @>$4=vsum(@II..@III)
 
 As can be seen there is a large amount of different voltages required in order to power all of the devices, therefore some modifications and compromises will have to be made:
 
@@ -38,19 +38,127 @@ As can be seen there is a large amount of different voltages required in order t
 - The router will be replaced in the future with a Mikrotik Routerboard or a PFsense appliance from https://teklager.se/en/pfsense-hardware/ that both can be powered from DC
 - The switch will be modded to have a DC power supply
 
-The 1U case that I want to use for this is a case from a switch:
+* Component layout
 
-... empty case photo ...
+The 1U case that I used for this project is a case from a ipTime ZC-SW2405 switch:
 
-I have removed everything from the switch case except the colling fan and the LED board. The LED board I intend to use to provide visual status information about the UPS
-(such as battery level and load). The fan will come in handy to get rid of heat.
+[[file:switch-case.jpg][file:thumb-switch-case.jpg]]
 
-The case has 1U dimensions, to be exact xx . xx . xx mm.
+I have removed everything from the switch case including the power supply as it was only providing 3.3V and did not have enough power. The case has 1U dimensions, to be exact 16 cm x 44 cm x 4.4 cm.
+I have also drilled out all of the studs holding the original PCBs to the case in order to fit the battery and AC PSU. This has proven to be a hindrance however as I had to remake some of them later to 
+mount my custom boards.
 
-The case size puts a limit on the size and shape of two biggest internal components - the battery pack and the 230V AC power supply. I have devised the following placement
-for these main components.
+The case size puts a limit on the size and shape of two biggest internal components - the battery pack and the 230V AC power supply. I have devised the following placement for these components.
 
-... layout with battery ...
+[[file:basic-layout.jpg][file:thumb-basic-layout.jpg]]
 
-power supply: https://www.aliexpress.com/item/33042313383.html
+From the basic layout the following elements are COTS components:
+
+|-------+-----------------------------+-------------------+----------------------+----------------------------------------------------|
+| Brand | Model                       | Parameters        | Notes                | Link                                               |
+|-------+-----------------------------+-------------------+----------------------+----------------------------------------------------|
+| KAYPW | Switching Power Supply      | 24V 5A 120W max   |                      | [[https://www.aliexpress.com/item/33042313383.html]]   |
+|       | 40A 16.8V Balance REV 2.3   | 4S 40A            |                      | [[https://www.aliexpress.com/item/4000026248298.html]] |
+|       | XL4015-B CC/CV module       | 5A CC/CV, 75W max | Li-Ion charger       | [[https://www.aliexpress.com/item/4000383898441.html]] |
+|       | XL4015 buck dc-dc converter | 5A max            | Provides 12 V output | [[https://www.aliexpress.com/item/4000796650052.html]] |
+|       | LM2596 buck dc-dc converter | 3A max            | Provides 5 V output  | [[https://www.aliexpress.com/item/4000064597454.html]] |
+|-------+-----------------------------+-------------------+----------------------+----------------------------------------------------|
+
+* The battery
+
+The battery for the UPS was built using 18650 Li-Ion cells recovered from hoverboard battery packs. These are cheap no-name cells with not a lot of capacity left in them (around 800 mAh) each but I figured
+that a UPS would be the perfect idea to utilise them. They will operate under low current load per cell so their internal resistance shouldn't be a problem. The UPS will be mostly sitting idle and charged 
+so the cells won't get further capacity fade from cycling. The cells have been screened for self-discharge and excessive heat generation during operation. As the space in the case is pretty tight heat might
+be a problem therefore two thermal fuses tripping at 75 °C have been fitted in the battery as a safety feature. The battery will be protected with a 20A car fuse and paired with a 4S 40A BMS. 
+
+As a further step to increase the lifetime of the cells the top charging voltage will be limited to 4V per cell. This provides a battery with around 80% capacity while significantly increasing the 
+number of cycles (see [[https://batteryuniversity.com/learn/article/how_to_prolong_lithium_based_batteries]]).
+
+The cells themselves were mounted in plastic cages recovered from the disassembled hoverboard battery packs. This type of cages are not the only ones that can be used, you could also use very popular DIY
+holders with brackets that can be assembled together in many shapes: [[https://www.aliexpress.com/item/32871111193.html]]. The cells were welded together with a spot welder using a 0.1 mm nickel strip, first
+the rows of the cells:
+
+[[file:battery-pack1.jpg][file:thumb-battery-pack1.jpg]]
+
+Next, the cells are arranged with poles alternating between positive and negative. This makes it easy to weld horizontal strips forming series connections between cells on both sides. This can be seen
+on the two pictures below:
+
+[[file:battery-pack2.jpg][file:thumb-battery-pack2.jpg]]
+
+[[file:battery-pack3.jpg][file:thumb-battery-pack3.jpg]]
+
+Next, the battery has the main leads soldered to the ends and balancing wires to each cell.
+
+[[file:battery-pack4.jpg][file:thumb-battery-pack4.jpg]]
+
+[[file:battery-pack5.jpg][file:thumb-battery-pack5.jpg]]
+
+After applying insulating tape on both ends and also between the cells the battery connections are complete:
+
+[[file:battery-pack6.jpg][file:thumb-battery-pack6.jpg]]
+
+Now two thermal fuses are attached with heat-conducting glue in order to trip a protection circuit if excessive heat is generated during charging or discharging of the battery.
+
+[[file:battery-pack7.jpg][file:thumb-battery-pack7.jpg]]
+
+
+* The output board
+
+The output connectors board provides for the attachment points for all of the devices being powered by the UPS. Due to a "standard" developed in the [[https://hackerspace.pl][Warsaw Hackerspace]] of using Tamiya connectors as universal
+DC power plugs I have opted to get 4 of those on the front as well as 4 screw terminals. These were divided in half between the 12V and 5V outputs. In hindsight I should have divided them in a different ratio
+more towards having 12V outputs than 5V outputs as they are much more useful. I may rework this in the future.
+
+The actual building process of the output connectors board was a multi-step process as I wanted to make sure that my connectors would perfectly fit the existing cutouts in the front panel of the switch. 
+First, the baseboard was fitted and screwed in in front of the cutouts. A piece of double sided tape was glued to hold the connectors when they are positioned in place:
+
+[[file:output-board1.jpg][file:thumb-output-board1.jpg]]
+
+Then the 4 Tamiya connector housings were glued in place held together with their corresponding plug housings in order to provide proper clearance for the entire pack. The screw terminals were mounted 
+in a similar fashion:
+
+[[file:output-board2.jpg][file:thumb-output-board2.jpg]]
+
+The screw terminals were additionally fixed with epoxy glue as the surface holding onto the doublesided tape was too small to ensure a good grip. After the connectors were mounted they were soldered
+to 12V (yellow wires) and 5V (red wires) power rails and a common ground rail.
+
+[[file:output-board3.jpg][file:thumb-output-board3.jpg]]
+
+On the right you can see the fuse sockets, one is for the 12V rail, the second one is for the 5V rail and the third one is used for the auxillary rail connected directly to the battery without any 
+DC-DC converters in between. This will not be available on the front but have a screw terminal inside where extra devices can be connected. The power rails and ground rail were reinforced with copper
+"busbars" from below:
+
+[[file:output-board4.jpg][file:thumb-output-board4.jpg]]
+
+The DC-DC converters supplying the 12V and 5V rails are mounted on the side of the connector boards one on top of the other secured with distance posts and an isolating pad at the bottom. These have 
+outputs on the right which will be connected with short wires to the connector board, you can also see the blue screw terminal on the connector board used to plug in into the auxillary battery connection.
+
+[[file:output-board5.jpg][file:thumb-output-board5.jpg]]
+
+* The controller board
+
+Even though the entire controller board has been manually wired on a breadboard I made a schematics of the connections in [[https://www.kicad.org/][KiCad]] instead of paragraphs of text describing how everything is 
+connected together:
+
+file:control-circuit.svg
+
+The controller board circuit was assembled on a breadboard with the time-proven technique of jumper wire:
+
+[[file:controller-board1.jpg][file:thumb-controller-board1.jpg]]
+
+You can also see a heatsink attached to the BMS and a long screw terminal used as a point to connect all of the ground wires. Two LEDs are plugged in and wired to the front panel to provide basic
+status information. The thermal fuses are not yet connected and their terminals are shorted with jumpers for testing purposes. The fan cooling the AC PSU is wired directly to +24V provided by the
+AC power supply. The voltage here is much more than the fan is rated for (12V) but I left it as this for simplicity. The fan is pretty loud so it should be obvious when it breaks down ;).
+
+The battery cutoff switch seen on the schematic acts as if a thermal fuse has been tripped cutting of power to both the charging relay and the power selection relay disconnecting the battery from
+both the charger and the loads.
+
+* Final device
+
+The final result before the case is screwed on:
+
+[[file:final-assembly1.jpg][file:thumb-final-assembly1.jpg]]
+
+The front panel contains two status LEDs as well as the battery cutoff switch. 
+
+[[file:final-assembly2.jpg][file:thumb-final-assembly2.jpg]]
 
