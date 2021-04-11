@@ -9,7 +9,7 @@
         ("magical-index-pages"
          :base-directory "."
          :base-extension "org"
-         :publishing-directory "~/.cache/org-publish/magical-index"
+         :publishing-directory "_site/"
          :recursive t
          :publishing-function org-html-publish-to-html
          :auto-sitemap t
@@ -24,7 +24,7 @@
         ("magical-index-static"
          :base-directory "."
          :base-extension "css\\|js\\|svg\\|pdf\\|bin\\|rpm\\|deb\\|png\\|webp\\|jpg\\|jpeg\\|gif\\|apk\\|tar.xz\\|tar.bz2\\|tar.gz\\|zip\\|txt\\|py\\|sh\\|config"
-         :publishing-directory "~/.cache/org-publish/magical-index"
+         :publishing-directory "_site/"
          :recursive t
          :with-author t
          :with-date nil
@@ -36,7 +36,7 @@
         ("magical-index-archive"
          :base-directory "."
          :base-extension 'any
-         :publishing-directory "~/.cache/org-publish/magical-index/projects/archive"
+         :publishing-directory "_site/projects/archive"
          :recursive t
          :with-author t
          :with-date nil
