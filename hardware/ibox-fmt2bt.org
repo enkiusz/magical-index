@@ -74,7 +74,7 @@ similar.
 
 [[http://aliexpress.com/item/10000071259356.html][JL Bluetooth development board chip AC692N series 6925A/6926A/6925B dual mode 5.0 Audio BLE]]
 
-A development board for the 692X series chips. The development board description provides a convenient link to download an SDK and documentation for the development board: https://drive.google.com/drive/folders/1_rg1CTtwDWYpuCx29A9cRrXnMHIq35l0 ([[file:AC692X development board-20201101T105419Z-001.zip][mirror]])
+A development board for the 692X series chips. The development board description provides a convenient link to download an SDK and documentation for the development board: https://drive.google.com/drive/folders/1_rg1CTtwDWYpuCx29A9cRrXnMHIq35l0 ([[file:https://ipfs.io/ipfs/QmeV18rcNYqeJ9eyuvdLADi4JCz3ozChwuuHp4L42fKouXfilename=AC692X%20development%20board-20201101T105419Z-001.zip][mirror]])
 
 
 [[https://www.aliexpress.com/item/4000014316275.html][JL Development Board Support JL 690X Whole System Jieli Bluetooth Development Board]]
