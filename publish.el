@@ -9,6 +9,7 @@
         ("magical-index-pages"
          :base-directory "."
          :base-extension "org"
+         :exclude "_site/"
          :publishing-directory "_site/"
          :recursive t
          :publishing-function org-html-publish-to-html
@@ -24,6 +25,7 @@
         ("magical-index-static"
          :base-directory "."
          :base-extension "css\\|js\\|svg\\|pdf\\|bin\\|rpm\\|deb\\|png\\|webp\\|jpg\\|jpeg\\|gif\\|apk\\|tar.xz\\|tar.bz2\\|tar.gz\\|zip\\|txt\\|py\\|sh\\|config"
+         :exclude "_site/"
          :publishing-directory "_site/"
          :recursive t
          :with-author t
@@ -36,6 +38,7 @@
         ("magical-index-archive"
          :base-directory "."
          :base-extension 'any
+         :exclude "_site/"
          :publishing-directory "_site/projects/archive"
          :recursive t
          :with-author t
