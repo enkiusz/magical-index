@@ -24,7 +24,7 @@
 
         ("magical-index-static"
          :base-directory "."
-         :base-extension "css\\|js\\|svg\\|pdf\\|bin\\|rpm\\|deb\\|png\\|webp\\|jpg\\|jpeg\\|gif\\|apk\\|tar.xz\\|tar.bz2\\|tar.gz\\|zip\\|txt\\|py\\|sh\\|config"
+         :base-extension "css\\|js\\|svg\\|pdf\\|bin\\|rpm\\|deb\\|png\\|webp\\|jpg\\|jpeg\\|gif\\|apk\\|tar.xz\\|tar.bz2\\|tar.gz\\|zip\\|txt\\|py\\|sh\\|config\\|kicad.*"
          :exclude "_site/"
          :publishing-directory "_site/"
          :recursive t
