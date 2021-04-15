@@ -141,7 +141,7 @@ connected together:
 
 file:control-circuit.svg
 
-The controller board circuit was assembled on a breadboard with the time-proven technique of jumper wire:
+If your browser can't render SVGs o_O, you can download the [[control-circuit.pdf][PDF version]] or the [[hw.zip][Kicad project]] itself. The controller board circuit was assembled on a breadboard with the time-proven technique of jumper wire:
 
 [[file:controller-board1.jpg][file:thumb-controller-board1.jpg]]
 
