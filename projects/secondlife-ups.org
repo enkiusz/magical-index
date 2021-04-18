@@ -105,8 +105,8 @@ Now two thermal fuses are attached with heat-conducting glue in order to trip a 
 * The output board
 
 The output connectors board provides for the attachment points for all of the devices being powered by the UPS. Due to a "standard" developed in the [[https://hackerspace.pl][Warsaw Hackerspace]] of using Tamiya connectors as universal
-DC power plugs I have opted to get 4 of those on the front as well as 4 screw terminals. These were divided in half between the 12V and 5V outputs. In hindsight I should have divided them in a different ratio
-more towards having 12V outputs than 5V outputs as they are much more useful. I may rework this in the future.
+DC power plugs I have opted to get 4 of those on the front as well as 4 screw terminals. These were divided in between the 12V and 5V outputs. As the 12V output is much more versatile there are
+6 x 12V and 2 x 5V outputs.
 
 The actual building process of the output connectors board was a multi-step process as I wanted to make sure that my connectors would perfectly fit the existing cutouts in the front panel of the switch. 
 First, the baseboard was fitted and screwed in in front of the cutouts. A piece of double sided tape was glued to hold the connectors when they are positioned in place:
@@ -141,13 +141,15 @@ connected together:
 
 file:control-circuit.svg
 
-If your browser can't render SVGs o_O, you can download the [[control-circuit.pdf][PDF version]] or the [[hw.zip][Kicad project]] itself. The controller board circuit was assembled on a breadboard with the time-proven technique of jumper wire:
+If your browser can't render SVGs o_O, you can download the [[file:control-circuit.pdf][PDF version]] or the [[file:hw.zip][Kicad project]] itself. The controller board circuit was assembled on a breadboard with the time-proven technique of jumper wire:
 
 [[file:controller-board1.jpg][file:thumb-controller-board1.jpg]]
 
 You can also see a heatsink attached to the BMS and a long screw terminal used as a point to connect all of the ground wires. Two LEDs are plugged in and wired to the front panel to provide basic
-status information. The thermal fuses are not yet connected and their terminals are shorted with jumpers for testing purposes. The fan cooling the AC PSU is wired directly to +24V provided by the
-AC power supply. The voltage here is much more than the fan is rated for (12V) but I left it as this for simplicity. The fan is pretty loud so it should be obvious when it breaks down ;).
+status information. The thermal fuses are not yet connected and their terminals are shorted with jumpers for testing purposes. The fan cooling the AC PSU is powered via a 7812 regulator wrapped in
+insulating tape as it was added as an afterthought and I didn't want to disassemble everything:
+
+[[file:fan-power.jpg][file:thumb-fan-power.jpg]]
 
 The battery cutoff switch seen on the schematic acts as if a thermal fuse has been tripped cutting of power to both the charging relay and the power selection relay disconnecting the battery from
 both the charger and the loads.
@@ -161,4 +163,8 @@ The final result before the case is screwed on:
 The front panel contains two status LEDs as well as the battery cutoff switch. 
 
 [[file:final-assembly2.jpg][file:thumb-final-assembly2.jpg]]
+
+The AC 230V cable has been attached using an electrical pipe fitting usually found in distribution boxes. It's very practical as it's pretty sturdy and provides a good amount of strain relief for the cable:
+
+[[file:ac-cable1.jpg][file:thumb-ac-cable1.jpg]]
 
