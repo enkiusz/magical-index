@@ -54,15 +54,14 @@ The case size puts a limit on the size and shape of two biggest internal compone
 
 From the basic layout the following elements are COTS components:
 
-|-------+-----------------------------+-------------------+----------------------+----------------------------------------------------|
-| Brand | Model                       | Parameters        | Notes                | Link                                               |
-|-------+-----------------------------+-------------------+----------------------+----------------------------------------------------|
-| KAYPW | Switching Power Supply      | 24V 5A 120W max   |                      | [[https://www.aliexpress.com/item/33042313383.html]]   |
-|       | 40A 16.8V Balance REV 2.3   | 4S 40A            |                      | [[https://www.aliexpress.com/item/4000026248298.html]] |
-|       | XL4015-B CC/CV module       | 5A CC/CV, 75W max | Li-Ion charger       | [[https://www.aliexpress.com/item/4000383898441.html]] |
-|       | XL4015 buck dc-dc converter | 5A max            | Provides 12 V output | [[https://www.aliexpress.com/item/4000796650052.html]] |
-|       | LM2596 buck dc-dc converter | 3A max            | Provides 5 V output  | [[https://www.aliexpress.com/item/4000064597454.html]] |
-|-------+-----------------------------+-------------------+----------------------+----------------------------------------------------|
+|-------+-----------------------------+-------------------+-------------------------------+----------------------------------------------------|
+| Brand | Model                       | Parameters        | Notes                         | Link                                               |
+|-------+-----------------------------+-------------------+-------------------------------+----------------------------------------------------|
+| KAYPW | Switching Power Supply      | 24V 5A 120W max   |                               | [[https://www.aliexpress.com/item/33042313383.html]]   |
+|       | 40A 16.8V Balance REV 2.3   | 4S 40A            |                               | [[https://www.aliexpress.com/item/4000026248298.html]] |
+|       | XL4015-B CC/CV module       | 5A CC/CV, 75W max | Li-Ion charger                | [[https://www.aliexpress.com/item/4000383898441.html]] |
+|       | XL4015 buck dc-dc converter | 5A max            | Provides 5 V and  12 V outputs | [[https://www.aliexpress.com/item/4000796650052.html]] |
+|-------+-----------------------------+-------------------+-------------------------------+----------------------------------------------------|
 
 * The battery
 
@@ -131,8 +130,23 @@ DC-DC converters in between. This will not be available on the front but have a 
 
 The DC-DC converters supplying the 12V and 5V rails are mounted on the side of the connector boards one on top of the other secured with distance posts and an isolating pad at the bottom. These have 
 outputs on the right which will be connected with short wires to the connector board, you can also see the blue screw terminal on the connector board used to plug in into the auxillary battery connection.
+In the initial revision of the hardware, the 5V was supplied by an LM2596 module and 12V was sources from an XL4015. This can be seen on the picture below:
 
 [[file:output-board5.jpg][file:thumb-output-board5.jpg]]
+
+I have found out however, that the LM1596 isn't capable enough to reliably power all of the 5V loads (a Raspberry Pi + a fan in the rack in my case). Therefore I decided to replace the LM2596 with another 
+XL4015 board adjusted to provide 5.1V just in case to account for voltage drops on shitty wires. During the mounting of both boards I had to provide some distancing between the top and the bottom one
+as the bottom inductor was touching some solder joints on the top board. I used here small M3 screws with plastic insulating distance rings which were originally holding MOSFETs to a heatsink in a power
+supply. I knew they would come in handy some day ;)
+
+[[file:distance-screw1.jpg][file:thumb-distance-screw1.jpg]]
+
+The plastic distance rings fit perfectly into the M3 holes of the module and provide an ideal amount of distancing:
+
+[[file:distance-screw2.jpg][file:thumb-distance-screw2.jpg]]
+
+[[file:distance-screw3.jpg][file:thumb-distance-screw3.jpg]]
+
 
 * The controller board
 
@@ -154,6 +168,12 @@ insulating tape as it was added as an afterthought and I didn't want to disassem
 The battery cutoff switch seen on the schematic acts as if a thermal fuse has been tripped cutting of power to both the charging relay and the power selection relay disconnecting the battery from
 both the charger and the loads.
 
+* AC power connection
+
+The AC 230V cable has been attached using an electrical pipe fitting usually found in distribution boxes. It's very practical as it's pretty sturdy and provides a good amount of strain relief for the cable:
+
+[[file:ac-cable1.jpg][file:thumb-ac-cable1.jpg]]
+
 * Final device
 
 The final result before the case is screwed on:
@@ -164,7 +184,7 @@ The front panel contains two status LEDs as well as the battery cutoff switch.
 
 [[file:final-assembly2.jpg][file:thumb-final-assembly2.jpg]]
 
-The AC 230V cable has been attached using an electrical pipe fitting usually found in distribution boxes. It's very practical as it's pretty sturdy and provides a good amount of strain relief for the cable:
+I have also added stickers to showcase maximum current ratings allowed and label the output voltages.
 
-[[file:ac-cable1.jpg][file:thumb-ac-cable1.jpg]]
+[[file:stickers1.jpg][file:thumb-stickers1.jpg]]
 
