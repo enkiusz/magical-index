@@ -1,0 +1,62 @@
+#+TITLE: Identify
+#+FILETAGS: noexport
+
+#+BEGIN_EXPORT html
+<base href="identify-tool/"/>
+#+END_EXPORT
+
+http://endpoint/lookup/$(content) -- send content as-is from the reader, can include / ? = inject parameters and so on
+http://endpoint/lookup/$(content!urlencode) -- encode URL-specific characters and non-ascii characters
+http://endpoint/lookup?code=$(content!urlencode)&type=$(type) -- encode with base64, add the type as well 
+http://endpoint/lookup?code=$(content!urlencode)&type=$(type)&typecode=$(typecode) -- encode with base64, add the type as well, send the raw type code received from the reader
+
+types:
+barcode symbologies: UPC, EAN, Code128, GS1-128
+NFC tag types: iso-14443-a. iso-14443-b, etc.
+ascii: machine readable text - for example like inside passports
+unknown: Type was not reported by the reader or could not be recognized (for example with unknown type codes received from the reader)
+
+MQTT config
+broker
+topic (templatable)
+barcodes/
+barcodes/$(reader.serial) -- add barcode reader serial number
+barcodes/$(reader.model) -- add barcode reader morel
+
+other vars:
+reader.serial
+reader.model
+unit.serial - Identify accessory serial number (can be MAC, chip ID or a combination of both)
+
+
+
+content (templated)
+default:
+{ "content": "$(content!jsonencode)", "type": "$(type)" }
+{ "content": "$(content!jsonencode)", "type": "$(type)" } --- jsonencode encodes JSON-specific syntax characters
+or
+$(type)/$(content)
+
+A barcode reader accessory following the KISS principle. Insert barcode, receive info.  supply on and off)
+- support for more ways to connect barcode readers (PS/2 aka wedge, USB Host, Bluetooth?)
+- more protocols for transfering scanned barcodes (Bluetooth)
+- support for NFC readers
+- Support for HTTPS
+- selectable actions after a barcode is scanned (resulting in another HTTP request)
+- support for barcode readers that can read and report multiple barcodes at once
+- support for machine-readable ASCII text (for example on passports)
+- barcode string pre-processing before sending (for example in Lua)
+- automatic barcode reader configuration (commands sent via serial interface)
+- DHCP options to apply configuration (mainly URL)
+- WPS for wireless setup or other automated 802.11 configuration
+- Detailed 3 level network connectivity check and display: 802.11/IP/Internet
+- Simple graphics support (for example for OK / Not OK signs)
+- Support for differen lookup protocols (for example LDAP)
+- Pseudo mime-types for content (for example to discriminate between NDEF from NFC tags and plain strings from barcodes)
+- Support for GS1-128 - needs to encode and transmit FNC1-4
+- Multi-dimensional tags (for example an NFC tags has a unique ID apart from the NDEF content)
+- Support for magnetic stripe cards
+- Support for barcode readers that can produce images
+- Multiple barcode destinations (for example, fetching information via HTTP but also reporting scanned barcodes via MQTT)
+- Adding custom HTTP headers for authentication information
+- Support for 401 HTTP Basic and HTTP Digest authentication flows

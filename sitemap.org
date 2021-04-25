@@ -27,6 +27,7 @@
   - [[file:projects/arduino-workshop.org][Arduino workshops]]
   - [[file:projects/fred-the-ripper.org][Fred the Ripper]]
   - [[file:projects/homeups.org][Home UPS]]
+  - [[file:projects/identify-tool.org][Identify]]
   - [[file:projects/labeling.org][Labeling scheme]]
   - [[file:projects/paperworker.org][Paperworker]]
   - [[file:projects/personalclout.org][Personal Clout]]
