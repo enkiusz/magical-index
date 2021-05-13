@@ -1,0 +1,122 @@
+#+TITLE: A Lithium-Ion Cell Precharger
+
+#+BEGIN_EXPORT html
+<base href="cell-precharger/"/>
+#+END_EXPORT
+
+* The rationale
+
+When working with refurbished Lithium-Ion cells, in particular with attempting to recycle cells from used battery packs you will discover many cells in these packs who are very deeply 
+discharged. It's common to see cells that read a < 1V open-circuit voltage. There can be a number of reasons for this to happen:
+
+1. the cell may be damaged in a way that manifests itself as self-discharge
+1. the cell may have it's CID ([[https://batteryuniversity.com/learn/article/safety_circuits_for_modern_batteries][Current Interrupt Device]]) tripped which is an internal fuse in the cell that mechanically disconnects the cell terminals from the case in case of 
+  excessive conditions inside the cell, in this case the voltage just reads 0 and presents an infinite internal resistance
+1. the cell may have been connected to a BMS and not charged for a very long time, this causes the slow leakage current of internal resistances in the BMS to slowly drain the cell
+
+Of those 3 groups the last one is the most interesting to us as these cells can potentially still be reused. It is commonly known that deep discharge is damaging to lithium-ion cells.
+The cell will loose capacity, the internal resistance will increase. In extreme cases internal shorts can form in the cell which may cause thermal runaway of a cell
+(fire + smoke). So deeply discharged cell reuse is not without risks and you should always understand what you are doing, monitor the conditions of your cells (current, temperature and voltage)
+and always have safety features in place. Still for low-current applications there can be a place for a cell that will probably not handle its rated maximum current capacity safely but otherwise is
+not totally dead. 
+
+
+* The problem, "solution" and solution
+
+The basic practical issue with deeply discharged cells is that all ordinary chargers have a threshold voltage of a cell which the charger will accept. This voltage is typically around 2.5 or 2.75 V. 
+So if a cell has lower voltage than this the charger may simply refuse to charge it. The solution here is to first trickle-charge the battery until the threshold voltage is achieved and then 
+proceed with charging them with an ordinary charger. 
+
+There are numerous videos of this process on youtube often performed by connecting them in parallel to a charged "donor" cell where the current will flow from one to the other charging the weak cell
+relatively quickly. The thing is this is not what we want to do because the currents can be quite large (> 1 A easily) so we risk damaging the weak cell further. It would be much better to charge it
+using a small amount of current (< 100 mA) for a longer time. 
+
+Another way is to use a normal power supply (for example a 5V one) and connect it to the battery together with a voltmeter. You should be able to watch the battery voltage slowly rise towards the threshold
+voltage and disconnect it when you are ready.
+
+Both of these approaches make it harder to control the charging current and require you to be constantly alert while you are doing this to disconnect the cell when it's finished trickle-charging or when
+something unexpected happens.
+
+This is where the precharger comes into play. It allows you to perform trickle-charging on cells with relative safety and simplicity. The circut also indicates when the trickle-charging process is complete
+with a LED so you can connect each precharger to their own cell holder and build a rig that can pre-charge multiple cells at once.
+
+* The design goals
+
+The design considerations I have laid out for this circuit are the following:
+
+- limited and low charging current to not cause any issues if the cell is shorted or otherwise badly damaged
+- cell voltage limit so that overvoltage will not be an issue even when the cell is left connected for a longer amount of time
+- a LED indicator when the cells reaches a threshold voltage
+- simple and cheap to allow for building rigs pre-charging multiple cells at once
+- powered from +5V DC to be usable with many power supplies and even USB
+
+* Breadboard version and testing
+
+The first design built on a breadboard was designed to be the following:
+
+[[file:prototype-circuit.jpg][file:thumb-prototype-circuit.jpg]]
+
+This is a novice level circuit with a voltage divider halving the supply voltage from 5 V to 2.5 V. The cell is connected in parallel to the lower resistor making sure that the cell voltage (U_c) will never
+exceed 2.5 V which meets one of our design goals. The divider also meets the other design goal of limiting the trickle-charging current. 
+
+When a totally empty cell (reading 0V) is connected to the circuit the voltage on the lower resistor will also be 0 V this means that no no current will flow there but instead all current from the power
+supply will flow through the battery as a lithium-ion cell's internal resistance is typically on the order of miliohms. This current will have a maximum value of 
+
+I_o = 5 V / 47 = 100 mA
+
+this may look excessive at first but the voltage of the cell will quickly rise and less and more and more current will flow through the bottom resistor. After a while the cell voltage U_c will be equal to 
+2.5 V and the trickle-charging process will end.
+
+Now the TL431 circuit needs explanation. This is acually the trickle-charge end indicator which uses the TL431's internal opamp and the 2.5 V bandgap reference as a convenient comparator which 
+will light up the LED when the voltage on the lower resistor (equal to U_c) will be more than 2.5 V. 
+
+* Testing the initial circuit
+
+The circuit has been assembled on a breadboard with a voltmeter and ampmeter connected to the cell cage to monitor charging current and cell voltage.
+
+[[file:prototype-breadboard.jpg][file:thumb-prototype-breadboard.jpg]]
+
+As the cell is not yet connected the LED is on because the voltage on the lower resistor is 2.5V. When we connect a cell the LED will switch off and the trickle-charging process will start.The circuit
+has been tested with an overly discharged cell having and open-circuit voltage slightly below 1V. Needless to say this cell is not being recognized as connected to a charger (for example the 
+Liitokala Lii-500 that I'm using).
+
+A voltmeter and current meter are connected to the cell monitoring voltage and current. Initially after connecting the cell to the precharger around 50 mA flows to the cell:
+
+[[file:testcell-initial-state.jpg][file:thumb-testcell-initial-state.jpg]]
+
+The current slowly drops as the cell voltage rises towards 2.5 V, the state after around 10 minutes is:
+
+[[file:testcell-after-10min.jpg][file:thumb-testcell-after-10min.jpg]]
+
+When the target voltage is reached the indicator LED lights up and the current is just 5 mA:
+
+[[file:testcell-precharge-finished.jpg][file:thumb-testcell-precharge-finished.jpg]]
+
+The cell is now ready to be charged back up using an ordinary charger:
+
+[[file:testcell-final-charge.jpg][file:thumb-testcell-final-charge.jpg]]
+
+You should monitor the cell temperature during this phase as heating may occur if the cell is damaged. Anything more than 40 degrees Celcius means the cell is unusable.
+
+
+* Manufacturing
+
+As I plan to build a rig for pre-charging around 20 cells at once I tought it might make sense to make a small order from JLCPCB saving work on PCB manufacturing and soldering. This way 
+you can also more easily replicate this project and build the pre-charger yourself. The production rev 1 schematic is as follows:
+
+file:manuf-schematic-rev1.png
+
+The reader might notice that there have been a number of changes to the design. First, the resistor divider values have been increased to 100 Ohms in order to cut down on the maximum current 
+that can flow through a cell. I have also introduced a slight imbalance into the divider in order to bump the final voltage above 2.5V to around 2.6V. This makes the comparator circuit work
+more reliably. In order to guard against tolerances working against this I have also specified both resistors to have 1% tolerance.
+
+The design is a very small 22 mm x 18 mm dual layer PCB with two M2 mounting holes and footprints for both an SMD and a through-hole LEDs:
+
+[file:manuf-pcb-rev1.png]
+
+The [[file:cell-precharger.zip][Kicad project]] can also be downloaded.
+
+* Closing thoughts
+
+There is [[https://www.nature.com/articles/srep30248.pdf][research]] showing that the internal shorts do not develop when discharging lithium-ion cells until they are at -12% SoC. That is when they have been discharged to "negative voltage".
+

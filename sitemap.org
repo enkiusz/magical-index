@@ -23,6 +23,7 @@
   - [[file:hardware/wh-sp-ws01.org][WH-SP-WS01 Wind speed sensor (anemometer)]]
   - [[file:hardware/wrt-54g.org][WRT-54G]]
 - projects
+  - [[file:projects/cell-precharger.org][A Lithium-Ion Cell Precharger]]
   - [[file:projects/archive.org][Archive]]
   - [[file:projects/arduino-workshop.org][Arduino workshops]]
   - [[file:projects/fred-the-ripper.org][Fred the Ripper]]
