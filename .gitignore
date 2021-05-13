@@ -1,3 +1,9 @@
 *~
+
+# Kicad projects are automatically zipped
+*.kicad
+# Ignore backup zips in kicad projects
+*.kicad/*-backups/
+
 .*.swp
 _site
