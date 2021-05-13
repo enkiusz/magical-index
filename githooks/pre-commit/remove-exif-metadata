@@ -7,4 +7,11 @@ if ! which exiv2 > /dev/null; then
     exit 0
 fi
 
-find . -iname '*.png' -or -iname '*.jpg' -print0 | xargs -0 exiv2 -d a
+find . -iname '*.png' -or -iname '*.jpg' | while read fname; do
+	echo "Scrubbing '$fname'"
+	orientation=$(exiv2 -P v -K Exif.Image.Orientation "$fname")
+	exiv2 -d a "$fname"
+	if [ -n "$orientation" ]; then
+		exiv2 -M "set Exif.Image.Orientation Short $orientation" "$fname"
+	fi
+done
