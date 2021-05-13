@@ -112,7 +112,7 @@ more reliably. In order to guard against tolerances working against this I have 
 
 The design is a very small 22 mm x 18 mm dual layer PCB with two M2 mounting holes and footprints for both an SMD and a through-hole LEDs:
 
-[file:manuf-pcb-rev1.png]
+file:manuf-pcb-rev1.png
 
 The [[file:cell-precharger.zip][Kicad project]] can also be downloaded.
 
