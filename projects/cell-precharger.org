@@ -116,6 +116,19 @@ file:manuf-pcb-rev1.png
 
 The [[file:cell-precharger.zip][Kicad project]] can also be downloaded.
 
+* The rig assembly
+
+The ordered modules were assembled on a piece of board with each module connected to an individual 18650 socket. All of the modules are powered with an LM2596 step-down module which allows for
+more input voltage agility for the device.
+
+[[file:rig-v1.jpg][file:thumb-rig-v1.jpg]]
+
+Unfortunately I have noticed that the individual modules connected in parallel cause "latching" behaviour with eachother which requires the power supply to be reset when new cells are added.
+This needs fixing in the individual module, I also want to make it a bit narrower to more easily glue a number of modules next to eachother. The layout of connectors could also use some
+optimization.
+
+But for now the rig works as intended.
+
 * Closing thoughts
 
 There is [[https://www.nature.com/articles/srep30248.pdf][research]] showing that the internal shorts do not develop when discharging lithium-ion cells until they are at -12% SoC. That is when they have been discharged to "negative voltage".
