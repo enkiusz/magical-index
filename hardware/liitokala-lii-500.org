@@ -305,12 +305,12 @@ transfers. I have tried to trigger a single pin on both edges but when the inter
 
 #+BEGIN_EXPORT html
 <pre>
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
-#include <libopencm3/stm32/usart.h>
-#include <libopencm3/cm3/nvic.h>
-#include <libopencm3/stm32/exti.h>
-#include <string.h>
+#include &lt;libopencm3/stm32/rcc.h&gt;
+#include &lt;libopencm3/stm32/gpio.h&gt;
+#include &lt;libopencm3/stm32/usart.h&gt;
+#include &lt;libopencm3/cm3/nvic.h&gt;
+#include &lt;libopencm3/stm32/exti.h&gt;
+#include &lt;string.h&gt;
 
 void init_clocks(void);
 void init_io(void);
