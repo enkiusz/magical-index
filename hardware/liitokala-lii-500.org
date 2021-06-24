@@ -1,0 +1,488 @@
+#+TITLE: Liitokala Engineer Lii-500 Automation
+#+LANGUAGE: en
+
+#+BEGIN_EXPORT html
+<base href="liitokala-lii-500/"/>
+#+END_EXPORT
+
+* Overview
+
+The [[http://www.liito-kala.com/page92?product_id=6&brd=1][Liitokala Engineer Lii-500]] is a universal chemistry 4-cell smart charger manufactured by the well-known Liitokala brand. It is very popular with people building battery packs out of second life
+18650 Lithium-Ion cells because of its reasonable price and discharge capacity testing feature (NOR TEST mode). I own a number of those chargers and I use them as part of my cell assessment
+workflow. What I have found however is that entering cell capacity values reported by the charger manually into a computer is both a bit tedious as well as prone to mistakes. Therefore I have
+made attempts at automating the process by modding the charger.
+
+The overall idea was to reverse-engineer the charging and discharging circuits to the point that I would flash my own firmware into the microcontroller inside giving me the ability to automate the
+charging/discharging process and read out the measured cell parameters.
+
+Please take note, that all of the content here relates to the *Lii-500* charger *not* the *Lii-500S* charger. The [[http://www.liito-kala.com/page92?product_id=20&brd=1][Lii-500S]] is a newer version of the Lii-500, the outward appearance is very similar
+but the internal board microcontroller and LCD screen are entirely different.
+
+* The charger hardware
+
+The popularity of the Lii-500 charger means, that there are multiple modifications and hacks already published, a quick search on youtube reveals a number of videos showcasing the internals or
+multiple hacks that are possible with this charger. In particular:
+
+- [[https://www.youtube.com/watch?v=7qpD4n-aWsc][Disassembly video, adding a connector to test pouch cells]]
+- [[https://www.youtube.com/watch?v=EDoHxwg7Yak][A different disassembly video]]
+- [[https://www.youtube.com/watch?v=DZiGYneRyzE][Review and disassembly]]
+- [[https://www.youtube.com/watch?v=DZiGYneRyzE][Disasembly and button replacement]]
+
+I first thought to investigate the MCU that was inside the charger but unfortunately the chip is unmarked. I could just get rid of it and wire in my own MCU but I figured that I don't want to 
+modify the charger this heavily in case I would like to sell it some day. I have however figured out a different idea to get the cell information I wanted - sniffing the communications between
+the MCU and the LCD screen. Just a small drop-in pass-through board would be required and it would fit nicely in the existing case so this is the route I went on!
+
+* The LCD and its interface
+** Electrical
+Unfortunately, the LCD module also contains an unmarked controller chip on the back of the board:
+
+[[file:lcd-module-back.jpg][file:thumb-lcd-module-back.jpg]]
+
+By virtue of educated guessing (wide traces -> power ;) and connecting a logic analyzer I have figured out that the interface here is a rather slow one-directional SPI data flow, the pinout of the LCD module
+is the following:
+
+|------------+--------+-----------+---------------------------------------|
+| Pin number | Color  | Signal    | Notes                                 |
+|------------+--------+-----------+---------------------------------------|
+|          1 | Red    | +5V power |                                       |
+|          2 | Black  | MOSI      |                                       |
+|          3 | Yellow | SCK       | Frequency is 62.5 kHz                 |
+|          4 | Green  | /CS       |                                       |
+|          5 | Blue   | GND       |                                       |
+|          6 |        |           | Not present but marked on board front |
+|------------+--------+-----------+---------------------------------------|
+
+It's good to take a close note of this wiring together with the colors as the pin numbers are marked on the other side of the LCD and we definately would not want to swap +5V and GND. In order to
+make experimentation and later connecting the sniffer board I unsoldered the wire and put an angled 2.54 mm pin header. The image below also contains the pin 1 marked for your convenience and later
+reference:
+
+[[file:lcd-module-connector.jpg][file:thumb-lcd-module-connector.jpg]]
+
+** SPI Protocol
+
+The SPI protocol consists of a series of unidirectional transfers from the MCU to the LCD controller. As far as I've seen there is no readback in the other direction, it is possible that the missing
+pin 6 on the LCD board layout was supposed to be the MISO pin but this did not end up being used. The SPI clocking setup is CPOL=0 (Clock is Low when inactive), CPHA=0 (Data is valid on leading Clock
+edge) and enable line is Active Low.
+
+There are two kinds of transfers. The first kind is a "control" or "command" transfer which is always 12 bits and starts with 0x08 as the first 4 bits transmitted. An example of such a transfer captured
+is provided below:
+
+file:example-command-spi-transfer.png
+
+This is the first control transfer sent to the LCD when the charger is powered on and you can see a short sequence before it where all 3 SPI pins are shortly grounded. This might either be a firmware glitch when
+setting up the GPIO lines or SPI peripheral or a reset sequence. The first 3 bits of the transfer seems to indicate whether it's a control transfer (0x08) or LCD framebuffer update (later seen code 0x0A).
+The entire bit sequence of 0x803 is only one of a number of commands sent to the LCD controller that have been observed and summarized in the table below:
+
+|---------+------------------+----------------------------|
+| Command | Description      | Notes                      |
+|---------+------------------+----------------------------|
+|   0x803 | Controller reset | Sent during initialization |
+|   0x853 | Unknown          | Sent during initialization |
+|   0x807 | Unknown          | Sent during initialization |
+|   0x880 | Unknown          | Sent during initialization |
+|   0x813 | Backlight ON     |                            |
+|   0x810 | Backlight OFF    |                            |
+|---------+------------------+----------------------------|
+
+The initialization sequence consists of the following sequence of commands: 0x803, 0x853, 0x807, 0x880.
+
+I have tried to figure out the meaning behind all of those control commands by removing them from the initialization sequence and watching for any differences in behaviour. This approach has been successful
+only in identifying the first command code (0x803) as being critical (perhaps a RESET) for the controller to accept any commands at all. The meaning of the 0x810 and 0x813 codes was immidiately obvious
+as they are sent by the original charger firmware when the backlight changes state and thus were easy to spot.
+
+
+The second kind of transfer observed is the LCD framebuffer update which is sent when the charger wants to change what is displayed on the screen. The transfer is much longer and an example has been provided
+below:
+
+file:example-lcd-framebuffer-spi-transfer.png
+
+With observation and some Arduino experiments I have deduced the structure of this transfer to be as follows:
+
+|---------+-----------+------------------------------------|
+| Field   | Bit count | Description                        |
+|---------+-----------+------------------------------------|
+| Code    |         4 | Always 0x0A                        |
+| Address |         5 | Framebuffer address in 4-bit units |
+| FB      | up to 128 | The framebuffer contents           |
+|---------+-----------+------------------------------------|
+
+The full framebuffer length (128 bits) can be noticed in the first post-initialization transfer where all of the LCD elements are being shown likely as a simple QA check for the factory staff. 
+Later transfers do not use all of the bits. With this knowledge I have created Arduino code to figure out the exact layout of the LCD framebuffer:
+
+#+BEGIN_EXPORT html
+<pre>
+#include &lt;string.h&gt;
+
+const int pinMOSI = 9;
+const int pinSCK = 8;
+const int pinCS = 7;
+
+const int buttonUP = 3;
+const int buttonDOWN = 2;
+
+void sckEdge(void){
+  digitalWrite(pinSCK, LOW);
+  delayMicroseconds(6);
+  digitalWrite(pinSCK, HIGH);
+  delayMicroseconds(9);
+}
+
+void xmitFrame(byte cmd, int offset /* Offset in 4-bit chunks */, byte frame[16]) {
+  digitalWrite(pinSCK, LOW);
+  digitalWrite(pinCS, LOW);
+
+  for(int j = 3; j >= 0; j--) {
+    digitalWrite(pinMOSI, bitRead(cmd, j));      
+    sckEdge();  
+  }
+
+  for(int j = 4; j >= 0; j--) {
+    digitalWrite(pinMOSI, bitRead(offset, j));      
+    sckEdge();  
+  }
+  
+  for (int i = 0; i < 16; i++) {
+    for(int j = 7; j >= 0; j--) {
+      digitalWrite(pinMOSI, bitRead(frame[i], j));      
+      sckEdge();  
+    }
+  }
+
+  digitalWrite(pinSCK, HIGH);
+  digitalWrite(pinCS, HIGH);  
+}
+
+void xmitWords(unsigned short words[], size_t n) {
+  digitalWrite(pinSCK, LOW);
+  digitalWrite(pinCS, LOW);
+  
+  for (int i = 0; i < n; i++) {
+    for(int j = 11; j >= 0; j--) {
+      digitalWrite(pinMOSI, bitRead(words[i], j));      
+      sckEdge();  
+    }
+  }
+
+  digitalWrite(pinSCK, HIGH);
+  digitalWrite(pinCS, HIGH);
+}
+
+int i = 0;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("XSL-Lii500A-B2 LCD test code");
+    
+  pinMode(pinMOSI, OUTPUT);
+  pinMode(pinSCK, OUTPUT);
+  pinMode(pinCS, OUTPUT);
+  
+  pinMode(buttonUP, INPUT_PULLUP);
+  pinMode(buttonDOWN, INPUT_PULLUP);
+
+  digitalWrite(pinMOSI, HIGH);
+  digitalWrite(pinSCK, HIGH);
+  digitalWrite(pinCS, HIGH);  
+
+  /* This may be some kind of reset sequence */
+  digitalWrite(pinMOSI, LOW);
+  digitalWrite(pinSCK, LOW);
+  digitalWrite(pinCS, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pinMOSI, HIGH);
+  digitalWrite(pinSCK, HIGH);
+  digitalWrite(pinCS, HIGH);  
+  delayMicroseconds(50);
+
+  unsigned short w1[1];
+
+  // send initialization instructions
+  w1[0] = 0x803;
+  xmitWords(w1, 1);   
+  
+  w1[0] = { 0x853 };
+  xmitWords(w1, 1);
+  delayMicroseconds(5);
+
+  w1[0] = { 0x807 };
+  xmitWords(w1, 1);
+  delayMicroseconds(5);
+
+  w1[0] = { 0x880 };
+  xmitWords(w1, 1);
+  delayMicroseconds(5);
+
+  /* Enable backlight */
+  w1[0] = { 0x813 };
+  xmitWords(w1, 1);
+  delayMicroseconds(5);
+
+  /* Use 0x810 to disable backlight */
+  
+}
+
+void loop() { 
+
+    if (digitalRead(buttonUP)) {
+      i += 1;
+    }
+    
+    if (digitalRead(buttonDOWN)) {
+      i -= 1;
+    }
+
+    char buf[128];
+    sprintf(buf, "i %02d byte %02d bit %02d", i, i /  8, 7-(i % 8));
+    Serial.println(buf);
+   
+    byte zeroframe[16] = {
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+
+    bitSet(zeroframe[i / 8], 7-(i % 8));
+    xmitFrame(0x0A, 0, zeroframe);
+
+    unsigned short w1[] = { 0x813 };
+    xmitWords(w1, 1);
+    delayMicroseconds(15);
+    
+    delay(100);
+      
+}
+</pre>
+#+END_EXPORT
+
+Relevant logic probe captures which can be opened in the [[https://www.saleae.com/downloads/][Saleae Logic software]] and are provided in the Extras section at the end.
+
+** Framebuffer layout
+
+Using the above code I figured out the mapping between the particular framebuffer bits and different pieces of the LCD display. Please note, that the LCD module that I had had the silkscreen marking of
+"XSL-Lii500A-B2". In case you find a different LCD module in your particular charger you might find that your mapping is different.
+
+[[file:lcd-display-layout.jpg][file:thumb-lcd-display-layout.jpg]]
+
+The numbers on the image correspond to indices inside the framebuffer. For example, if you set the bit number 99 (starting from 0 being the first bit) in the framebuffer then the "End" marker will show
+on the LCD.
+
+* The SPI sniffer
+
+After confirming the basic facts about the protocol the first version of the sniffer was breadboarded and later improved upon:
+
+[[file:spi-sniffer-breadboard.jpg][file:thumb-spi-sniffer-breadboard.jpg]]
+
+The SPI sniffer itself was built using the popular [[https://components101.com/microcontrollers/stm32f103c8t8-blue-pill-development-board][Blue Pill]] board using the STM32F103C8 microcontroller. It has been chosen because it contains a built-in USB interface that will be used in the final 
+version to transmit data from the LCD to a PC. 
+
+** Bus tap board
+
+The next order of business was to somehow bring out the LCD wires from outside of the charger enclosure neatly in order to connect them to whatever will be snffing the traffic. For this purpose
+a small breadboard has been used together with three 2.54 mm angled headers. All of this fits neatly at the back of the LCD module with the external wire running down the middle and out of a air
+vent in the case:
+
+[[file:spi-sniffer-breakout-board.jpg][file:thumb-spi-sniffer-breakout-board.jpg]]
+
+After putting the bus tap board and the original PCB in please do not forget to put in some heat-conductive paste or glue into the small rectangular slots where two NTC sensors fit in. These
+slots have been marked on the photo above.
+
+** The sniffer code
+
+Currently, the code uses the serial port to transmit the sniffed SPI traffic to a host for interpretation. This is fine for the moment as the SPI interface to the LCD is pretty slow and we are
+monitoring only one of them. Also, most of the SPI transfers repeat themselves as the LCD is being refreshed so smarter logic could be added to the sniffer code to transmit data only when
+anything changes on the display.
+
+The SPI transfer content is sent out using a rather ghetto packet format which should provide reasonable stream synchronization and recovery in case the reader jumps into a middle of an already transmitted
+ packet. It's sure not future-proof though and some other way will need to be devised (maybe HDLC or PPP framing?).
+
+The code uses interrupts to detect all of the /CS and clock edges instead of polling or using the built-in SPI peripheral. I have found interrupts to be more reliable than simple polling and the built-in
+ SPI peripheral is not useable in our case as it can reliably handle SPI transfers that are not multiples of 8 or 16 bits in length.
+
+The sniffer code has been built using the excellent [[https://github.com/libopencm3/libopencm3][libopencm3]] library for ARM Cortex M3 microcontrollers with the Makefiles and overall structure copied from our supreme leader Mike's [[https://github.com/szczys/bluepill-opencm3][opencm3 examples]]. 
+
+The only significant gotcha worth mentioning is the fact that both PB10 and PB13 should be connected to /CS to properly separate falling and rising edges of /CS to mark the beginning and end of SPI 
+transfers. I have tried to trigger a single pin on both edges but when the interrupt function executes there seems to be no way to check which edge has triggered it. The code has been also published on
+[[https://github.com/mgrela/bluepill-opencm3][github]]. 
+
+#+BEGIN_EXPORT html
+<pre>
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/gpio.h>
+#include <libopencm3/stm32/usart.h>
+#include <libopencm3/cm3/nvic.h>
+#include <libopencm3/stm32/exti.h>
+#include <string.h>
+
+void init_clocks(void);
+void init_io(void);
+void init_usart(void);
+void init_exti(void);
+int main(void);
+
+void init_clocks(void) {
+  // internal oscillator (HSI) at 48MHz
+  rcc_clock_setup_in_hsi_out_48mhz();
+  rcc_periph_clock_enable(RCC_GPIOA);  
+	rcc_periph_clock_enable(RCC_GPIOB);
+  rcc_periph_clock_enable(RCC_USART2);
+}
+
+void init_io(void) {
+
+  // /CS  -> PB10 and PB13 (to properly detect both edges)
+  // SCK  -> PB11
+  // MOSI -> PB12
+	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, GPIO10 | GPIO11 | GPIO12 | GPIO13);
+
+}
+
+void init_usart(void) {
+
+  //Setup USART2 TX on PA2
+  gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART2_TX);
+
+  usart_set_baudrate(USART2, 115200);
+  usart_set_databits(USART2, 8);
+  usart_set_stopbits(USART2, USART_STOPBITS_1);
+  usart_set_mode(USART2, USART_MODE_TX_RX);
+  usart_set_parity(USART2, USART_PARITY_NONE);
+  usart_set_flow_control(USART2, USART_FLOWCONTROL_NONE);
+
+	usart_enable(USART2);
+}
+
+void init_exti(void)
+{
+	rcc_periph_clock_enable(RCC_AFIO);
+	nvic_enable_irq(NVIC_EXTI15_10_IRQ);
+
+	exti_select_source(EXTI10, GPIOB);
+	exti_select_source(EXTI11, GPIOB);
+	exti_select_source(EXTI13, GPIOB);
+
+  exti_set_trigger(EXTI10, EXTI_TRIGGER_FALLING);
+  exti_set_trigger(EXTI11, EXTI_TRIGGER_RISING);
+  exti_set_trigger(EXTI13, EXTI_TRIGGER_RISING);
+
+}
+
+volatile char buf[512];
+volatile unsigned int bit_count;
+volatile bool flag = false;
+
+#define BIT_WRITE(word, n, bit) word = (word & ~(1U << (n) )) | (bit << (n) )
+
+void exti15_10_isr(void) {
+
+  if (exti_get_flag_status(EXTI11)) {
+    exti_reset_request(EXTI11);
+
+    // sample and store MOSI bit in buffer
+    bool bit = gpio_get(GPIOB, GPIO12);
+    BIT_WRITE(buf[bit_count / 8], 7-(bit_count % 8), bit);
+    bit_count += 1;
+  }
+
+  if (exti_get_flag_status(EXTI10)) {
+    exti_reset_request(EXTI10);
+
+    exti_disable_request(EXTI10);
+    exti_enable_request(EXTI13);
+
+    exti_enable_request(EXTI11);
+  }
+
+  if (exti_get_flag_status(EXTI13)) {
+    exti_reset_request(EXTI13);
+
+  	exti_disable_request(EXTI10);
+  	exti_disable_request(EXTI11);
+  	exti_disable_request(EXTI13);
+
+    flag = true;
+
+  }
+}
+
+#define BYTECOUNT(bits) ( ((bits) & 0x07) ? ((bits) / 8) + 1 : ((bits) / 8) )
+
+int main() {
+  init_clocks();
+  init_io();
+  init_usart();
+  init_exti();
+  
+	exti_enable_request(EXTI10);
+  exti_disable_request(EXTI13);
+
+  while(1) {
+    if (! flag) {
+      continue;
+    }
+
+    /* Send packet with SPI transaction data */
+    bit_count = bit_count & 0xFF;
+    usart_send_blocking(USART2, 0xF0);
+    usart_send_blocking(USART2, bit_count);
+    for(unsigned int i=0; i < BYTECOUNT(bit_count); i++) {
+      usart_send_blocking(USART2, buf[i]);
+    }
+    usart_send_blocking(USART2, 0x0F);
+
+    memset(buf, 0, sizeof(buf));
+    bit_count = 0;
+    flag = false;
+
+  	exti_enable_request(EXTI10);
+  	exti_disable_request(EXTI13);
+  }
+
+  return 0;
+}
+</pre>
+#+END_EXPORT
+
+** Interpreting the data
+
+Interpreting the raw data sent via serial port to a USB host is performed using Python code published [[https://github.com/mgrela/greatriver/blob/master/bin/test-liitokala-lcd.py][here]]. The Python encodes the LCD layout reverse-engineered as well as provides some logic to detect
+nonsensical data that can be received from the LCD (for example 7-segment codes which do not correspond to any characters) allowing for some protection against invalid data begin passed downwards to your
+application code. The end result is that the data shown on the LCD is reliably replicated in the tool's output. For example, when no cells are connected and the LCD displays a 'null' string the sniffer
+produces:
+
+#+BEGIN_EXPORT html
+<pre>
+2021-06-24 13:24.14 [info     ] lcd state                      state={'null': True}
+</pre>
+#+END_EXPORT
+
+when a cell is being charged:
+
+#+BEGIN_EXPORT html
+<pre>
+2021-06-24 13:25.06 [info     ] lcd state                      state={'capacity': '0 mAh', 'cell_select': '1', 'mode': 'charge', 'end': False, 'usb': False, 'voltage': '4.19 V', 'current_select': '500 mA', 'time': {'hours': 0, 'minutes': 0, 'tick': True, 'h': True}, 'ir': '125 mΩ'}
+</pre>
+#+END_EXPORT
+
+and when charging finishes:
+
+#+BEGIN_EXPORT html
+<pre>
+2021-06-24 13:43.29 [info     ] lcd state                      state={'capacity': '24 mAh', 'cell_select': '1', 'mode': 'charge', 'end': True, 'usb': False, 'voltage': '4.2 V', 'current_select': '500 mA', 'time': {'hours': 0, 'minutes': 15, 'tick': True, 'h': True}, 'ir': '125 mΩ'}
+</pre>
+#+END_EXPORT
+
+* Future developments
+
+This is not by all means a finished project. The future direction of development is planned to be (in the order of highest-priority on top):
+
+- support for using USB Serial to send the SPI transfers
+- a proper PCB that fits all of the connectors and the STM32 on a board small enough to fit entirely inside the case of the charger
+- support for probing of the cell voltage during the discharge cycle to plot individual cell discharge curves
+- support for sensing the temperature of each cell to detect abnormal heat, the charger itself has two NTC elements built in however they seem to be only used as a safety feature, the data from them is not displayed
+- support for other chargers (starting likely from the [[http://www.liito-kala.com/page92?product_id=20&brd=1][Lii-500S]])
+- support for monitoring more than one charger with a single board
+
+
+* Extras
+
+- [[file:cell-connected-no-charging.logicdata][Logic probe capture when a cell is connected]]
+- [[file:start-and-null.logicdata][Logic probe capture after power-on]]
