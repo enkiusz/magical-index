@@ -34,9 +34,21 @@ the MCU and the LCD screen. Just a small drop-in pass-through board would be req
 
 * The LCD and its interface
 ** Electrical
-Unfortunately, the LCD module also contains an unmarked controller chip on the back of the board:
+
+I have found that some of the LCD modules had unmarked controller chips on the back of the board:
 
 [[file:lcd-module-back.jpg][file:thumb-lcd-module-back.jpg]]
+
+However, by disassembling the next charger I discovered that it's LCD module contained a marked chip as the LCD controller:
+
+[[file:lcd-module-holtek.jpg][file:thumb-lcd-module-holtek.jpg]]
+
+The chip is Holtek 1621B the datasheet is easily found. As I have previously reverse engineered the protocol from scratch I was happy to find that everything matches with what the datasheet describes. 
+The LCD driver chip has much more features than are used by the MCU (for example a watchdog timer). The one interesting tidbit is that the LCD driver chip contains no GPIO pins to drive a transistor 
+controlling the backlight. What the designers choose instead is to reuse the buzzer outputs for the backlight driver. When the LCD backlight enable command is sent the buzzer output is configured to 
+output a 4 kHz tone for the buzzer which I assume drives the backlight transistor.
+
+For posterity I have left all of the reverse-engineering process description below.
 
 By virtue of educated guessing (wide traces -> power ;) and connecting a logic analyzer I have figured out that the interface here is a rather slow one-directional SPI data flow, the pinout of the LCD module
 is the following:
@@ -690,7 +702,8 @@ This is not by all means a finished project. The future direction of development
 - support for monitoring more than one charger with a single board
 
 
-* Extras
+* Addendum
 
 - [[file:cell-connected-no-charging.logicdata][Logic probe capture when a cell is connected]]
 - [[file:start-and-null.logicdata][Logic probe capture after power-on]]
+- [[https://www.holtek.com/documents/10179/116711/HT1621v321.pdf][The LCD controller datasheet]]
