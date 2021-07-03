@@ -1,9 +1,10 @@
 *~
 
-# Kicad projects are automatically zipped
-*.kicad
 # Ignore backup zips in kicad projects
 *.kicad/*-backups/
+# Kicad footprint cache files
+*.kicad/fp-info-cache
+*.kicad/fp-lib-table
 
 .*.swp
 _site
