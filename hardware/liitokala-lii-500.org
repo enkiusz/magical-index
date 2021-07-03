@@ -691,6 +691,11 @@ and when charging finishes:
 </pre>
 #+END_EXPORT
 
+* The sidekick board
+
+In order to make the entire idea easier to use I have began developing a custom PCB with streamlined connectors and small footprint. The board is basically a [[https://stm32-base.org/assets/pdf/boards/original-schematic-STM32F103C8T6-Blue_Pill.pdf][STM32 Blue Pill]] remixed for this application.
+The Kicad project of the REV1 board can be downloaded [[file:sidekick.kicad/sidekick-rev1.zip][here]].
+
 * Future developments
 
 This is not by all means a finished project. The future direction of development is planned to be (in the order of highest-priority on top):
