@@ -2,11 +2,12 @@
 
 # Automatic backup zips in kicad projects
 /**/*.kicad/*-backups/
+
 # Kicad footprint cache files
 fp-info-cache
 fp-lib-table
 # Unzipped manufacturing files
-/**/*.kicad/manuf/*/
+/**/*.kicad/manuf/
 
 .*.swp
 _site
