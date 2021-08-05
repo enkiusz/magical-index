@@ -364,6 +364,14 @@ In order to make the entire idea easier to use I have began developing a custom 
 There have been multiple iterations of this board already designed ([[file:sidekick.kicad/sidekick-rev1.zip][REV 1]], [[file:sidekick.kicad/sidekick-rev2.zip][REV 2]]), REV 2 was the first one that was manufactured. Currently the REV 3 board is getting its last design touches and will likely
 get manufactured together with the sensor board to save on shipping costs.
 
+The REV 2 board:
+
+[[file:sdkk-lii500-rev2-board.jpg][file:thumb-sdkk-lii500-rev2-board.jpg]]
+
+Attached on the back of the charger LCD:
+
+[[file:sdkk-lii500-rev2-attached.jpg][file:thumb-sdkk-lii500-rev2-attached.jpg]]
+
 * The sidekick sensor board
 
 In order to facilitate the probing of each cell voltage as well as temperature a sensor board has been designed. This board is still in the prototype phase.
