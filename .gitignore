@@ -11,3 +11,5 @@ fp-lib-table
 
 .*.swp
 _site
+.DS_Store
+
