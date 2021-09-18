@@ -1,0 +1,699 @@
+#+TITLE: Megacell Charger
+#+OPTIONS: ^:{}
+
+#+BEGIN_EXPORT html
+<base href="megacell-charger/"/>
+#+END_EXPORT
+
+* Introduction
+
+This page gathers independent information about the Megacell Charger focusing primarily on the communications protocol used between the Megacell Monitor and the Megacell Charger
+with the purpose of creating custom automation.
+
+* Hardware
+
+The [[https://megacellcharger.com][Megacell charger]] is a 16-slot 18650 litihium ion cell charger with some automation capabilities and software control via 802.11 WLAN. The charger is bundled with software
+which implements features useful for larger-scale lithium-ion cell refurbishment and reuse. The charger is built around an ESP8266 module which seems to be running NodeMCU.
+
+* Software
+
+The charger is bundled with a software package called [[https://www.megacellmonitor.com/][Megacell Monitor]] which allows for a degree of remote control, setup and automation of the charger. It can also store
+the cell information in an SQL database, print labels or calculate pack layouts based on the cells inside it's database.
+
+* The protocol
+
+The protocol is based on HTTP, the charger has to be connected to a 802.11 WLAN network and obtains it's IP address using DHCP. The following requests are understood by
+the charger (assuming 10.10.10.30 is the charger IP address):
+
+** Charger presence detection and API version
+   
+#+BEGIN_EXPORT html
+<pre>
+$ curl -i -X POST http://10.10.10.30/api/who_am_i
+HTTP/1.1 200 OK
+Content-Type: text/json
+Content-Length: 35
+Connection: close
+
+{
+  "McC": "Firmware V4.3.0.11"
+}
+</pre>
+#+END_EXPORT
+
+This request is used to scan an IP subnet to detect the presence of chargers which are online. It also allows to obtain the firmware version which might be used to activate
+firmware-specific features and improve compatibility.
+
+** API v0
+
+As the charger API has no explicit version code, the current API observed to be implemented in firmware version V4.3.0.11 has been designated as v0.
+
+*** Get charger configuration
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -X POST http://10.10.10.30/api/get_config_info
+{
+  "MaV": 4.2,
+  "StV": 3.7,
+  "MiV": 3,
+  "DiR": 1000,
+  "MaT": 40,
+  "DiC": 1,
+  "FwV": "Firmware V4.3.0.11",
+  "FirmwareVersion": "Firmware V4.3.0.11",
+  "ChC": false,
+  "LmV": 0.3,
+  "LcV": 3.6,
+  "LmD": 1.1,
+  "LmR": 90,
+  "McH": 240,
+  "LcR": 1000,
+  "CcO": 1,
+  "DcO": 1,
+  "MsR": 250,
+  "MuL": 0
+}
+</pre>
+#+END_EXPORT
+
+The parameters here are set in the "Settings" menu of Megacell Monitor UI in two different windows - "Charger Settings" and "Circuit Breaker". They meaning of particular
+codes is as follows. For some parameters the minimum and maximum values permitted by the UI have been documented. It is not known whether these limits reflect limitations of
+the hardware or firmware in the Megacell Charger or whether they are what the developers considered "sensible".
+
+|----------------+---------------------------------------------------------------+--------------------------------------+------------------------------------------+----------------------------------------------|
+| Parameter code | Name in Megacell Monitor UI (in Settings)                     | Default value in Megacell Monitor UI | Value restriction in Megacell Monitor UI | Notes                                        |
+|----------------+---------------------------------------------------------------+--------------------------------------+------------------------------------------+----------------------------------------------|
+| /              | <                                                             |                                    < | <                                        | <                                            |
+| MaV            | Charger Settings -> Max Voltage (V)                           |                                  4.2 |                                          |                                              |
+| StV            | Charger Settings -> Store Voltage (V)                         |                                  3.7 |                                          |                                              |
+| MiV            | Charger Settings -> Min Voltage (V)                           |                                    3 |                                          |                                              |
+| DiR            | Charger Settings -> Max Discharge (mAh) (sic!)                |                                 1000 |                                          |                                              |
+| MaT            | Charger Settings -> Max Temp (C)                              |                                   40 |                                          |                                              |
+| DiC            | Charger Settings -> Discharge Cycles                          |                                    1 |                                          |                                              |
+| FwV            | Charger Settings -> Firmware version                          |              Cannot be changed in UI |                                          |                                              |
+|----------------+---------------------------------------------------------------+--------------------------------------+------------------------------------------+----------------------------------------------|
+| ChC            |                                                               |         Not presented in UI directly |                                          | A global "busy" flag for the charger:        |
+|                |                                                               |                                      |                                          | - true when charging/discharging on any slot |
+|                |                                                               |                                      |                                          | - false when charger is idle                 |
+|----------------+---------------------------------------------------------------+--------------------------------------+------------------------------------------+----------------------------------------------|
+| LmV            | Circuit Breaker -> LVC Minimum voltage (V)                    |                                  0.3 | min 0.01, max 3.0                        |                                              |
+| LcV            | Circuit Breaker -> LVC charge voltage (V)                     |                                    3 |                                          |                                              |
+| LmD            | Circuit Breaker -> LVC Max voltage drop (V)                   |                                  1.1 |                                          |                                              |
+| LmR            | Circuit Breaker -> LVC Max trickle time (minutes)             |                                   90 | min 5, max 180                           |                                              |
+| McH            | Circuit Breaker -> Max Charge time (minutes)                  |                                  240 |                                          |                                              |
+| LcR            | Circuit Breaker -> Reject cells with low capacity (mA) (sic!) |                                 1000 |                                          |                                              |
+| CcO            | Charger Settings -> Charge Correction Factor (%)              |                                    1 |                                          |                                              |
+| DcO            | Charger Settings -> Discharge Correction Factor (%)           |                                    1 |                                          |                                              |
+| MsR            | Circuit Breaker -> Max ESR value (mΩ)                         |                                  250 |                                          |                                              |
+| MuL            |                                                               |         Not presented in UI directly |                                          | Unknown, value is always 0                   |
+|----------------+---------------------------------------------------------------+--------------------------------------+------------------------------------------+----------------------------------------------|
+
+*** Set charger configuration
+
+A request very similar to getting charger configuration is used to set it. As an example:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -i -d '{"McH": 240, "LcR": 1000, "LmR": 90, "CcO": 1, "DcO": 1, "LmV": 0.3, "LcV": 3.6, "LmD": 1.1, "ChC": false, "MaV": 4.2, "StV": 3.7, "MiV": 3, "DiR": 1000, "MaT": 40, "DiC": 1, "MsR": 250, "MuL": 0}' -X POST http://10.10.10.30/api/set_config_info
+HTTP/1.1 200 OK
+Content-Type: text/plane
+Content-Length: 8
+Connection: close
+
+Received%
+</pre>
+#+END_EXPORT
+
+When the operation is successful the charger replies with a 'Received' string. When the JSON content is invalid, an error response is sent back:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -i -d 'fdsgdd' -X POST http://10.10.10.30/api/set_config_info
+HTTP/1.1 200 OK
+Content-Type: text/plane
+Content-Length: 6
+Connection: close
+
+failed%
+</pre>
+#+END_EXPORT
+
+Partial settings updates are possible, for example in order to change the value of a single parameter (for example McH) the following request can be sent:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -i -d '{"McH": 100}' -X POST http://10.10.10.30/api/set_config_info
+HTTP/1.1 200 OK
+Content-Type: text/plane
+Content-Length: 8
+Connection: close
+
+Received%
+</pre>
+#+END_EXPORT
+
+The value limits that are enforced by the UI can be bypassed by sending configuration parameters directly, for example the maximum allowed value for the LmR parameter (max trickle
+charge time) is 180 minutes. Using the following request a higher value can be set, the firmware doesn't enforce the limits from Megacell Monitor UI:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -i -d '{"LmR": 200}' -X POST http://10.10.10.30/api/set_config_info
+HTTP/1.1 200 OK
+Content-Type: text/plane
+Content-Length: 8
+Connection: close
+
+Received%
+</pre>
+#+END_EXPORT
+
+This results in the LmR parameter successfully set to 200:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -X POST http://10.10.10.30/api/get_config_info
+{
+[...]
+  "LmR": 200,
+[...]
+}
+</pre>
+#+END_EXPORT
+
+The firmware however imposes it's own limits on the parameter values. For example, when a request is sent attempting to change the LmR parameter to 300:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -i -d '{"LmR": 300}' -X POST http://10.10.10.30/api/set_config_info
+HTTP/1.1 200 OK
+Content-Type: text/plane
+Content-Length: 8
+Connection: close
+
+Received%
+</pre>
+#+END_EXPORT
+
+This results in a success response but the new LmR parameter value received when the configuration is read does not reflect the initially requested value 300, instead the
+parameter value seems to be reset to a "firmware-default" which is 90 in this case:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -X POST http://10.10.10.30/api/get_config_info
+{
+[...]
+  "LmR": 90,
+[...]
+}
+</pre>
+#+END_EXPORT
+
+*** Charger reset
+
+The Megacell Monitor UI contains a button labeled as "Reboot Chargers" which sends the following request:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -i -d '{ "secret": 20200104}' -X POST http://10.10.10.30/api/reset_charger
+HTTP/1.1 200 OK
+Content-Type: text/plane
+Content-Length: 6
+Connection: close
+
+failed
+</pre>
+#+END_EXPORT
+
+Even though the response indicates a failure the charger does reboot, this can be noticed on the LCD as well as when observing the debug log.
+
+*** Get current cell information
+
+An API request used to fetch the current state for each of the 16 charger slots is used to update the charger view in the Megacell Monitor UI. The request is as follows:
+
+#+BEGIN_EXPORT html
+<pre>
+$ curl -i -d '{"settings": [{"charger_id": 1}]}' -X POST http://10.10.10.30/api/get_cells_info
+HTTP/1.1 200 OK
+Content-Type: text/json
+Access-Control-Allow-Origin: null
+Access-Control-Allow-Credentials: true
+Access-Control-Max-Age: 1800
+Access-Control-Allow-Headers: content-type
+Access-Control-Allow-Methods: PUT, POST, GET, DELETE, PATCH, OPTIONS
+Content-Length: 5334
+Connection: close
+
+{
+  "cells": [
+    {
+      "CiD": 0,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 20,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 1,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 20.32258,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 2,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 20,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 3,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 20.32258,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 4,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 20,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 5,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 21.93548,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 6,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 22.58064,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 7,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 23.87097,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 8,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 23.54839,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 9,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 21.93548,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 10,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 21.29032,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 11,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 19.35484,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 12,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 20.32258,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 13,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 20.64516,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 14,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 20,
+      "ChC": false,
+      "State": "Low voltage cell"
+    },
+    {
+      "CiD": 15,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 21.29032,
+      "ChC": false,
+      "State": "Low voltage cell"
+    }
+  ]
+}
+</pre>
+#+END_EXPORT
+
+The request parameters are always identical and are likely a future extension point where a single API endpoint will be able to handle multiple chargers each having their own slots.
+For each slot the following JSON content is returned:
+
+#+BEGIN_EXPORT html
+<pre>
+    {
+      "CiD": 8,
+      "voltage": 0,
+      "amps": 0,
+      "capacity": 0,
+      "chargeCapacity": 0,
+      "status": "Not Inserted",
+      "esr": 0,
+      "action_length": 0,
+      "DiC": 1,
+      "complete_cycles": 0,
+      "temperature": 23.54839,
+      "ChC": false,
+      "State": "Low voltage cell"
+    }
+</pre>
+#+END_EXPORT
+
+Educated guesses and observation have lead to the following table explaining the meaning of the above fields:
+
+|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+| Parameter code  | Description                       | Unit    | Valid values                                                             | Notes                                             |
+|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+| /               | <                                 | <       | <                                                                        | <                                                 |
+| CiD             | Cell slot identifier              | N/A     | slot C1 - 0                                                              |                                                   |
+|                 |                                   |         | slot C2 - 1                                                              |                                                   |
+|                 |                                   |         | ...                                                                      |                                                   |
+|                 |                                   |         | slot C16 - 15                                                            |                                                   |
+|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+| voltage         | Cell voltage                      | V       |                                                                          |                                                   |
+| amps            | Cell current                      | mA      |                                                                          | Positive when charging, negative when discharging |
+| capacity        | Discharge capacity                | mAh     |                                                                          | Capacity measured during discharge                |
+| chargeCapactity | Charge capacity                   | mAh     |                                                                          | Capacity measured during charge                   |
+|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+| status          |                                   |         | - "Not Inserted" when no cell in slot                                    | This is the string displayed on the LCD           |
+|                 |                                   |         | - "New cell inserted" after inserting a cell                             |                                                   |
+|                 |                                   |         | - "LVC Charging"                                                         |                                                   |
+|                 |                                   |         | - "Stopped Charging"                                                     |                                                   |
+|                 |                                   |         | - "Started Discharging"                                                  |                                                   |
+|                 |                                   |         | - "mCap Started Charging" when capacity test is requested in UI          |                                                   |
+|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+| esr             | Cell internal resistance          | mΩ      |                                                                          |                                                   |
+| action_length   |                                   | second  |                                                                          |                                                   |
+| DiC             | number of disch. cycles           |         |                                                                          |                                                   |
+| complete_cycles | number of completed disch. cycles |         |                                                                          |                                                   |
+| temperature     | Cell temperature                  | deg C   |                                                                          |                                                   |
+|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+| ChC             | Cell busy flag                    | boolean | - false when slot is idle                                                |                                                   |
+|                 |                                   |         | - true when slot is charging/discharging                                 |                                                   |
+|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+| State           |                                   |         | - "Low voltage cell" when cell voltage is below the minimum for charging |                                                   |
+|                 |                                   |         | - "Healthy" when cell voltage is OK                                      |                                                   |
+|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+
+
+*** Performing actions by the charger
+
+Performing actions by the charger on particular cells (for example a charge/discharge cycle or LVC) is accomplished by "setting the cell state" using the following request.
+In the example below slots 0 and 1 are requested to perform LVC:
+
+#+BEGIN_EXPORT html
+$ curl -i -d '{"cells": [{"CiD": 0, "CmD": "alr"},{"CiD": 1, "CmD": "alr"}]}' -X POST http://10.10.10.30/api/set_cell
+HTTP/1.1 200 OK
+Content-Type: text/plane
+Content-Length: 8
+Connection: close
+
+Received%
+#+END_EXPORT
+
+The values of the CmD field correspond to different actions that can be sent to the charger, the following codes have been documented based on what is available in the "New cell
+insert actions" in Megacell Monitor UI:
+
+| Action code       | Action name in Megacell Monitor UI | Description | Log message                                                             |
+|-------------------+------------------------------------+-------------+-------------------------------------------------------------------------|
+| \                 | <                                  | <           |                                                                         |
+| alr               | Start LVC recovery                 |             | (Informational) - CellID: 0 - handle_set_cell_state: start lvc recovery |
+| ach               | Start charging                     |             | (Notice) - CellID: 0 - handle_set_cell_state: Start Charging            |
+| sc                | Stop charging                      |             | (Informational) - CellID: 0 - handle_set_cell_state: Stop Charging      |
+| adc               | Start discharging                  |             | (Informational) - CellID: 0 - handle_set_cell_state: Start Discharging  |
+| odc               | Stop discharging                   |             | (Informational) - CellID: 0 - handle_set_cell_state: Stop Discharging   |
+| act               | Start capacity test                |             | (Informational) - CellID: 0 - handle_set_cell_state: Start cap test     |
+| omc               | Stop capacity test                 |             | (Informational) - CellID: 0 - handle_set_cell_state: Stop cap test      |
+| "" (empty string) | Stop operation                     |             |                                                                         |
+
+** The debug log
+
+The charger firmware provides the possibility to receive a debug log by connecting to the port 8888 of the IP address assigned to the charger. An example dump of messages received
+when no cells are inserted:
+
+#+BEGIN_EXPORT html
+<pre>
+╰─± nc -v 10.10.10.30 8888
+Connection to 10.10.10.30 port 8888 [tcp/ddi-tcp-1] succeeded!
+000 00:30:01.682 - (Debug) - No data in log buffer at: 0
+000 00:30:01.684 - (Debug) - Adding string to position: 0:No cells
+000 00:30:01.686 - (Debug) - Display nRow: 0
+000 00:30:01.687 - (Debug) - Display X: 0
+000 00:30:01.689 - (Debug) - Display Y: 0
+000 00:30:01.789 - (Debug) - Display output string: No cells
+000 00:30:01.803 - (Debug) - Log buffer has data at: 0
+000 00:30:01.805 - (Debug) - No data in log buffer at: 1
+000 00:30:01.806 - (Debug) - Adding string to position: 1:inserted
+000 00:30:01.808 - (Debug) - Display nRow: 0
+000 00:30:01.809 - (Debug) - Display X: 0
+000 00:30:01.814 - (Debug) - Display Y: 0
+000 00:30:01.816 - (Debug) - Display output string: No cells
+000 00:30:01.821 - (Debug) - Display nRow: 1
+000 00:30:01.824 - (Debug) - Display X: 0
+000 00:30:01.827 - (Debug) - Display Y: 17
+000 00:30:01.830 - (Debug) - Display output string: inserted
+000 00:30:01.836 - (Debug) - Log buffer has data at: 0
+000 00:30:01.838 - (Debug) - Log buffer has data at: 1
+000 00:30:01.839 - (Debug) - No data in log buffer at: 2
+000 00:30:01.841 - (Debug) - Adding string to position: 2:000 00:30:01.836
+000 00:30:01.845 - (Debug) - Display nRow: 0
+000 00:30:01.852 - (Debug) - Display X: 0
+000 00:30:01.853 - (Debug) - Display Y: 0
+000 00:30:01.856 - (Debug) - Display output string: No cells
+000 00:30:01.869 - (Debug) - Display nRow: 1
+000 00:30:01.871 - (Debug) - Display X: 0
+000 00:30:01.872 - (Debug) - Display Y: 17
+000 00:30:01.875 - (Debug) - Display output string: inserted
+000 00:30:01.882 - (Debug) - Display nRow: 2
+000 00:30:01.886 - (Debug) - Display X: 0
+000 00:30:01.891 - (Debug) - Display Y: 34
+000 00:30:01.893 - (Debug) - Display output string: 000 00:30:01.836
+</pre>
+#+END_EXPORT
+
+As the debug log contains a lot of repeating messages from the LCD display routines it's useful to filter those out:
+
+#+BEGIN_EXPORT html
+<pre>
+nc -v 10.10.10.30 8888 | grep -v -F -e '(Debug) - Display' -e '(Debug) - Adding string to position' -e '(Debug) - Log buffer has data' -e '(Debug) - No data in log buffer'
+Connection to 10.10.10.30 port 8888 [tcp/ddi-tcp-1] succeeded!
+000 00:02:23.383 - (Debug) - Received request to send cell details.
+000 00:02:23.559 - (Notice) - Loop delay: 166.00 ms (Uptime: 000 00:02:23.560 )
+000 00:02:23.562 - (Notice) - FREEHeap: 16648 DIFF: -3240 Fragmentation: 2
+</pre>
+#+END_EXPORT
+
+The log messages received when a new cell is inserted:
+
+#+BEGIN_EXPORT html
+<pre>
+000 00:03:59.963 - (Notice) - CiD: 0 - Cell voltage: 1.26 - cell_amps: 0.00 - full_charge_threshold:  - Cell status: Not Inserted - cell_watchdog: New cell inserted Detected..
+000 00:03:59.964 - (Warning) - ClearCellData: 0
+000 00:03:59.966 - (Warning) - ClearCellData: 0
+000 00:04:00.829 - (Debug) - Update display for cell: 1
+</pre>
+#+END_EXPORT
+
+The log messages received when LVC is requested for an inserted cell:
+
+#+BEGIN_EXPORT html
+<pre>
+000 00:12:30.474 - (Notice) - Received request to change cell state.
+000 00:12:30.476 - (Informational) - Deserialization succeeded
+000 00:12:30.487 - (Informational) - CellID: 0 - handle_set_cell_state: start lvc recovery
+000 00:12:30.489 - (Warning) - ClearCellData: 0
+000 00:12:30.998 - (Informational) - LVC: eWorkflow: LVC_Check_cell_voltage
+000 00:12:31.000 - (Informational) - LmV: Check details for cell: 0
+000 00:12:31.001 - (Informational) - LmV: 0.30
+000 00:12:31.002 - (Informational) - Cell voltage: 1.25
+000 00:12:31.004 - (Informational) - LVC: Started charging: 0
+000 00:12:34.930 - (Notice) - Setting fan speed to: 10%
+000 00:12:34.943 - (Notice) - CiD: 1 - Cell voltage: 4.24 - cell_amps: 0.00 - full_charge_threshold:  - Cell status: Not Inserted - cell_watchdog: New cell inserted Detected..
+000 00:12:34.945 - (Warning) - ClearCellData: 1
+000 00:12:34.946 - (Warning) - ClearCellData: 1
+000 00:12:34.947 - (Notice) - Setting fan speed to: 10%
+000 00:12:35.094 - (Informational) - LVC: eWorkflow: LVC_Wait_for_readiness
+000 00:12:35.114 - (Notice) - CiD: 1 - Cell voltage: 0.00 - cell_amps: 0.00 - full_charge_threshold:  - Cell status: New cell inserted - cell_watchdog: Cell removed from charger...
+000 00:12:35.116 - (Warning) - ClearCellData: 1
+000 00:12:35.117 - (Warning) - ClearCellData: 1
+000 00:12:35.118 - (Notice) - Setting fan speed to: 10%
+000 00:12:35.230 - (Debug) - Received request to send cell details.
+000 00:12:35.592 - (Informational) - LVC: eWorkflow: LVC_Wait_for_readiness
+000 00:12:36.091 - (Informational) - LVC: eWorkflow: LVC_Wait_for_readiness
+</pre>
+#+END_EXPORT
+
+Log entries received when a capacity test is requested:
+
+#+BEGIN_EXPORT html
+<pre>
+000 00:47:24.709 - (Notice) - Received request to change cell state.
+000 00:47:24.712 - (Informational) - Deserialization succeeded
+000 00:47:24.724 - (Informational) - CellID: 0 - handle_set_cell_state: Start cap test
+000 00:47:24.727 - (Warning) - startCapTestMacro - reseting dischargeCapacity
+000 00:47:24.729 - (Warning) - startCapTestMacro: clearing chargeCapacity: 0
+000 00:47:25.239 - (Notice) - CiD: 0 - ProcessWorkflow: eWorkflow::initiate_mCap
+000 00:47:25.242 - (Notice) - ProcessWorkflow: eWorkflow::initiate_mCap -> Started charging
+000 00:47:25.244 - (Debug) - CiD: 0 - Voltage read: 3.96 - Max volt: 4.20
+000 00:47:25.244 - (Debug) - ProcessWorkflow: eWorkflow::initiate_mCap -> Next step -> eWorkflow::WaitForChargeReadiness_mcap
+000 00:47:25.245 - (Warning) - initiate_mCap: clearing chargeCapacity: 0
+000 00:47:25.245 - (Warning) - initiate_mCap - reseting dischargeCapacity
+000 00:47:25.249 - (Notice) - Setting fan speed to: 10%
+000 00:47:29.860 - (Debug) - Update display for cell: 1
+</pre>
+#+END_EXPORT
