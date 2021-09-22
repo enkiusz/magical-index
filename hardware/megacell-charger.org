@@ -581,6 +581,32 @@ insert actions" in Megacell Monitor UI:
 | omc               | Stop capacity test                 |             | (Informational) - CellID: 0 - handle_set_cell_state: Stop cap test      |
 | "" (empty string) | Stop operation                     |             |                                                                         |
 
+*** Changing the log level
+
+The charger exposes a log on port 8888 (described in detail in the next section). An API request can be used to adjust the log level of messages which are sent to the log.
+The request is the following:
+
+#+BEGIN_EXPORT html
+$ curl -i -d '{"debug_level": "Debug"}' -X POST http://10.10.10.30/api/set_log_level
+HTTP/1.1 200 OK
+Content-Type: text/plane
+Content-Length: 5
+Connection: close
+
+Debug%
+#+END_EXPORT
+
+The debug levels possible correspond to classical UNIX syslog levels (see the 'man 3 syslog' command):
+
+- Emergency
+- Alert
+- Critical
+- Error
+- Warning
+- Notice
+- Informational
+- Debug
+
 ** The debug log
 
 The charger firmware provides the possibility to receive a debug log by connecting to the port 8888 of the IP address assigned to the charger. An example dump of messages received
