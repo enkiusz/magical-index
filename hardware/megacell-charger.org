@@ -587,6 +587,7 @@ The charger exposes a log on port 8888 (described in detail in the next section)
 The request is the following:
 
 #+BEGIN_EXPORT html
+<pre>
 $ curl -i -d '{"debug_level": "Debug"}' -X POST http://10.10.10.30/api/set_log_level
 HTTP/1.1 200 OK
 Content-Type: text/plane
@@ -594,6 +595,7 @@ Content-Length: 5
 Connection: close
 
 Debug%
+</pre>
 #+END_EXPORT
 
 The debug levels possible correspond to classical UNIX syslog levels (see the 'man 3 syslog' command):
