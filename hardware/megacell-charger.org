@@ -533,9 +533,11 @@ Educated guesses and observation have lead to the following table explaining the
 | status          |                                   |         | - "Not Inserted" when no cell in slot                                    | This is the string displayed on the LCD           |
 |                 |                                   |         | - "New cell inserted" after inserting a cell                             |                                                   |
 |                 |                                   |         | - "LVC Charging"                                                         |                                                   |
+|                 |                                   |         | - "LVC Completed"                                                        |                                                   |
 |                 |                                   |         | - "Stopped Charging"                                                     |                                                   |
 |                 |                                   |         | - "Started Discharging"                                                  |                                                   |
 |                 |                                   |         | - "mCap Started Charging" when capacity test is requested in UI          |                                                   |
+|                 |                                   |         | - "Bad Cell"                                                             |                                                   |
 |-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
 | esr             | Cell internal resistance          | mΩ      |                                                                          |                                                   |
 | action_length   |                                   | second  |                                                                          |                                                   |
@@ -548,6 +550,7 @@ Educated guesses and observation have lead to the following table explaining the
 |-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
 | State           |                                   |         | - "Low voltage cell" when cell voltage is below the minimum for charging |                                                   |
 |                 |                                   |         | - "Healthy" when cell voltage is OK                                      |                                                   |
+|                 |                                   |         | - "LVC recovery failed" when LVC has failed to recover the cell          |                                                   |
 |-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
 
 
@@ -571,7 +574,7 @@ insert actions" in Megacell Monitor UI:
 
 | Action code       | Action name in Megacell Monitor UI | Description | Log message                                                             |
 |-------------------+------------------------------------+-------------+-------------------------------------------------------------------------|
-| \                 | <                                  | <           |                                                                         |
+| /                 | <                                  | <           |                                                                         |
 | alr               | Start LVC recovery                 |             | (Informational) - CellID: 0 - handle_set_cell_state: start lvc recovery |
 | ach               | Start charging                     |             | (Notice) - CellID: 0 - handle_set_cell_state: Start Charging            |
 | sc                | Stop charging                      |             | (Informational) - CellID: 0 - handle_set_cell_state: Stop Charging      |
