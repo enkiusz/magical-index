@@ -516,42 +516,62 @@ For each slot the following JSON content is returned:
 
 Educated guesses and observation have lead to the following table explaining the meaning of the above fields:
 
-|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
-| Parameter code  | Description                       | Unit    | Valid values                                                             | Notes                                             |
-|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
-| /               | <                                 | <       | <                                                                        | <                                                 |
-| CiD             | Cell slot identifier              | N/A     | slot C1 - 0                                                              |                                                   |
-|                 |                                   |         | slot C2 - 1                                                              |                                                   |
-|                 |                                   |         | ...                                                                      |                                                   |
-|                 |                                   |         | slot C16 - 15                                                            |                                                   |
-|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
-| voltage         | Cell voltage                      | V       |                                                                          |                                                   |
-| amps            | Cell current                      | mA      |                                                                          | Positive when charging, negative when discharging |
-| capacity        | Discharge capacity                | mAh     |                                                                          | Capacity measured during discharge                |
-| chargeCapactity | Charge capacity                   | mAh     |                                                                          | Capacity measured during charge                   |
-|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
-| status          |                                   |         | - "Not Inserted" when no cell in slot                                    | This is the string displayed on the LCD           |
-|                 |                                   |         | - "New cell inserted" after inserting a cell                             |                                                   |
-|                 |                                   |         | - "LVC Charging"                                                         |                                                   |
-|                 |                                   |         | - "LVC Completed"                                                        |                                                   |
-|                 |                                   |         | - "Stopped Charging"                                                     |                                                   |
-|                 |                                   |         | - "Started Discharging"                                                  |                                                   |
-|                 |                                   |         | - "mCap Started Charging" when capacity test is requested in UI          |                                                   |
-|                 |                                   |         | - "Bad Cell"                                                             |                                                   |
-|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
-| esr             | Cell internal resistance          | mΩ      |                                                                          |                                                   |
-| action_length   |                                   | second  |                                                                          |                                                   |
-| DiC             | number of disch. cycles           |         |                                                                          |                                                   |
-| complete_cycles | number of completed disch. cycles |         |                                                                          |                                                   |
-| temperature     | Cell temperature                  | deg C   |                                                                          |                                                   |
-|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
-| ChC             | Cell busy flag                    | boolean | - false when slot is idle                                                |                                                   |
-|                 |                                   |         | - true when slot is charging/discharging                                 |                                                   |
-|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
-| State           |                                   |         | - "Low voltage cell" when cell voltage is below the minimum for charging |                                                   |
-|                 |                                   |         | - "Healthy" when cell voltage is OK                                      |                                                   |
-|                 |                                   |         | - "LVC recovery failed" when LVC has failed to recover the cell          |                                                   |
-|-----------------+-----------------------------------+---------+--------------------------------------------------------------------------+---------------------------------------------------|
+|-----------------+---------------------------------------+---------+--------------------------------------------------------------------------------+---------------------------------------------------|
+| Parameter code  | Description                           | Unit    | Valid values                                                                   | Notes                                             |
+|-----------------+---------------------------------------+---------+--------------------------------------------------------------------------------+---------------------------------------------------|
+| /               | <                                     | <       | <                                                                              | <                                                 |
+| CiD             | Cell slot identifier                  | N/A     | slot C1 - 0                                                                    |                                                   |
+|                 |                                       |         | slot C2 - 1                                                                    |                                                   |
+|                 |                                       |         | ...                                                                            |                                                   |
+|                 |                                       |         | slot C16 - 15                                                                  |                                                   |
+|-----------------+---------------------------------------+---------+--------------------------------------------------------------------------------+---------------------------------------------------|
+| voltage         | Cell voltage                          | V       |                                                                                |                                                   |
+| amps            | Cell current                          | mA      |                                                                                | Positive when charging, negative when discharging |
+| capacity        | Discharge capacity                    | mAh     |                                                                                | Capacity measured during discharge                |
+| chargeCapactity | Charge capacity                       | mAh     |                                                                                | Capacity measured during charge                   |
+|-----------------+---------------------------------------+---------+--------------------------------------------------------------------------------+---------------------------------------------------|
+| status          |                                       |         | - "Not Inserted" when no cell in slot                                          | This is the string displayed on the LCD           |
+|                 |                                       |         | - "New cell inserted" after inserting a cell                                   |                                                   |
+|                 |                                       |         | - "LVC Charging"                                                               |                                                   |
+|                 |                                       |         | - "LVC Charged                                                                 |                                                   |
+|                 |                                       |         | - "Cell rest 5 Min"                                                            |                                                   |
+|                 |                                       |         | - "LVC Completed"                                                              |                                                   |
+|                 |                                       |         |                                                                                |                                                   |
+|                 |                                       |         | - "Started Charging"                                                           |                                                   |
+|                 |                                       |         | - "Stopped Charging"                                                           |                                                   |
+|                 |                                       |         | - "Hot Charged"                                                                |                                                   |
+|                 |                                       |         |                                                                                |                                                   |
+|                 |                                       |         | - "Started Discharging"                                                        |                                                   |
+|                 |                                       |         | - "Discharged"                                                                 |                                                   |
+|                 |                                       |         | - "Hot Discharged"                                                             |                                                   |
+|                 |                                       |         |                                                                                |                                                   |
+|                 |                                       |         | - "Initiating mCap"                                                            |                                                   |
+|                 |                                       |         | - "mCap Started Charging" when capacity test is requested in UI                |                                                   |
+|                 |                                       |         | - "Wait For ESR Test"                                                          |                                                   |
+|                 |                                       |         | - "mCap Started Discharging"                                                   |                                                   |
+|                 |                                       |         | - "mCap Store Charging"                                                        |                                                   |
+|                 |                                       |         | - "Store Charged"                                                              |                                                   |
+|                 |                                       |         |                                                                                |                                                   |
+|                 |                                       |         | - "Bad Cell" - State describes what was the failure                            |                                                   |
+|-----------------+---------------------------------------+---------+--------------------------------------------------------------------------------+---------------------------------------------------|
+| esr             | Cell internal resistance              | Ω       |                                                                                |                                                   |
+| action_length   | Time elapsed since action was started | seconds |                                                                                |                                                   |
+| DiC             | number of disch. cycles               |         |                                                                                |                                                   |
+| complete_cycles | number of completed disch. cycles     |         |                                                                                |                                                   |
+| temperature     | Cell temperature                      | °C      |                                                                                |                                                   |
+|-----------------+---------------------------------------+---------+--------------------------------------------------------------------------------+---------------------------------------------------|
+| ChC             | Unknown                               | boolean |                                                                                |                                                   |
+|                 |                                       |         |                                                                                |                                                   |
+|-----------------+---------------------------------------+---------+--------------------------------------------------------------------------------+---------------------------------------------------|
+| State           | Second component of cell state        |         | - "Low voltage cell" when cell voltage is below the minimum for charging       | Mostly related to failure conditions              |
+|                 |                                       |         |                                                                                |                                                   |
+|                 |                                       |         | - "High ESR Error" when ESR during mCap was higher than maximum                |                                                   |
+|                 |                                       |         | - "HOT charged" and "HOT discharged" when temperature was exceeded during mCap |                                                   |
+|                 |                                       |         | - "Low capacity Error" when capacity during mCap was less than minimum         |                                                   |
+|                 |                                       |         |                                                                                |                                                   |
+|                 |                                       |         | - "Healthy" when cell voltage is OK                                            |                                                   |
+|                 |                                       |         | - "LVC recovery failed" when LVC has failed to recover the cell                |                                                   |
+|-----------------+---------------------------------------+---------+--------------------------------------------------------------------------------+---------------------------------------------------|
 
 
 *** Performing actions by the charger
