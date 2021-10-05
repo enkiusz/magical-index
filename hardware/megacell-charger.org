@@ -10,6 +10,9 @@
 This page gathers independent information about the Megacell Charger focusing primarily on the communications protocol used between the Megacell Monitor and the Megacell Charger
 with the purpose of creating custom automation.
 
+All of this information has been independently discovered, later to be found documented on [[http://manual.megacellmonitor.com:3000/en/APIspecifications][MegaCell Monitor Wiki]]. The "wiki" here is unfortunately not editable and may disappear at
+any time so the information here is likely to stay relevant as a backup.
+
 * Hardware
 
 The [[https://megacellcharger.com][Megacell charger]] is a 16-slot 18650 litihium ion cell charger with some automation capabilities and software control via 802.11 WLAN. The charger is bundled with software
@@ -598,17 +601,22 @@ Received%
 The values of the CmD field correspond to different actions that can be sent to the charger, the following codes have been documented based on what is available in the "New cell
 insert actions" in Megacell Monitor UI:
 
-| Action code       | Action name in Megacell Monitor UI | Description | Log message                                                             |
-|-------------------+------------------------------------+-------------+-------------------------------------------------------------------------|
-| /                 | <                                  | <           |                                                                         |
-| alr               | Start LVC recovery                 |             | (Informational) - CellID: 0 - handle_set_cell_state: start lvc recovery |
-| ach               | Start charging                     |             | (Notice) - CellID: 0 - handle_set_cell_state: Start Charging            |
-| sc                | Stop charging                      |             | (Informational) - CellID: 0 - handle_set_cell_state: Stop Charging      |
-| adc               | Start discharging                  |             | (Informational) - CellID: 0 - handle_set_cell_state: Start Discharging  |
-| odc               | Stop discharging                   |             | (Informational) - CellID: 0 - handle_set_cell_state: Stop Discharging   |
-| act               | Start capacity test                |             | (Informational) - CellID: 0 - handle_set_cell_state: Start cap test     |
-| omc               | Stop capacity test                 |             | (Informational) - CellID: 0 - handle_set_cell_state: Stop cap test      |
-| "" (empty string) | Stop operation                     |             |                                                                         |
+| Action code       | Action name in Megacell Monitor UI       | Description         | Log message                                                             |
+|-------------------+------------------------------------------+---------------------+-------------------------------------------------------------------------|
+| /                 | <                                        | <                   |                                                                         |
+| alr               | Start LVC recovery                       |                     | (Informational) - CellID: 0 - handle_set_cell_state: start lvc recovery |
+| ach               | Start charging                           |                     | (Notice) - CellID: 0 - handle_set_cell_state: Start Charging            |
+| sc                | Stop charging                            |                     | (Informational) - CellID: 0 - handle_set_cell_state: Stop Charging      |
+| adc               | Start discharging                        |                     | (Informational) - CellID: 0 - handle_set_cell_state: Start Discharging  |
+| odc               | Stop discharging                         |                     | (Informational) - CellID: 0 - handle_set_cell_state: Stop Discharging   |
+| act               | Start capacity test                      | mCap on charger LCD | (Informational) - CellID: 0 - handle_set_cell_state: Start cap test     |
+| omc               | Stop capacity test                       | mCap on charger LCD | (Informational) - CellID: 0 - handle_set_cell_state: Stop cap test      |
+| asc               | Not available in the Megacell Monitor UI | StartStoreCharge    |                                                                         |
+| osc               | Not available in the Megacell Monitor UI | StopStoreChrage     |                                                                         |
+| dsp               | Not available in the Megacell Monitor UI | DisposeStart        |                                                                         |
+| dps               | Not available in the Megacell Monitor UI | DisposeStop         |                                                                         |
+|                   |                                          |                     |                                                                         |
+| "" (empty string) | Stop operation                           |                     |                                                                         |
 
 *** Changing the log level
 
