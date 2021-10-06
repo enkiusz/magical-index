@@ -95,6 +95,7 @@ the hardware or firmware in the Megacell Charger or whether they are what the de
 | MaT            | Charger Settings -> Max Temp (C)                              |                                   40 |                                          |                                 |
 | DiC            | Charger Settings -> Discharge Cycles                          |                                    1 |                                          |                                 |
 | FwV            | Charger Settings -> Firmware version                          |                                      |                                          | Cannot be changed in UI         |
+| MuL            | Charger Settings -> Multicast enable                          |                                    0 |                                          |                                 |
 |----------------+---------------------------------------------------------------+--------------------------------------+------------------------------------------+---------------------------------|
 | ChC            | Not presented in UI directly                                  |                                      |                                          | Chip-controlled charging enable |
 |----------------+---------------------------------------------------------------+--------------------------------------+------------------------------------------+---------------------------------|
@@ -107,7 +108,6 @@ the hardware or firmware in the Megacell Charger or whether they are what the de
 | CcO            | Charger Settings -> Charge Correction Factor (%)              |                                    1 |                                          |                                 |
 | DcO            | Charger Settings -> Discharge Correction Factor (%)           |                                    1 |                                          |                                 |
 | MsR            | Circuit Breaker -> Max ESR value (mΩ)                         |                                  250 |                                          |                                 |
-| MuL            | Not presented in UI directly                                  |                                    0 |                                          | Unknown, value is always 0      |
 |----------------+---------------------------------------------------------------+--------------------------------------+------------------------------------------+---------------------------------|
 
 *** Set charger configuration
