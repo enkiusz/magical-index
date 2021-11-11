@@ -305,7 +305,7 @@ The SPI transfer content is sent out using a rather ghetto packet format which s
  packet. It's sure not future-proof though and some other way will need to be devised (maybe HDLC or PPP framing?).
 
 The code uses interrupts to detect all of the /CS and clock edges instead of polling or using the built-in SPI peripheral. I have found interrupts to be more reliable than simple polling and the built-in
- SPI peripheral is not useable in our case as it can reliably handle SPI transfers that are not multiples of 8 or 16 bits in length.
+ SPI peripheral is not useable in our case as it cannot reliably handle SPI transfers that are not multiples of 8 or 16 bits in length.
 
 The sniffer code has been built using the excellent [[https://github.com/libopencm3/libopencm3][libopencm3]] library for ARM Cortex M3 microcontrollers with the Makefiles and overall structure copied from our supreme leader Mike's [[https://github.com/szczys/bluepill-opencm3][opencm3 examples]]. 
 
