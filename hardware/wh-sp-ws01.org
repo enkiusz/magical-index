@@ -6,6 +6,7 @@
 <base href="wh-sp-ws01/"/>
 #+END_EXPORT
 
+* Hardware
 
 This is an anemometer for a very popular weather station sold on aliexpress (https://www.aliexpress.com/item/4001089508787.html)
 
@@ -23,7 +24,10 @@ It has an RJ-11 connector with a short cable:
 
 [[file:cable.jpg][file:thumb-cable.jpg]]
 
+* Calibration
 
+** Aliexpress
+   
 The way in which pulses from the anemometer can be converted into wind speed has been documented in one of the aliexpress offers https://www.aliexpress.com/item/4000352147677.html
 
 Quote:
@@ -39,3 +43,15 @@ The wind direction is marked with NSWE direction.
 There is also a connection schematic on the same site:
 
 file:conn.png
+
+** Weather Sensor Assembly p/n 80422 (Instructables)
+
+I have also found a weather station build description on [[https://www.instructables.com/LoRaWAN-Automatic-Weather-Station/][Instructables LoRaWAN Automatic Weather Station]]. There the WH-SP-WS01 aneomometer sensor is referenced as one of the parts
+and a [[https://gateway.pinata.cloud/ipfs/QmX3RaMoCPPXB8RvYAbcoaHYdEkEFahyr6UccCBQDMMPPW][datasheet]] is provided for it. Unfortunately, the calibration value presented there is different than the one provided on Aliexpress. The datasheet claims that winspeed of
+2.4 km/h generates 1 pulse per second (1 Hz). Unfortunately this is entirely inconsistent with what is reported by Aliexpress offer above. The conclusion is that the
+anemometer needs to be calibrated properly before any real meawsurements can be taken with it.
+
+* References
+
+- [[https://www.instructables.com/LoRaWAN-Automatic-Weather-Station/][An Instructables weather station build using this sensor]]
+- [[https://www.argentdata.com/files/80422_datasheet.pdf][The original location of the datasheet for the WH-SP-WS01 anemometer referenced on Instrucables]]
