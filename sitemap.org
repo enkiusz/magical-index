@@ -38,5 +38,6 @@
   - [[file:projects/reed-fuse.org][Reed switches as cell fuses]]
   - [[file:projects/rotor.org][Rotor]]
   - [[file:projects/secondlife-ups.org][Second Life UPS]]
+  - [[file:projects/th35-rail-18650-mounts.org][TH-35 (DIN rail) mounts for 18650 cell packs]]
   - [[file:projects/whitestar.org][Whitestar]]
   - [[file:projects/iot-power-meter.org][iot power meter]]

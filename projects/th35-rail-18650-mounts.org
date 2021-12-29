@@ -1,0 +1,68 @@
+#+TITLE: TH-35 (DIN rail) mounts for 18650 cell packs
+
+#+BEGIN_EXPORT html
+<base href="th35-rail-18650-mounts/"/>
+#+END_EXPORT
+
+* The rationale
+
+All builders of permanent DIY power wall batteries using refurbished 18650 cells need a way to mount the power packs into a rack or onto a wall where the battery will be
+deployed. For battery packs using the commonly found [[https://www.aliexpress.com/item/1005003181626763.html][4x5 or other format cell spacers/holders]] people have been using any number of ad-hoc solutions amounting to putting cell
+"blocks" on some kind of shelf or support and letting gravity do its work (for example [[https://www.youtube.com/watch?v=MyVK59ozYDE][here]] or [[https://www.youtube.com/watch?v=qh5Bff3Ae8E][here]]). I have initially considered the [[https://www.youtube.com/watch?v=GTU-w8iya0c][HBPowerwall 18650 mount]] to mount my cells
+but further research has pointed me towards a better solution - using TH-35 (aka DIN rails) and mount the cell packs on them. There are numerous advantages to using DIN rails:
+
+- they are a standard industry component which can be easily purchased instead of ordering custom-cut sheet metal like you would for the HBPowerwall mount
+- they are very versatile with mounting equipment other than the packs themselves with a lot of typical electrical equipment mountable on a DIN rail
+- they are easily expandable for multiple sizes or amounts of 18650 cell blocks, the HBPowerwall mount is designed for a 4x20 cell block and needs extra tricks to fit bigger
+  blocks (like shown on [[https://www.youtube.com/watch?v=EltBFVKStEg][this example]] with 10x20 blocks)
+
+the main disadvantage of using DIN rails to mount cell blocks is that the alignment of rails needs to be precise if two rails need to support a single cell block. This will be
+the case for most deployments and might require some kind of base board instead of using the wall directly. Naturally, using a bent sheet metal holder which already has the
+proper dimensions takes care of the above for us.
+
+While looking for existing designs for mounting 18650 cell blocks on DIN rails a number of existing solutions have been documented.
+
+- https://www.youtube.com/watch?v=aI3y65HWzqs
+- https://www.youtube.com/watch?v=Znbdh_Lq_w8
+- https://www.youtube.com/watch?v=wuQiwXhlYKo
+- https://www.youtube.com/watch?v=yzfTqGsklB8
+- https://www.youtube.com/watch?v=kJQh48c9h5Y
+
+After studying these solutions I have found a number of drawbacks with all of them:
+
+- they are designed to hold relatively small cell blocks not near enough to having for example 4x20 block capacity
+- many of them use a lot of filament in order to clip the cell holders from two sides and allow the block to "clip into" the holders
+- some of them use the triangle-shaped cutouts in the holders which don't allow for the [[https://batteryhookup.com/collections/accessories/products/nickel-fuse-2p-wide-continuous-roll-by-the-foot-18650-cell-level-fusing?variant=34549080457378][Batteryhookup nickel fuse roll]] to be used on the blocks
+
+The above findings have prompted me to design my own system of DIN rail mounts for 18650 cell blocks with the following features in mind:
+
+- flexibility - the mounts should allow for either small or large blocks that might need to be supported by more than one parallel DIN rail
+- price - the amount of filament used should be as small as possible
+- unobstructed both positive and negative sides of the cell pack in order to facilitate all ways of connecting the cells to busbars
+
+** Mount design
+
+The mounting bracket design has been performed in [[https://www.freecadweb.org/][FreeCAD]] and can be downloaded here. The basic design can be seen below:
+
+#+ATTR_HTML: :width 800
+[[file:hook-clip-female-dovetail.png]]
+
+This part has variants for both male and female dovetails as well as only hook, only clip or both hook+clip variants:
+
+|----------+---------------+------------------------------------------|
+| Dovetail | Variant       | Image                                    |
+|----------+---------------+------------------------------------------|
+|----------+---------------+------------------------------------------|
+| Male     | Hook          | file:thumb-hook-male-dovetail.png        |
+|----------+---------------+------------------------------------------|
+| Male     | Clip          | file:thumb-clip-male-dovetail.png        |
+|----------+---------------+------------------------------------------|
+| Male     | Hook and Clip | file:thumb-hook-clip-male-dovetail.png   |
+|----------+---------------+------------------------------------------|
+| Female   | Hook          | file:thumb-hook-female-dovetail.png      |
+|----------+---------------+------------------------------------------|
+| Female   | Clip          | file:thumb-clip-female-dovetail.png      |
+|----------+---------------+------------------------------------------|
+| Female   | Hook and Clip | [[file:thumb-hook-clip-female-dovetail.png]] |
+|----------+---------------+------------------------------------------|
+
