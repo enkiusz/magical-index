@@ -1,4 +1,4 @@
-#+TITLE: TH-35 (DIN rail) mounts for 18650 cell packs
+#+TITLE: TH-35 (DIN rail) mounting brackets for 18650 cell packs
 
 #+BEGIN_EXPORT html
 <base href="th35-rail-18650-mounts/"/>
@@ -7,7 +7,7 @@
 * The rationale
 
 All builders of permanent DIY power wall batteries using refurbished 18650 cells need a way to mount the power packs into a rack or onto a wall where the battery will be
-deployed. For battery packs using the commonly found [[https://www.aliexpress.com/item/1005003181626763.html][4x5 or other format cell spacers/holders]] people have been using any number of ad-hoc solutions amounting to putting cell
+deployed. For battery packs using the commonly found [[https://www.aliexpress.com/item/1005003181626763.html][20.2 mm pitch cell spacers/holders]] people have been using any number of ad-hoc solutions amounting to putting cell
 "blocks" on some kind of shelf or support and letting gravity do its work (for example [[https://www.youtube.com/watch?v=MyVK59ozYDE][here]] or [[https://www.youtube.com/watch?v=qh5Bff3Ae8E][here]]). I have initially considered the [[https://www.youtube.com/watch?v=GTU-w8iya0c][HBPowerwall 18650 mount]] to mount my cells
 but further research has pointed me towards a better solution - using TH-35 (aka DIN rails) and mount the cell packs on them. There are numerous advantages to using DIN rails:
 
@@ -40,17 +40,20 @@ The above findings have prompted me to design my own system of DIN rail mounts f
 - price - the amount of filament used should be as small as possible
 - unobstructed both positive and negative sides of the cell pack in order to facilitate all ways of connecting the cells to busbars
 
-** Mount design
+** Mounting bracket design
 
-The mounting bracket design has been performed in [[https://www.freecadweb.org/][FreeCAD]] and can be downloaded here. The basic design can be seen below:
+The mounting bracket design has been performed in [[https://www.freecadweb.org/][FreeCAD]] and is based on [[https://www.thingiverse.com/thing:500504]]. It can be downloaded from [[https://www.thingiverse.com/thing:5178220][Thingiverse]]. The basic design can be 
+seen below:
 
 #+ATTR_HTML: :width 800
 [[file:hook-clip-female-dovetail.png]]
 
+The brackets are designed to mate with the dovetails with popular 20.2 mm pitch 18650 cell spacers.
+
 This part has variants for both male and female dovetails as well as only hook, only clip or both hook+clip variants:
 
 |----------+---------------+------------------------------------------|
-| Dovetail | Variant       | Image                                    |
+| Dovetail | Variant       | Bracket image                            |
 |----------+---------------+------------------------------------------|
 |----------+---------------+------------------------------------------|
 | Male     | Hook          | file:thumb-hook-male-dovetail.png        |
@@ -65,4 +68,20 @@ This part has variants for both male and female dovetails as well as only hook, 
 |----------+---------------+------------------------------------------|
 | Female   | Hook and Clip | [[file:thumb-hook-clip-female-dovetail.png]] |
 |----------+---------------+------------------------------------------|
+
+How do the different mounting brackets work together? In order to understand this let's look at an example 5x16 cell block. This will be mounted on two parallel horizontal DIN rails
+using two sets of brackets. The top set of brackets will be the Hook variant and the bottom set of brackets will use the Clip variant. This arrangement will allow for the entire block
+to be secured as if it was a normal DIN-rail electrical equipment. Don't worry about the corroded junk cells, these are just to simulate the shape and mass:
+
+[[file:5x16-block.jpg][file:thumb-5x16-block.jpg]]
+
+When you zoom in into the particular brackets you can see how the male and female dovetails mate with eachother:
+
+| [[file:clip-male-mated.jpg][file:thumb-clip-male-mated.jpg]] | [[file:hook-female-mated.jpg][file:thumb-hook-female-mated.jpg]] |
+
+A video below demonstrates the brackets being attached to the two parallel DIN rails:
+
+#+BEGIN_EXPORT html
+<iframe src="https://diode.zone/videos/embed/6Rq2LP5VaQ2e2YkXKV3K84" frameborder="0" style="min-height: 600px; min-width: 800px" sandbox="allow-same-origin allow-scripts" allowfullscreen="allowfullscreen"></iframe>
+#+END_EXPORT
 
