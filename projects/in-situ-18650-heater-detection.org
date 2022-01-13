@@ -29,7 +29,11 @@ temperature. The temperature from the thermocouple is being read using a MAX6675
 file:ZIF-20C-TEMP-heater-locations.png
 
 The temperature sensors are labeled U1-U5 and their relative locations can be seen on the PCB silkscreen. The location of the fake heater cell is indicated with the "HEATER LOC 1"
-text. During the experimental runs the temperatures read from U1-U5 sensors are logged into a CSV file for analysis.
+text. During the experimental runs the temperatures read from U1-U5 sensors are logged into a CSV file for analysis. The assembled experimental setup can be seen below:
+
+[[file:experimental-setup-photo.jpg][file:thumb-experimental-setup-photo.jpg]]
+
+[[file:experimental-setup-heater.jpg][file:thumb-experimental-setup-heater.jpg]]
 
 * Software
 
