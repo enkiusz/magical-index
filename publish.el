@@ -1,4 +1,7 @@
 (require 'ox)
+  ( org-babel-do-load-languages 'org-babel-load-languages '((gnuplot . t)) )
+  ( org-babel-do-load-languages 'org-babel-load-languages '((python . t)) )
+  ( org-babel-do-load-languages 'org-babel-load-languages '((shell . t)) )
 
 (setf user-full-name "Maciej Grela")
 (setf user-mail-address "enki@fsck.pl")
@@ -24,14 +27,13 @@
 
         ("magical-index-static"
          :base-directory "."
-         :base-extension "css\\|js\\|svg\\|pdf\\|bin\\|rpm\\|deb\\|png\\|webp\\|jpg\\|jpeg\\|gif\\|apk\\|tar.xz\\|tar.bz2\\|tar.gz\\|zip\\|txt\\|py\\|sh\\|config\\|kicad.*\\|logicdata"
+         :base-extension "css\\|js\\|svg\\|pdf\\|bin\\|rpm\\|deb\\|png\\|webp\\|jpg\\|jpeg\\|gif\\|apk\\|tar.xz\\|tar.bz2\\|tar.gz\\|zip\\|txt\\|py\\|sh\\|config\\|kicad.*\\|logicdata\\|ino\\|csv"
          :exclude "_site/"
          :publishing-directory "_site/"
          :recursive t
          :with-author t
          :with-date nil
          :with-creator nil
-         :language "en"
          :publishing-function org-publish-attachment
          )
 
