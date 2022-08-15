@@ -9,6 +9,7 @@ fp-lib-table
 # Unzipped manufacturing files
 /**/*.kicad/manuf/
 
+.#*
 .*.swp
 _site
 .DS_Store
