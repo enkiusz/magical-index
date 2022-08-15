@@ -1,0 +1,100 @@
+#+TITLE: Enecsys Gateway CG-A-AB-US-1
+#+LANGUAGE: en
+#+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
+
+#+BEGIN_EXPORT html
+<base href="enecsys-gateway-cg-a-ab-us-1/"/>
+#+END_EXPORT
+
+* Intro
+
+
+The Enecsys Gateway is a Zigbee gateway allowing communications between the Enecsys microinverters and their monitoring backend. The Enecsys company is unfortunately [[https://businessbankruptcies.com/cases/enecsys-llc][defunct since 2015]]
+and their DNS domains have been taken over by a UK enecsys owner who created his own monitoring system on https://enecsys-monitoring.com/
+
+** Network interface
+
+[[file:boot.pcapng]]
+
+
+*** Port scans
+
+TCP port scan results for the gateway's IPv4 address:
+
+#+BEGIN_EXPORT html
+<pre>
+Starting Nmap 7.80 ( https://nmap.org ) at 2022-08-15 22:08 CEST
+Initiating ARP Ping Scan at 22:08
+Scanning 10.1.0.10 [1 port]
+Completed ARP Ping Scan at 22:08, 0.06s elapsed (1 total hosts)
+Initiating SYN Stealth Scan at 22:08
+Scannnnning 10.1.0.10 [65535 ports]
+Discovered open port 80/tcp on 10.1.0.10
+SYN Stealth Scan Timing: About 20.07% done; ETC: 22:11 (0:02:03 remaining)
+SYN Stealth Scan Timing: About 41.88% done; ETC: 22:11 (0:01:25 remaining)
+SYN Stealth Scan Timing: About 58.10% done; ETC: 22:11 (0:01:06 remaining)
+SYN Stealth Scan Timing: About 79.32% done; ETC: 22:11 (0:00:32 remaining)
+Completed SYN Stealth Scan at 22:11, 167.83s elapsed (65535 total ports)
+Nmap scan report for 10.1.0.10
+Host is up, received arp-response (0.0094s latency).
+Scanned at 2022-08-15 22:08:48 CEST for 168s
+Not shown: 65534 filtered ports
+Reason: 65534 no-responses
+Some closed ports may be reported as filtered due to --defeat-rst-ratelimit
+PORT   STATE SERVICE REASON
+80/tcp open  http    syn-ack ttl 100
+MAC Address: 34:C6:9A:00:16:D4 (Enecsys)
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 168.05 seconds
+           Raw packets sent: 131198 (5.773MB) | Rcvd: 136 (6.115KB)
+</pre>
+#+END_EXPORT
+
+UDP port scan results for the gateway's IPv4 address:
+
+#+BEGIN_EXPORT html
+<pre>
+Starting Nmap 7.80 ( https://nmap.org ) at 2022-08-15 22:12 CEST
+Initiating ARP Ping Scan at 22:12
+Scanning 10.1.0.10 [1 port]
+Completed ARP Ping Scan at 22:12, 0.06s elapsed (1 total hosts)
+Initiating UDP Scan at 22:12
+Scanning 10.1.0.10 [65535 ports]
+UDP Scan Timing: About 2.24% done; ETC: 22:35 (0:22:33 remaining)
+UDP Scan Timing: About 4.75% done; ETC: 22:34 (0:21:24 remaining)
+UDP Scan Timing: About 8.86% done; ETC: 22:34 (0:20:14 remaining)
+UDP Scan Timing: About 13.66% done; ETC: 22:34 (0:19:04 remaining)
+UDP Scan Timing: About 18.69% done; ETC: 22:34 (0:17:55 remaining)
+UDP Scan Timing: About 23.71% done; ETC: 22:34 (0:16:47 remaining)
+UDP Scan Timing: About 28.74% done; ETC: 22:34 (0:15:40 remaining)
+UDP Scan Timing: About 33.76% done; ETC: 22:34 (0:14:33 remaining)
+UDP Scan Timing: About 40.70% done; ETC: 22:33 (0:13:01 remaining)
+UDP Scan Timing: About 45.72% done; ETC: 22:33 (0:11:55 remaining)
+UDP Scan Timing: About 50.75% done; ETC: 22:33 (0:10:48 remaining)
+UDP Scan Timing: About 55.77% done; ETC: 22:33 (0:09:42 remaining)
+UDP Scan Timing: About 60.80% done; ETC: 22:33 (0:08:36 remaining)
+UDP Scan Timing: About 65.82% done; ETC: 22:33 (0:07:30 remaining)
+UDP Scan Timing: About 70.85% done; ETC: 22:33 (0:06:23 remaining)
+UDP Scan Timing: About 76.11% done; ETC: 22:33 (0:05:14 remaining)
+UDP Scan Timing: About 81.13% done; ETC: 22:33 (0:04:08 remaining)
+UDP Scan Timing: About 86.16% done; ETC: 22:33 (0:03:02 remaining)
+UDP Scan Timing: About 91.19% done; ETC: 22:33 (0:01:56 remaining)
+UDP Scan Timing: About 96.21% done; ETC: 22:33 (0:00:50 remaining)
+Completed UDP Scan at 22:33, 1314.24s elapsed (65535 total ports)
+Nmap scan report for 10.1.0.10
+Host is up, received arp-response (0.0027s latency).
+All 65535 scanned ports on 10.1.0.10 are open|filtered because of 65535 no-responses
+MAC Address: 34:C6:9A:00:16:D4 (Enecsys)
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 1314.44 seconds
+           Raw packets sent: 131071 (3.676MB) | Rcvd: 74 (4.290KB)
+</pre>
+#+END_EXPORT
+
+*** The Web interface
+
+The default credentials for the web interface are admin/password. You can tell that the gateway is (c) 2009 as there is no way to change the admin password ;).
+
+

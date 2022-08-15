@@ -1,0 +1,8 @@
+# Nmap 7.80 scan initiated Mon Aug 15 22:12:02 2022 as: nmap -p1-65535 -n --open -sU -oA hardware/enecsys-gateway-cg-a-ab-us-1/tcp-full -vv 10.1.0.10
+Nmap scan report for 10.1.0.10
+Host is up, received arp-response (0.0027s latency).
+All 65535 scanned ports on 10.1.0.10 are open|filtered because of 65535 no-responses
+MAC Address: 34:C6:9A:00:16:D4 (Enecsys)
+
+Read data files from: /usr/bin/../share/nmap
+# Nmap done at Mon Aug 15 22:33:56 2022 -- 1 IP address (1 host up) scanned in 1314.44 seconds

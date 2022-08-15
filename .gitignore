@@ -14,3 +14,6 @@ fp-lib-table
 _site
 .DS_Store
 
+# Sitemap is automatically regenerated when the projects are published
+# by org-mode
+sitemap.org
