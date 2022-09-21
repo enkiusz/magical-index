@@ -1,5 +1,0 @@
-# Nmap 7.80 scan initiated Mon Aug 15 22:12:02 2022 as: nmap -p1-65535 -n --open -sU -oA hardware/enecsys-gateway-cg-a-ab-us-1/tcp-full -vv 10.1.0.10
-# Ports scanned: TCP(0;) UDP(65535;1-65535) SCTP(0;) PROTOCOLS(0;)
-Host: 10.1.0.10 ()	Status: Up
-Host: 10.1.0.10 ()	Status: Up
-# Nmap done at Mon Aug 15 22:33:56 2022 -- 1 IP address (1 host up) scanned in 1314.44 seconds

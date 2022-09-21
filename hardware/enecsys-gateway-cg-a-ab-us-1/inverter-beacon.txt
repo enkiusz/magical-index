@@ -1,0 +1,35 @@
+No.     Time           Source                Destination           Protocol Length Info
+      1 0.000000                             Broadcast             IEEE 802.15.4 10     Beacon Request
+
+Frame 1: 10 bytes on wire (80 bits), 10 bytes captured (80 bits) on interface -, id 0
+IEEE 802.15.4 Command, Dst: Broadcast
+    Frame Control Field: 0x0803, Frame Type: Command, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: None
+    Sequence Number: 81
+    Destination PAN: 0xffff
+    Destination: 0xffff
+    Command Identifier: Beacon Request (0x07)
+    FCS: 0x6d72 (Correct)
+
+No.     Time           Source                Destination           Protocol Length Info
+      2 77.003990                            Broadcast             IEEE 802.15.4 10     Beacon Request
+
+Frame 2: 10 bytes on wire (80 bits), 10 bytes captured (80 bits) on interface -, id 0
+IEEE 802.15.4 Command, Dst: Broadcast
+    Frame Control Field: 0x0803, Frame Type: Command, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: None
+    Sequence Number: 97
+    Destination PAN: 0xffff
+    Destination: 0xffff
+    Command Identifier: Beacon Request (0x07)
+    FCS: 0xaaa2 (Correct)
+
+No.     Time           Source                Destination           Protocol Length Info
+      3 154.014790                           Broadcast             IEEE 802.15.4 10     Beacon Request
+
+Frame 3: 10 bytes on wire (80 bits), 10 bytes captured (80 bits) on interface -, id 0
+IEEE 802.15.4 Command, Dst: Broadcast
+    Frame Control Field: 0x0803, Frame Type: Command, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: None
+    Sequence Number: 113
+    Destination PAN: 0xffff
+    Destination: 0xffff
+    Command Identifier: Beacon Request (0x07)
+    FCS: 0xe812 (Correct)

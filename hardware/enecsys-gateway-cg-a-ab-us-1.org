@@ -98,3 +98,277 @@ Nmap done: 1 IP address (1 host up) scanned in 1314.44 seconds
 The default credentials for the web interface are admin/password. You can tell that the gateway is (c) 2009 as there is no way to change the admin password ;).
 
 
+
+** The Zigbee radio
+
+The inverter contains a [[https://octopart.com/etrx2-pa-telegesis-19255118][ETRX2-PA]] Zigbee module manufactured by Telegesis. More information about this module can be found in the page describing the [[file:../enecsys-smi-360-72.org][Enecsys SMI-360-72 Inverter]]. 
+When the gateway boots and initializes its radio interfaces it starts to send broadcast "beacon" frames every 15 seconds:
+
+#+BEGIN_EXPORT html
+<pre>
+No.     Time           Source                Destination           Protocol Length Info
+      1 0.000000       0x0000                Broadcast             ZigBee   47     Command, Dst: Broadcast, Src: 0x0000
+
+Frame 1: 47 bytes on wire (376 bits), 47 bytes captured (376 bits) on interface -, id 0
+    Interface id: 0 (-)
+    Encapsulation type: IEEE 802.15.4 Wireless PAN (104)
+    Arrival Time: Sep 21, 2022 20:43:42.000000000 CEST
+    [Time shift for this packet: 0.000000000 seconds]
+    Epoch Time: 1663785822.000000000 seconds
+    [Time delta from previous captured frame: 0.000000000 seconds]
+    [Time delta from previous displayed frame: 0.000000000 seconds]
+    [Time since reference or first frame: 0.000000000 seconds]
+    Frame Number: 1
+    Frame Length: 47 bytes (376 bits)
+    Capture Length: 47 bytes (376 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: wpan:zbee_nwk:data]
+IEEE 802.15.4 Data, Dst: Broadcast, Src: 0x0000
+    Frame Control Field: 0x8841, Frame Type: Data, PAN ID Compression, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: Short/16-bit
+    Sequence Number: 227
+    Destination PAN: 0x0064
+    Destination: 0xffff
+    Source: 0x0000
+    [Extended Source: Enecsys_00:77:35:c1:a9 (34:c6:9a:00:77:35:c1:a9)]
+    [Origin: 1]
+    FCS: 0xd8bc (Correct)
+ZigBee Network Layer Command, Dst: Broadcast, Src: 0x0000
+    Frame Control Field: 0x1209, Frame Type: Command, Discover Route: Suppress, Security, Extended Source Command
+    Destination: 0xfffc
+    Source: 0x0000
+    Radius: 1
+    Sequence Number: 23
+    Extended Source: Enecsys_00:77:35:c1:a9 (34:c6:9a:00:77:35:c1:a9)
+    ZigBee Security Header
+    Data (2 bytes)
+
+0000  9c 39                                             .9
+
+Frame 2: 47 bytes on wire (376 bits), 47 bytes captured (376 bits) on interface -, id 0
+    Interface id: 0 (-)
+    Encapsulation type: IEEE 802.15.4 Wireless PAN (104)
+    Arrival Time: Sep 21, 2022 20:43:58.070981000 CEST
+    [Time shift for this packet: 0.000000000 seconds]
+    Epoch Time: 1663785838.070981000 seconds
+    [Time delta from previous captured frame: 16.070981000 seconds]
+    [Time delta from previous displayed frame: 16.070981000 seconds]
+    [Time since reference or first frame: 16.070981000 seconds]
+    Frame Number: 2
+    Frame Length: 47 bytes (376 bits)
+    Capture Length: 47 bytes (376 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: wpan:zbee_nwk:data]
+IEEE 802.15.4 Data, Dst: Broadcast, Src: 0x0000
+    Frame Control Field: 0x8841, Frame Type: Data, PAN ID Compression, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: Short/16-bit
+    Sequence Number: 228
+    Destination PAN: 0x0064
+    Destination: 0xffff
+    Source: 0x0000
+    [Extended Source: Enecsys_00:77:35:c1:a9 (34:c6:9a:00:77:35:c1:a9)]
+    [Origin: 1]
+    FCS: 0x6a0b (Correct)
+ZigBee Network Layer Command, Dst: Broadcast, Src: 0x0000
+    Frame Control Field: 0x1209, Frame Type: Command, Discover Route: Suppress, Security, Extended Source Command
+    Destination: 0xfffc
+    Source: 0x0000
+    Radius: 1
+    Sequence Number: 24
+    Extended Source: Enecsys_00:77:35:c1:a9 (34:c6:9a:00:77:35:c1:a9)
+    ZigBee Security Header
+    Data (2 bytes)
+
+0000  37 38                                             78
+</pre>
+#+END_EXPORT
+
+Some more beacons can be found in [[file:gateway-beacon.txt]]. Unfortunately the beacons are encrypted with an unknown Zigbee Network key. This key is likely preconfigured as it would make sense 
+for such a closed-loop system. Adding the typical Zigbee key used by the Home Automation Profile (0x5A 0x69 0x67 0x42 0x65 0x65 0x41 0x6C 0x6C 0x69 0x61 0x6E 0x63 0x65 0x30 0x39).
+
+As for the inverter, when it boots it first sends out a standard Beacon Request Zigbee packet every 77 (sic!) seconds, see traffic [[file:inveter-beacon.txt]]:
+
+#+BEGIN_EXPORT html
+No.     Time           Source                Destination           Protocol Length Info
+      1 0.000000                             Broadcast             IEEE 802.15.4 10     Beacon Request
+
+Frame 1: 10 bytes on wire (80 bits), 10 bytes captured (80 bits) on interface -, id 0
+IEEE 802.15.4 Command, Dst: Broadcast
+    Frame Control Field: 0x0803, Frame Type: Command, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: None
+    Sequence Number: 81
+    Destination PAN: 0xffff
+    Destination: 0xffff
+    Command Identifier: Beacon Request (0x07)
+    FCS: 0x6d72 (Correct)
+
+No.     Time           Source                Destination           Protocol Length Info
+      2 77.003990                            Broadcast             IEEE 802.15.4 10     Beacon Request
+
+Frame 2: 10 bytes on wire (80 bits), 10 bytes captured (80 bits) on interface -, id 0
+IEEE 802.15.4 Command, Dst: Broadcast
+    Frame Control Field: 0x0803, Frame Type: Command, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: None
+    Sequence Number: 97
+    Destination PAN: 0xffff
+    Destination: 0xffff
+    Command Identifier: Beacon Request (0x07)
+    FCS: 0xaaa2 (Correct)
+
+No.     Time           Source                Destination           Protocol Length Info
+      3 154.014790                           Broadcast             IEEE 802.15.4 10     Beacon Request
+
+Frame 3: 10 bytes on wire (80 bits), 10 bytes captured (80 bits) on interface -, id 0
+IEEE 802.15.4 Command, Dst: Broadcast
+    Frame Control Field: 0x0803, Frame Type: Command, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: None
+    Sequence Number: 113
+    Destination PAN: 0xffff
+    Destination: 0xffff
+    Command Identifier: Beacon Request (0x07)
+    FCS: 0xe812 (Correct)
+#+END_EXPORT
+
+After receiving an answer to the Beacon Request from the gateway the standard association process starts. This has been captured and is available in [[file:zigbee-inverter-connect.pcapng]] 
+and [[file:inverter-associate.txt]] as a text dump. After the exchange of some data back and forth the gateway indicates that the inverter is connected by incrementing a counter on the 
+LCD. If the gateway doesn't receive any communications from the inverter for around 200 seconds it considers it disconnected and decreases the counter again.
+
+
+Packets captured so far:
+
+
+#+BEGIN_EXPORT html
+<code>
+WZ=qcE1dwCaxjQAAAZhIQEAAAAMClP1BfcFAJrGNEg=AE,S=2000011689 sent when inverter connects
+00000000  a9 c1 35 77 00 9a c6 34  00 00 07 51 21 01 00 00  |..5w...4...Q!...|
+00000010  00 0f 0a 53 f5 05 f7 05  00 9a c6 34 48           |...S.......4H|
+0000001d
+
+the first 8 bytes are the gateway Zigbee MAC address (34:c6:9a:00:77:35:c1:a9)
+next we get some data and then the inverter MAC address (34:c6:9a:00:05:f7:05:f5)
+
+WZ=qcE1dwCaxjQAAAaSIQEAAAAOClOpwTV3AJrGNEg=0E,S=2000011689 these are from the gateway itself
+00000000  a9 c1 35 77 00 9a c6 34  00 00 06 92 21 01 00 00  |..5w...4....!...|
+00000010  00 0e 0a 53 a9 c1 35 77  00 9a c6 34 48           |...S..5w...4H|
+0000001d
+
+This one is different, we don't have the inverter MAC but something else
+
+inverter serial on barcode
+
+01 00 04 50 29 (dec)
+01 00 04 32 1d (hex)
+
+inverter serial on label
+
+00 00 61 75 77 (dex)
+00 00 3d 4b 4d (hex)
+
+
+WS=9QX3BQCaxjQAAAbLIQEAAAAAFDADiAEAAgAAAAAAAAAYAY0AAwQF00  
+00000000  f5 05 f7 05 00 9a c6 34  00 00 06 cb 21 01 00 00  |.......4....!...|
+00000010  00 00 14 30 03 88 01 00  02 00 00 00 00 00 00 00  |...0............|
+00000020  18 01 8d 00 03 04 05                              |.......|
+00000027
+
+First 8 bytes are the MAC address of the inverter (34:c6:9a:00:05:f7:05:f5), later we have something that appears to be data from the inverter
+
+WZ=qcE1dwCaxjQAAAdRIQEAAAAPClP1BfcFAJrGNEg=60,S=2000011689
+00000000  a9 c1 35 77 00 9a c6 34  00 00 07 51 21 01 00 00  |..5w...4...Q!...|
+00000010  00 0f 0a 53 f5 05 f7 05  00 9a c6 34 48           |...S.......4H|
+0000001d
+
+WS=9QX3BQCaxjQAAAdYIQIAAAAAFDADiAEAAgAAAAAAAAAZAY0AAwAF81
+00000000  f5 05 f7 05 00 9a c6 34  00 00 07 58 21 02 00 00  |.......4...X!...|
+00000010  00 00 14 30 03 88 01 00  02 00 00 00 00 00 00 00  |...0............|
+00000020  19 01 8d 00 03 00 05                              |.......|
+00000027
+
+WS=9QX3BQCaxjQAAAdYIQIAAAAAFDADiAEAAgAAAAAAAAAZAY0AAwAF81  << these seem to come from the inverter
+00000000  f5 05 f7 05 00 9a c6 34  00 00 07 58 21 02 00 00  |.......4...X!...|
+00000010  00 00 14 30 03 88 01 00  02 00 00 00 00 00 00 00  |...0............|
+00000020  19 01 8d 00 03 00 05                              |.......|
+00000027
+
+WS=9QX3BQCaxjQAAAe7IQEAAAACFDADiAEAAgAAAAAAADgZAY0AAwAF44
+00000000  f5 05 f7 05 00 9a c6 34  00 00 07 bb 21 01 00 00  |.......4....!...|
+00000010  00 02 14 30 03 88 01 00  02 00 00 00 00 00 00 38  |...0...........8|
+00000020  19 01 8d 00 03 00 05                              |.......|
+00000027
+
+WS=9QX3BQCaxjQAAAkkIQEAAAAFFDADiAEAAgAAAAAAADgZAY0AAwAF8A
+00000000  f5 05 f7 05 00 9a c6 34  00 00 09 24 21 01 00 00  |.......4...$!...|
+00000010  00 05 14 30 03 88 01 00  02 00 00 00 00 00 00 38  |...0...........8|
+00000020  19 01 8d 00 03 00 05                              |.......|
+00000027
+
+WZ=qcE1dwCaxjQAAAkyIQEAAAATClP1BfcFAJrGNEg=7A,S=2000011689
+00000000  a9 c1 35 77 00 9a c6 34  00 00 09 32 21 01 00 00  |..5w...4...2!...|
+00000010  00 13 0a 53 f5 05 f7 05  00 9a c6 34 48           |...S.......4H|
+0000001d
+
+
+WZ=qcE1dwCaxjQAAAljIQEAAAAUClOpwTV3AJrGNEg=E9,S=2000011689
+00000000  a9 c1 35 77 00 9a c6 34  00 00 09 63 21 01 00 00  |..5w...4...c!...|
+00000010  00 14 0a 53 a9 c1 35 77  00 9a c6 34 48           |...S..5w...4H|
+0000001d
+
+WS=9QX3BQCaxjQAAAoUIQEAAAAHFDADiAEAAgAAAAAAADgaAY0AAwAF5B
+00000000  f5 05 f7 05 00 9a c6 34  00 00 0a 14 21 01 00 00  |.......4....!...|
+00000010  00 07 14 30 03 88 01 00  02 00 00 00 00 00 00 38  |...0...........8|
+00000020  1a 01 8d 00 03 00 05                              |.......|
+00000027
+
+WZ=qcE1dwCaxjQAAAoiIQEAAAAVClP1BfcFAJrGNEg=22,S=2000011689
+WZ=qcE1dwCaxjQAAApTIQEAAAAWClOpwTV3AJrGNEg=BD,S=2000011689
+
+WS=9QX3BQCaxjQAAAqMIQEAAAAIFDADiAEAAgAAAAAAADgaAY0AAwAF44
+WS=9QX3BQCaxjQAAAsEIQEAAAAJFDADiAEAAgAAAAAAADgaAY0AAwAF1E
+
+WZ=qcE1dwCaxjQAAAz0IQEAAAAbClP1BfcFAJrGNEg=C9,S=2000011689
+WZ=qcE1dwCaxjQAAA0lIQEAAAAcClOpwTV3AJrGNEg=BC,S=2000011689
+WS=9QX3BQCaxjQAAA3WIQEAAAAPFDADiAEAAgAAAAAAADgaAY0AAwAFCF
+WZ=qcE1dwCaxjQAAA4VIQEAAAAeClOpwTV3AJrGNEg=A0,S=2000011689
+WS=9QX3BQCaxjQAAA5OIQEAAAAQFDADiAEAAgAAAAAAADgaAY0AAwAF9D
+
+
+WS=9QX3BQCaxjQAAD2_IQEAAAB1FDADiAEAAgAAAAAAADgdAY0AAwAF46
+
+
+WZ=qcE1dwCaxjQAAD6-IQEAAACFClP1BfcFAJrGNEg=48,S=2000011689
+
+
+
+
+Vdc = 36V
+36 dec == 24 hex
+
+WS=9QX3BQCaxjQAAEs1IQEAAAALFDADiAMAAgAAAAAAADgdAY4AAwAFCB
+00000000: F5 05 F7 05 00 9A C6 34  00 00 4B 35 21 01 00 00  .......4..K5!...
+00000010: 00 0B 14 30 03 88 03 00  02 00 00 00 00 00 00 38  ...0...........8
+00000020: 1D 01 8E 00 03 00 05                              .......
+
+WS=9QX3BQCaxjQAAEuuIQEAAAAMFDADiAMAAgAAAAAAADgdAY4AAwAF2E
+00000000: F5 05 F7 05 00 9A C6 34  00 00 4B AE 21 01 00 00  .......4..K.!...
+00000010: 00 0C 14 30 03 88 03 00  02 00 00 00 00 00 00 38  ...0...........8
+00000020: 1D 01 8E 00 03 00 05   
+
+
+Vdc = 42V 
+42 dec == 2a hex
+
+WS=9QX3BQCaxjQAAE0WIQEAAAAPFDADiAMAAgAAAAAAAEUdAY4AAwAF29
+00000000: F5 05 F7 05 00 9A C6 34  00 00 4D 16 21 01 00 00  .......4..M.!...
+00000010: 00 0F 14 30 03 88 03 00  02 00 00 00 00 00 00 45  ...0...........E
+00000020: 1D 01 8E 00 03 00 05                              .......
+WS=9QX3BQCaxjQAAE2OIQEAAAAQFDADiAMAAgAAAAAAAEUdAY4AAwAFE5
+00000000: F5 05 F7 05 00 9A C6 34  00 00 4D 8E 21 01 00 00  .......4..M.!...
+00000010: 00 10 14 30 03 88 03 00  02 00 00 00 00 00 00 45  ...0...........E
+00000020: 1D 01 8E 00 03 00 05                              .......
+WS=9QX3BQCaxjQAAE4HIQEAAAARFDADiAMAAgAAAAAAAEUdAY4AAwAFE1
+00000000: F5 05 F7 05 00 9A C6 34  00 00 4E 07 21 01 00 00  .......4..N.!...
+00000010: 00 11 14 30 03 88 03 00  02 00 00 00 00 00 00 45  ...0...........E
+00000020: 1D 01 8E 00 03 00 05                              .......
+
+</code>
+#+END_EXPORT
+
+
+
