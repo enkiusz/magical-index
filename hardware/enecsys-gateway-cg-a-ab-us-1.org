@@ -189,6 +189,7 @@ for such a closed-loop system. Adding the typical Zigbee key used by the Home Au
 As for the inverter, when it boots it first sends out a standard Beacon Request Zigbee packet every 77 (sic!) seconds, see traffic [[file:inveter-beacon.txt]]:
 
 #+BEGIN_EXPORT html
+<pre>
 No.     Time           Source                Destination           Protocol Length Info
       1 0.000000                             Broadcast             IEEE 802.15.4 10     Beacon Request
 
@@ -224,6 +225,7 @@ IEEE 802.15.4 Command, Dst: Broadcast
     Destination: 0xffff
     Command Identifier: Beacon Request (0x07)
     FCS: 0xe812 (Correct)
+</pre>
 #+END_EXPORT
 
 After receiving an answer to the Beacon Request from the gateway the standard association process starts. This has been captured and is available in [[file:zigbee-inverter-connect.pcapng]] 
@@ -235,7 +237,7 @@ Packets captured so far:
 
 
 #+BEGIN_EXPORT html
-<code>
+<pre>
 WZ=qcE1dwCaxjQAAAZhIQEAAAAMClP1BfcFAJrGNEg=AE,S=2000011689 sent when inverter connects
 00000000  a9 c1 35 77 00 9a c6 34  00 00 07 51 21 01 00 00  |..5w...4...Q!...|
 00000010  00 0f 0a 53 f5 05 f7 05  00 9a c6 34 48           |...S.......4H|
@@ -367,7 +369,7 @@ WS=9QX3BQCaxjQAAE4HIQEAAAARFDADiAMAAgAAAAAAAEUdAY4AAwAFE1
 00000010: 00 11 14 30 03 88 03 00  02 00 00 00 00 00 00 45  ...0...........E
 00000020: 1D 01 8E 00 03 00 05                              .......
 
-</code>
+</pre>
 #+END_EXPORT
 
 
