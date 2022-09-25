@@ -95,8 +95,6 @@ def parse_pkt(pkt):
     hexdump(contents)
 
     if flavor == 'WZ':
-        return  # We're not interested in WZ messages for now
-
         if type == 0x2100:  # Bootup message
 
             log.info('gw bootup', gw_eui64=eui64)
