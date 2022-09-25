@@ -226,11 +226,11 @@ def parse_pkt(pkt):
 
 
 def zigbee_packets(config):
-    log.info('polling start', url=config.url, period=config.polling_period)
+    log.info('polling start', url=config.gateway_url, period=config.polling_period)
     total_requests = 0
 
     while True:
-        response = requests.get(config.url)
+        response = requests.get(config.gateway_url)
         response.raise_for_status()
 
         total_requests +=1
@@ -270,7 +270,7 @@ def file_packets(config):
 
 def main(config):
 
-    if config.url:
+    if config.gateway_url:
         packet_source = zigbee_packets(config)
     elif config.files:
         packet_source = file_packets(config)
@@ -307,7 +307,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Poll the Enecsys Gateway for Zigbee packets')
     parser.add_argument('--loglevel', choices=LOG_LEVEL_NAMES, default='INFO', help='Change log level')
-    parser.add_argument('--url', help='Poll messages from gateway URL')
+    parser.add_argument('--gateway-url', help='Poll messages from gateway URL')
     parser.add_argument('--polling-period', default=0, help='Time between polling requests')
     parser.add_argument('--file', dest='files', nargs='+', help='Read messages from file, use - for standard input')
     parser.add_argument("--broker-url", metavar="NAME", help="Send data to specified MQTT broker URL")
