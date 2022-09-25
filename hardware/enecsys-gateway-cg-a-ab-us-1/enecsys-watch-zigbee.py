@@ -310,7 +310,7 @@ if __name__ == "__main__":
     parser.add_argument('--url', help='Poll messages from gateway URL')
     parser.add_argument('--polling-period', default=0, help='Time between polling requests')
     parser.add_argument('--file', dest='files', nargs='+', help='Read messages from file, use - for standard input')
-    parser.add_argument("--mqtt-broker", metavar="NAME", help="Send data to specified MQTT broker URL")
+    parser.add_argument("--broker-url", metavar="NAME", help="Send data to specified MQTT broker URL")
     parser.add_argument("--topic-base", metavar="TOPIC", default='enecsys', help="Set MQTT topic base")
     parser.add_argument("--mqtt-reconnect-delay", metavar="MIN MAX", nargs=2, type=int, help="Set MQTT client reconnect behaviour")
 
