@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 
-from re import I
 import sys
+import time
 import argparse
 import logging
 import structlog
 import requests
 from xml.dom.minidom import parseString
 import base64
+from urllib.parse import urlparse
+import json
 from struct import unpack, calcsize
 from hexdump import hexdump
 import fileinput
 from datetime import timedelta
 from binascii import hexlify, unhexlify
+from pathlib import Path
 
 # Default logging configuration
 structlog.configure(
@@ -47,7 +50,8 @@ def consume(b, formatstring):
 
 
 def parse_pkt(pkt):
-    log.info('parsing packet', pkt=pkt)
+    log.debug('parsing packet', pkt=pkt)
+    parsed = dict(_raw=pkt)
 
     flavor = pkt[0:2]
     payload = pkt[3:]
@@ -70,10 +74,10 @@ def parse_pkt(pkt):
         log.error('cannot decode base64', pkt=pkt)
         return None
 
-    log.info('unwrapped', flavor=flavor, kvps=kvps, checksum=checksum)
+    log.debug('unwrapped', flavor=flavor, kvps=kvps, checksum=checksum)
 
-    print("PAYLOAD")
-    hexdump(payload)
+    #print("PAYLOAD")
+    #hexdump(payload)
 
     #
     # Parse fields common to both WZ ans WS flavors
@@ -87,17 +91,25 @@ def parse_pkt(pkt):
     # The uptime unit is 500ms
     uptime = timedelta(seconds=uptime * 0.5)
 
-    log.info('common fields', eui64=eui64, uptime=str(uptime), type=hex(type), counter=counter, length=length)
+    log.debug('common fields', eui64=eui64, uptime=str(uptime), type=hex(type), counter=counter, length=length)
 
     (payload, contents) = consume(payload, f'{length}s')
-
-    print("CONTENTS")
-    hexdump(contents)
+    parsed.update({
+        'eui64': eui64,
+        'flavor': flavor,
+        'type': hex(type),
+        'uptime': uptime.total_seconds(),
+        'counter': counter,
+    })
+    #print("CONTENTS")
+    #hexdump(contents)
 
     if flavor == 'WZ':
         if type == 0x2100:  # Bootup message
 
             log.info('gw bootup', gw_eui64=eui64)
+            parsed['label'] = 'gw bootup'
+            parsed['gw_eui64'] = gw_eui64
 
             # Hypothesis for contents:
             #
@@ -113,13 +125,15 @@ def parse_pkt(pkt):
                 log.warn('unexpected contents', pkt=pkt, contents=contents)
 
         elif type == 0x2101:  # Connectivity report, sent out reporting the EUI64 of seen inverters
-
-            log.info('gw beacon', contents=contents)
-
             (contents, code1, device_eui64_bytes, code2) = consume(contents, 'B8sB')
             device_eui64 = format_eui64(device_eui64_bytes)
 
-            log.info('gw device report', gw_eui64=eui64, device=device_eui64, code1=code1, code2=code2)
+            log.info('device alive', gw_eui64=eui64, device_eui64=device_eui64, code1=code1, code2=code2)
+            parsed.update({
+                'label': 'device alive',
+                'gw_eui64': eui64,
+                'device_eui64': device_eui64
+            })
 
             if code1 != 0x53:
                 log.warn('unexpected value', pkt=pkt, code1=code1)
@@ -134,7 +148,9 @@ def parse_pkt(pkt):
     elif flavor == 'WS':
 
         if type == 0x2100:  # Bootup message
-            (contents, unknown1) = consume(contents, '7s')
+            (contents, unknown1) = consume(contents, '3s')
+            (contents, inverter_id) = consume(contents, '4s')
+            inverter_id = hexlify(inverter_id)
 
             (contents, text1) = consume(contents, '16s')
             text1 = text1.decode('ascii').rstrip('\x00')
@@ -144,9 +160,15 @@ def parse_pkt(pkt):
 
             (contents, text2) = consume(contents, '16s')
 
-            log.info('inverter bootup', unknown1=unknown1, text1=text1, unknown2=unknown2, unknown3=unknown3, text2=text2)
+            log.info('inverter bootup', unknown1=unknown1, inverter_id=inverter_id, text1=text1, unknown2=unknown2, unknown3=unknown3, text2=text2)
+            parser.update({
+                'label': 'inverter bootup',
+                'inverter_id': inverter_id,
+                'text1': text1,
+                'text2': text2,
+            })
 
-            if unknown1 != b'r\x01\x03\x05\xf7\x05\xf5':  # Value seen so far
+            if unknown1 != b'r\x01\x03':  # Value seen so far
                 log.warn('unexpected value', pkt=pkt, unknown1=unknown1)
 
             if text1 != 'WSI-00003':
@@ -168,15 +190,23 @@ def parse_pkt(pkt):
             (contents, unknown1, dc_power, ac_power, efficiency, ac_frequency, mppt_drive, unknown2, mppt_flag, unknown3) = consume(contents, '!4sHHHBxH4sBB')
 
             # efficiency:
-            efficiency = 0.1 * efficiency
+            efficiency = 0.001 * efficiency
 
             # mppt_flag:
             # -> 04 means voltage is too low for MPPT
             # -> 00 means MPPT is operating
+
             v_ac = 0.004 * mppt_drive
 
             log.info(t_label, unknown1=unknown1, ac_frequency=ac_frequency, v_ac=round(v_ac,2), mppt_drive=mppt_drive, dc_power=dc_power, ac_power=ac_power, efficiency=efficiency, unknown2=unknown2, mppt_flag=mppt_flag, unknown3=unknown3)
-
+            parsed.update({
+                'label': t_label,
+                'v_ac': v_ac,
+                'dc_power': dc_power,
+                'ac_power': ac_power,
+                'efficiency': efficiency,
+                'mppt_flag': mppt_flag
+            })
         else:
             log.warn('unknown message type', pkt=pkt, type=hex(type), contents=contents)
 
@@ -192,8 +222,11 @@ def parse_pkt(pkt):
         print("UNPARSED PAYLOAD")
         hexdump(payload)
 
+    return parsed
+
+
 def zigbee_packets(config):
-    log.info('polling start', url=config.url)
+    log.info('polling start', url=config.url, period=config.polling_period)
     total_requests = 0
 
     while True:
@@ -218,6 +251,8 @@ def zigbee_packets(config):
         except AttributeError as e:
             continue
 
+        time.sleep(config.polling_period)
+
     raise RuntimeError("We shouldn't have gotten here")
 
 
@@ -241,15 +276,43 @@ def main(config):
         packet_source = file_packets(config)
 
     for pkt in packet_source:
-       parse_pkt(pkt)
+        parsed = parse_pkt(pkt)
+        log.debug('parsed packet', parsed=parsed)
 
+        topic = Path(config.topic_base)
+
+        if mqtt_client:
+            topic2 = topic / 'raw_message'
+            topic2 /= parsed['eui64']
+            log.debug('publishing to mqtt', topic=topic2, payload=parsed['_raw'])
+            mqtt_client.publish(str(topic2), parsed['_raw'], qos=1)
+
+
+            if parsed['label'] == 'device alive':
+                pass
+
+            if parsed['label'] in ('inverter idle', 'inverter online'):
+                topic /= 'inverter' 
+                topic /= parsed['eui64']
+                payload = json.dumps({
+                    'dc_power': dict(v=parsed['dc_power'], u='W'),
+                    'ac_power': dict(v=parsed['ac_power'], u='W'),
+                    'efficiency': dict(v=parsed['efficiency'], u='1/1'),
+                    'ac_voltage': dict(v=parsed['v_ac'], u='V')
+                })
+                log.debug('publishing to mqtt', topic=str(topic), payload=payload)
+                mqtt_client.publish(str(topic), payload, qos=1)
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Poll the Enecsys Gateway for Zigbee packets')
     parser.add_argument('--loglevel', choices=LOG_LEVEL_NAMES, default='INFO', help='Change log level')
     parser.add_argument('--url', help='Poll messages from gateway URL')
+    parser.add_argument('--polling-period', default=0, help='Time between polling requests')
     parser.add_argument('--file', dest='files', nargs='+', help='Read messages from file, use - for standard input')
+    parser.add_argument("--mqtt-broker", metavar="NAME", help="Send data to specified MQTT broker URL")
+    parser.add_argument("--topic-base", metavar="TOPIC", default='enecsys', help="Set MQTT topic base")
+    parser.add_argument("--mqtt-reconnect-delay", metavar="MIN MAX", nargs=2, type=int, help="Set MQTT client reconnect behaviour")
 
     (args) = parser.parse_args()
     config = args
@@ -258,5 +321,36 @@ if __name__ == "__main__":
     structlog.configure( wrapper_class=structlog.make_filtering_bound_logger(getattr(logging, args.loglevel)) )
 
     log.debug('config', args=args)
+
+    if config.mqtt_broker:
+        broker_url = urlparse(config.mqtt_broker)
+
+        import paho.mqtt.client as mqtt
+        import ssl
+
+        mqtt_client = mqtt.Client()
+        #mqtt_client.enable_logger(logger=log)  # FIXME: How to configure paho-mqtt to use structlog?
+
+        if broker_url.scheme == 'mqtts':
+            log.debug("initializing mqtt TLS")
+            mqtt_client.tls_set(cert_reqs=ssl.CERT_NONE)
+            mqtt_port = 8883
+        else:
+            mqtt_port = 1883
+
+        if config.mqtt_reconnect_delay is not None:
+            (_min_delay, _max_delay) = config.mqtt_reconnect_delay
+            mqtt_client.reconnect_delay_set(min_delay=_min_delay, max_delay=_max_delay)
+
+        try:
+            log.info('connecting to mqtt', broker=config.mqtt_broker)
+            mqtt_client.connect(broker_url.netloc, port=mqtt_port)
+            mqtt_client.loop_start()
+        except:
+            # Connection to broker failed
+            log.error("Cannot connect to MQTT broker", _exc_info=True)
+            sys.exit(1)
+    else:
+        mqtt_client = None
 
     main(config)
