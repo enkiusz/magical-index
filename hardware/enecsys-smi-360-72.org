@@ -26,7 +26,6 @@ Some remnants of the development kit brochures can be found on [[https://media.d
 As a sidenote, the EM250 is also used in the popular XBee and XBee-PRO Zigbee RF modules models XBEE2, XBEEPRO2 as described in their [[https://usermanual.wiki/Digi/XBEEPRO2.Revised-Used-Manual][User manual]]. This has also been independently
 confirmed on the Digi (maker of XBee) [[https://www.digi.com/support/forum/6928/ember-znet-firmwares-on-xbee-series-2-modules][forums]].
 
-
 * Random links
 
 A random thread on Microchip's forum describing how you can enter the Ember bootloader from the AT command (default firmware) by entering 

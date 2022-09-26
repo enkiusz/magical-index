@@ -109,7 +109,7 @@ def parse_pkt(pkt):
 
             log.info('gw bootup', gw_eui64=eui64)
             parsed['label'] = 'gw bootup'
-            parsed['gw_eui64'] = gw_eui64
+            parsed['gw_eui64'] = eui64
 
             # Hypothesis for contents:
             #

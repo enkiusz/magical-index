@@ -12,97 +12,12 @@
 The Enecsys Gateway is a Zigbee gateway allowing communications between the Enecsys microinverters and their monitoring backend. The Enecsys company is unfortunately [[https://businessbankruptcies.com/cases/enecsys-llc][defunct since 2015]]
 and their DNS domains have been taken over by a UK enecsys owner who created his own monitoring system on https://enecsys-monitoring.com/
 
-** Network interface
+* Zigbee Radio
 
-[[file:boot.pcapng]]
+The gateway contains a [[https://octopart.com/etrx2-pa-telegesis-19255118][ETRX2-PA]] Zigbee module manufactured by Telegesis. More information about this module can be found in the page describing the [[file:../enecsys-smi-360-72.org][Enecsys SMI-360-72 Inverter]]. This
+module is connected with an UART on the main MCU. The uart settings are 19200 8n1.
 
-
-*** Port scans
-
-TCP port scan results for the gateway's IPv4 address:
-
-#+BEGIN_EXPORT html
-<pre>
-Starting Nmap 7.80 ( https://nmap.org ) at 2022-08-15 22:08 CEST
-Initiating ARP Ping Scan at 22:08
-Scanning 10.1.0.10 [1 port]
-Completed ARP Ping Scan at 22:08, 0.06s elapsed (1 total hosts)
-Initiating SYN Stealth Scan at 22:08
-Scannnnning 10.1.0.10 [65535 ports]
-Discovered open port 80/tcp on 10.1.0.10
-SYN Stealth Scan Timing: About 20.07% done; ETC: 22:11 (0:02:03 remaining)
-SYN Stealth Scan Timing: About 41.88% done; ETC: 22:11 (0:01:25 remaining)
-SYN Stealth Scan Timing: About 58.10% done; ETC: 22:11 (0:01:06 remaining)
-SYN Stealth Scan Timing: About 79.32% done; ETC: 22:11 (0:00:32 remaining)
-Completed SYN Stealth Scan at 22:11, 167.83s elapsed (65535 total ports)
-Nmap scan report for 10.1.0.10
-Host is up, received arp-response (0.0094s latency).
-Scanned at 2022-08-15 22:08:48 CEST for 168s
-Not shown: 65534 filtered ports
-Reason: 65534 no-responses
-Some closed ports may be reported as filtered due to --defeat-rst-ratelimit
-PORT   STATE SERVICE REASON
-80/tcp open  http    syn-ack ttl 100
-MAC Address: 34:C6:9A:00:16:D4 (Enecsys)
-
-Read data files from: /usr/bin/../share/nmap
-Nmap done: 1 IP address (1 host up) scanned in 168.05 seconds
-           Raw packets sent: 131198 (5.773MB) | Rcvd: 136 (6.115KB)
-</pre>
-#+END_EXPORT
-
-UDP port scan results for the gateway's IPv4 address:
-
-#+BEGIN_EXPORT html
-<pre>
-Starting Nmap 7.80 ( https://nmap.org ) at 2022-08-15 22:12 CEST
-Initiating ARP Ping Scan at 22:12
-Scanning 10.1.0.10 [1 port]
-Completed ARP Ping Scan at 22:12, 0.06s elapsed (1 total hosts)
-Initiating UDP Scan at 22:12
-Scanning 10.1.0.10 [65535 ports]
-UDP Scan Timing: About 2.24% done; ETC: 22:35 (0:22:33 remaining)
-UDP Scan Timing: About 4.75% done; ETC: 22:34 (0:21:24 remaining)
-UDP Scan Timing: About 8.86% done; ETC: 22:34 (0:20:14 remaining)
-UDP Scan Timing: About 13.66% done; ETC: 22:34 (0:19:04 remaining)
-UDP Scan Timing: About 18.69% done; ETC: 22:34 (0:17:55 remaining)
-UDP Scan Timing: About 23.71% done; ETC: 22:34 (0:16:47 remaining)
-UDP Scan Timing: About 28.74% done; ETC: 22:34 (0:15:40 remaining)
-UDP Scan Timing: About 33.76% done; ETC: 22:34 (0:14:33 remaining)
-UDP Scan Timing: About 40.70% done; ETC: 22:33 (0:13:01 remaining)
-UDP Scan Timing: About 45.72% done; ETC: 22:33 (0:11:55 remaining)
-UDP Scan Timing: About 50.75% done; ETC: 22:33 (0:10:48 remaining)
-UDP Scan Timing: About 55.77% done; ETC: 22:33 (0:09:42 remaining)
-UDP Scan Timing: About 60.80% done; ETC: 22:33 (0:08:36 remaining)
-UDP Scan Timing: About 65.82% done; ETC: 22:33 (0:07:30 remaining)
-UDP Scan Timing: About 70.85% done; ETC: 22:33 (0:06:23 remaining)
-UDP Scan Timing: About 76.11% done; ETC: 22:33 (0:05:14 remaining)
-UDP Scan Timing: About 81.13% done; ETC: 22:33 (0:04:08 remaining)
-UDP Scan Timing: About 86.16% done; ETC: 22:33 (0:03:02 remaining)
-UDP Scan Timing: About 91.19% done; ETC: 22:33 (0:01:56 remaining)
-UDP Scan Timing: About 96.21% done; ETC: 22:33 (0:00:50 remaining)
-Completed UDP Scan at 22:33, 1314.24s elapsed (65535 total ports)
-Nmap scan report for 10.1.0.10
-Host is up, received arp-response (0.0027s latency).
-All 65535 scanned ports on 10.1.0.10 are open|filtered because of 65535 no-responses
-MAC Address: 34:C6:9A:00:16:D4 (Enecsys)
-
-Read data files from: /usr/bin/../share/nmap
-Nmap done: 1 IP address (1 host up) scanned in 1314.44 seconds
-           Raw packets sent: 131071 (3.676MB) | Rcvd: 74 (4.290KB)
-</pre>
-#+END_EXPORT
-
-*** The Web interface
-
-The default credentials for the web interface are admin/password. You can tell that the gateway is (c) 2009 as there is no way to change the admin password ;).
-
-
-
-** The Zigbee radio
-
-The inverter contains a [[https://octopart.com/etrx2-pa-telegesis-19255118][ETRX2-PA]] Zigbee module manufactured by Telegesis. More information about this module can be found in the page describing the [[file:../enecsys-smi-360-72.org][Enecsys SMI-360-72 Inverter]]. 
-When the gateway boots and initializes its radio interfaces it starts to send broadcast "beacon" frames every 15 seconds:
+When the gateway boots and initializes its radio interfaces it starts to send broadcast frames every 15 seconds:
 
 #+BEGIN_EXPORT html
 <pre>
@@ -184,9 +99,10 @@ ZigBee Network Layer Command, Dst: Broadcast, Src: 0x0000
 #+END_EXPORT
 
 Some more beacons can be found in [[file:gateway-beacon.txt]]. Unfortunately the beacons are encrypted with an unknown Zigbee Network key. This key is likely preconfigured as it would make sense 
-for such a closed-loop system. Adding the typical Zigbee key used by the Home Automation Profile (0x5A 0x69 0x67 0x42 0x65 0x65 0x41 0x6C 0x6C 0x69 0x61 0x6E 0x63 0x65 0x30 0x39).
+for such a closed-loop system. Trying to decrypt the messages using the typical Zigbee key used by the Home Automation Profile 
+(0x5A 0x69 0x67 0x42 0x65 0x65 0x41 0x6C 0x6C 0x69 0x61 0x6E 0x63 0x65 0x30 0x39) does not work.
 
-As for the inverter, when it boots it first sends out a standard Beacon Request Zigbee packet every 77 (sic!) seconds, see traffic [[file:inveter-beacon.txt]]:
+As for the inverter, when it boots it first sends out a standard Beacon Request Zigbee packet every 77 (sic!) seconds, see traffic [[file:inverter-beacon.txt]]:
 
 #+BEGIN_EXPORT html
 <pre>
@@ -230,39 +146,244 @@ IEEE 802.15.4 Command, Dst: Broadcast
 
 After receiving an answer to the Beacon Request from the gateway the standard association process starts. This has been captured and is available in [[file:zigbee-inverter-connect.pcapng]] 
 and [[file:inverter-associate.txt]] as a text dump. After the exchange of some data back and forth the gateway indicates that the inverter is connected by incrementing a counter on the 
-LCD. If the gateway doesn't receive any communications from the inverter for around 200 seconds it considers it disconnected and decreases the counter again.
+LCD.
 
 
-Packets captured so far:
+* Network interface
 
+** Device bootup
+
+During the gateway bootup the following network traffic can be seen:
+
+[[file:boot.pcapng]]
+
+** Port scans
+
+TCP port scan results for the gateway's IPv4 address:
 
 #+BEGIN_EXPORT html
 <pre>
-WZ=qcE1dwCaxjQAAAZhIQEAAAAMClP1BfcFAJrGNEg=AE,S=2000011689 sent when inverter connects
+Starting Nmap 7.80 ( https://nmap.org ) at 2022-08-15 22:08 CEST
+Initiating ARP Ping Scan at 22:08
+Scanning 10.1.0.10 [1 port]
+Completed ARP Ping Scan at 22:08, 0.06s elapsed (1 total hosts)
+Initiating SYN Stealth Scan at 22:08
+Scannnnning 10.1.0.10 [65535 ports]
+Discovered open port 80/tcp on 10.1.0.10
+Completed SYN Stealth Scan at 22:11, 167.83s elapsed (65535 total ports)
+Nmap scan report for 10.1.0.10
+Host is up, received arp-response (0.0094s latency).
+Scanned at 2022-08-15 22:08:48 CEST for 168s
+Not shown: 65534 filtered ports
+Reason: 65534 no-responses
+Some closed ports may be reported as filtered due to --defeat-rst-ratelimit
+PORT   STATE SERVICE REASON
+80/tcp open  http    syn-ack ttl 100
+MAC Address: 34:C6:9A:00:16:D4 (Enecsys)
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 168.05 seconds
+           Raw packets sent: 131198 (5.773MB) | Rcvd: 136 (6.115KB)
+</pre>
+#+END_EXPORT
+
+UDP port scan results for the gateway's IPv4 address:
+
+#+BEGIN_EXPORT html
+<pre>
+Starting Nmap 7.80 ( https://nmap.org ) at 2022-08-15 22:12 CEST
+Initiating ARP Ping Scan at 22:12
+Scanning 10.1.0.10 [1 port]
+Completed ARP Ping Scan at 22:12, 0.06s elapsed (1 total hosts)
+Initiating UDP Scan at 22:12
+Scanning 10.1.0.10 [65535 ports]
+Completed UDP Scan at 22:33, 1314.24s elapsed (65535 total ports)
+Nmap scan report for 10.1.0.10
+Host is up, received arp-response (0.0027s latency).
+All 65535 scanned ports on 10.1.0.10 are open|filtered because of 65535 no-responses
+MAC Address: 34:C6:9A:00:16:D4 (Enecsys)
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 1314.44 seconds
+           Raw packets sent: 131071 (3.676MB) | Rcvd: 74 (4.290KB)
+</pre>
+#+END_EXPORT
+
+** The Web Interface
+
+The default credentials for the web interface are admin/password. You can tell that the gateway is (c) 2009 as there is no way to change the admin password ;).
+
+The following endpoints have been detected on the device:
+
+|-------------+----------------------------------+-------|
+| Endpoint    | Description                      | Notes |
+|-------------+----------------------------------+-------|
+| /           | Main user interface              |       |
+| /index.htm  | ''                               |       |
+| /debug.htm  | Debug interface HTML layout      |       |
+| /ajax.xml   | Debug interface polling endpoint |       |
+| /mpfsupload | MPFS Image Upload                |       |
+|-------------+----------------------------------+-------|
+
+*** Main user interface
+
+The main user interface has basic settings like IP address and it can be used to set the remote monitoring server hostname and port. Apart from that NTP and proxy can be configured. 
+Here is a screenshot of the main UI:
+
+[[file:main-ui.png][file:thumb-main-ui.png]]
+
+*** Debug Interface
+
+The debug interface allows us to see what messages the Zigbee Module UART sends to the main MCU. These appear to be raw decrypted contents of Zigbee frames from the inverters as well as
+some traffic generated by the Zigbee module firmware itself even when there are no inverters connected. Some of the layout of these messages has been reverse engineered in the 
+section near the end of the document. There is also a status display about the Zigbee network and monitoring server connection. The interface itself looks like this:
+
+[[file:debug-ui.png][file:thumb-debug-ui.png]]
+
+The debug UI polls the /ajax.xml endpoint in the background in order to receive the data about the latest messages received from the Zigbee module. The endpoint returns the 
+following XML:
+
+#+BEGIN_ajax_xml
+<response>
+<zigbeeData></zigbeeData>
+<serverData></serverData>
+<connectionStatus>Offline</connectionStatus>
+<connectionUptime>-NA-</connectionUptime>
+<lastConnectionUptime>000:00:00</lastConnectionUptime>
+<connectionUptimeSinceReset>000:00:00</connectionUptimeSinceReset>
+<totalConnects>0</totalConnects>
+<connectionDowntime>000:23:21</connectionDowntime>
+<lastConnectionDowntime>-NA-</lastConnectionDowntime>
+<connectionDowntimeSinceReset>000:23:21</connectionDowntimeSinceReset>
+<timeSinceReset>000:23:21</timeSinceReset>
+<devicesInNetwork>0</devicesInNetwork>
+<device0></device0>
+<device1></device1>
+<device2></device2>
+<device3></device3>
+<device4></device4>
+<device5></device5>
+<device6></device6>
+<device7></device7>
+<device8></device8>
+<device9></device9>
+<device10></device10>
+<device11></device11>
+<device12></device12>
+<device13></device13>
+<device14></device14>
+<device15></device15>
+<device16></device16>
+<device17></device17>
+<device18></device18>
+<device19></device19>
+<device20></device20>
+<device21></device21>
+<device22></device22>
+<device23></device23>
+<device24></device24>
+<device25></device25>
+<device26></device26>
+<device27></device27>
+<device28></device28>
+<device29></device29>
+<device30></device30>
+<device31></device31>
+<device32></device32>
+<device33></device33>
+<device34></device34>
+<device35></device35>
+<device36></device36>
+<device37></device37>
+<device38></device38>
+<device39></device39>
+<device40></device40>
+<device41></device41>
+<device42></device42>
+<device43></device43>
+<device44></device44>
+<device45></device45>
+<device46></device46>
+<device47></device47>
+<device48></device48>
+<device49></device49>
+<device50></device50>
+<device51></device51>
+<device52></device52>
+<device53></device53>
+<device54></device54>
+<device55></device55>
+<device56></device56>
+<device57></device57>
+<device58></device58>
+<device59></device59>
+<device60></device60>
+<device61></device61>
+<device62></device62>
+<device63></device63>
+<device64></device64>
+<device65></device65>
+<device66></device66>
+<device67></device67>
+<device68></device68>
+<device69></device69>
+<device70></device70>
+<device71></device71>
+<device72></device72>
+<device73></device73>
+<device74></device74>
+<device75></device75>
+<device76></device76>
+<device77></device77>
+<device78></device78>
+<device79></device79>
+<device80></device80>
+<device81></device81>
+<device82></device82>
+<device83></device83>
+<device84></device84>
+<device85></device85>
+<device86></device86>
+<device87></device87>
+<device88></device88>
+<device89></device89>
+<device90></device90>
+<device91></device91>
+<device92></device92>
+<device93></device93>
+<device94></device94>
+<device95></device95>
+<device96></device96>
+<device97></device97>
+<device98></device98>
+<device99></device99>
+</response>
+#+END_ajax_xml
+
+*** The MPFS upload
+
+The MPFS is an internal HTTP upload server enabled by default in the Microchip TCP/IP stack. This feature can be used to upload files into the internal flash and possibly even modify
+firmware. There has been at least one device where this is possible: [[https://vulners.com/talos/TALOS-2018-0511]]. In the case of our device this won't be much use however as all
+of the Zigbee traffic encryption happens in the Zigbee module and the Microchip MCU is just a simple bridge which forwards the messages to the remote monitoring server.
+
+
+* Debug Messages Format
+
+A number of debug messages have been captured so far when the device and inverter were in various operational modes. Based on simple time correlation the messages sent out from the
+debug interface seem to be plaintexts for the traffic exchanged via Zigbee. Based on the knowledge gained the development of a parser for the messages has been started:
+[[file:enecsys-watch-zigbee.py]]. Here is an example set of messages together with their hexdumps:
+
+#+BEGIN_EXPORT html
+<pre>
+WZ=qcE1dwCaxjQAAAZhIQEAAAAMClP1BfcFAJrGNEg=AE,S=2000011689
 00000000  a9 c1 35 77 00 9a c6 34  00 00 07 51 21 01 00 00  |..5w...4...Q!...|
 00000010  00 0f 0a 53 f5 05 f7 05  00 9a c6 34 48           |...S.......4H|
 0000001d
 
-the first 8 bytes are the gateway Zigbee MAC address (34:c6:9a:00:77:35:c1:a9)
-next we get some data and then the inverter MAC address (34:c6:9a:00:05:f7:05:f5)
-
-WZ=qcE1dwCaxjQAAAaSIQEAAAAOClOpwTV3AJrGNEg=0E,S=2000011689 these are from the gateway itself
+WZ=qcE1dwCaxjQAAAaSIQEAAAAOClOpwTV3AJrGNEg=0E,S=2000011689
 00000000  a9 c1 35 77 00 9a c6 34  00 00 06 92 21 01 00 00  |..5w...4....!...|
 00000010  00 0e 0a 53 a9 c1 35 77  00 9a c6 34 48           |...S..5w...4H|
 0000001d
-
-This one is different, we don't have the inverter MAC but something else
-
-inverter serial on barcode
-
-01 00 04 50 29 (dec)
-01 00 04 32 1d (hex)
-
-inverter serial on label
-
-00 00 61 75 77 (dex)
-00 00 3d 4b 4d (hex)
-
 
 WS=9QX3BQCaxjQAAAbLIQEAAAAAFDADiAEAAgAAAAAAAAAYAY0AAwQF00  
 00000000  f5 05 f7 05 00 9a c6 34  00 00 06 cb 21 01 00 00  |.......4....!...|
@@ -270,20 +391,13 @@ WS=9QX3BQCaxjQAAAbLIQEAAAAAFDADiAEAAgAAAAAAAAAYAY0AAwQF00
 00000020  18 01 8d 00 03 04 05                              |.......|
 00000027
 
-First 8 bytes are the MAC address of the inverter (34:c6:9a:00:05:f7:05:f5), later we have something that appears to be data from the inverter
-
-WZ=qcE1dwCaxjQAAAdRIQEAAAAPClP1BfcFAJrGNEg=60,S=2000011689
-00000000  a9 c1 35 77 00 9a c6 34  00 00 07 51 21 01 00 00  |..5w...4...Q!...|
-00000010  00 0f 0a 53 f5 05 f7 05  00 9a c6 34 48           |...S.......4H|
-0000001d
-
 WS=9QX3BQCaxjQAAAdYIQIAAAAAFDADiAEAAgAAAAAAAAAZAY0AAwAF81
 00000000  f5 05 f7 05 00 9a c6 34  00 00 07 58 21 02 00 00  |.......4...X!...|
 00000010  00 00 14 30 03 88 01 00  02 00 00 00 00 00 00 00  |...0............|
 00000020  19 01 8d 00 03 00 05                              |.......|
 00000027
 
-WS=9QX3BQCaxjQAAAdYIQIAAAAAFDADiAEAAgAAAAAAAAAZAY0AAwAF81  << these seem to come from the inverter
+WS=9QX3BQCaxjQAAAdYIQIAAAAAFDADiAEAAgAAAAAAAAAZAY0AAwAF81
 00000000  f5 05 f7 05 00 9a c6 34  00 00 07 58 21 02 00 00  |.......4...X!...|
 00000010  00 00 14 30 03 88 01 00  02 00 00 00 00 00 00 00  |...0............|
 00000020  19 01 8d 00 03 00 05                              |.......|
@@ -295,82 +409,106 @@ WS=9QX3BQCaxjQAAAe7IQEAAAACFDADiAEAAgAAAAAAADgZAY0AAwAF44
 00000020  19 01 8d 00 03 00 05                              |.......|
 00000027
 
-WS=9QX3BQCaxjQAAAkkIQEAAAAFFDADiAEAAgAAAAAAADgZAY0AAwAF8A
-00000000  f5 05 f7 05 00 9a c6 34  00 00 09 24 21 01 00 00  |.......4...$!...|
-00000010  00 05 14 30 03 88 01 00  02 00 00 00 00 00 00 38  |...0...........8|
-00000020  19 01 8d 00 03 00 05                              |.......|
-00000027
-
-WZ=qcE1dwCaxjQAAAkyIQEAAAATClP1BfcFAJrGNEg=7A,S=2000011689
-00000000  a9 c1 35 77 00 9a c6 34  00 00 09 32 21 01 00 00  |..5w...4...2!...|
-00000010  00 13 0a 53 f5 05 f7 05  00 9a c6 34 48           |...S.......4H|
-0000001d
-
-
-WZ=qcE1dwCaxjQAAAljIQEAAAAUClOpwTV3AJrGNEg=E9,S=2000011689
-00000000  a9 c1 35 77 00 9a c6 34  00 00 09 63 21 01 00 00  |..5w...4...c!...|
-00000010  00 14 0a 53 a9 c1 35 77  00 9a c6 34 48           |...S..5w...4H|
-0000001d
-
-WS=9QX3BQCaxjQAAAoUIQEAAAAHFDADiAEAAgAAAAAAADgaAY0AAwAF5B
-00000000  f5 05 f7 05 00 9a c6 34  00 00 0a 14 21 01 00 00  |.......4....!...|
-00000010  00 07 14 30 03 88 01 00  02 00 00 00 00 00 00 38  |...0...........8|
-00000020  1a 01 8d 00 03 00 05                              |.......|
-00000027
-
 WZ=qcE1dwCaxjQAAAoiIQEAAAAVClP1BfcFAJrGNEg=22,S=2000011689
 WZ=qcE1dwCaxjQAAApTIQEAAAAWClOpwTV3AJrGNEg=BD,S=2000011689
-
 WS=9QX3BQCaxjQAAAqMIQEAAAAIFDADiAEAAgAAAAAAADgaAY0AAwAF44
 WS=9QX3BQCaxjQAAAsEIQEAAAAJFDADiAEAAgAAAAAAADgaAY0AAwAF1E
-
 WZ=qcE1dwCaxjQAAAz0IQEAAAAbClP1BfcFAJrGNEg=C9,S=2000011689
 WZ=qcE1dwCaxjQAAA0lIQEAAAAcClOpwTV3AJrGNEg=BC,S=2000011689
 WS=9QX3BQCaxjQAAA3WIQEAAAAPFDADiAEAAgAAAAAAADgaAY0AAwAFCF
 WZ=qcE1dwCaxjQAAA4VIQEAAAAeClOpwTV3AJrGNEg=A0,S=2000011689
 WS=9QX3BQCaxjQAAA5OIQEAAAAQFDADiAEAAgAAAAAAADgaAY0AAwAF9D
-
-
 WS=9QX3BQCaxjQAAD2_IQEAAAB1FDADiAEAAgAAAAAAADgdAY0AAwAF46
-
-
 WZ=qcE1dwCaxjQAAD6-IQEAAACFClP1BfcFAJrGNEg=48,S=2000011689
-
-
-
-
-Vdc = 36V
-36 dec == 24 hex
-
-WS=9QX3BQCaxjQAAEs1IQEAAAALFDADiAMAAgAAAAAAADgdAY4AAwAFCB
-00000000: F5 05 F7 05 00 9A C6 34  00 00 4B 35 21 01 00 00  .......4..K5!...
-00000010: 00 0B 14 30 03 88 03 00  02 00 00 00 00 00 00 38  ...0...........8
-00000020: 1D 01 8E 00 03 00 05                              .......
-
-WS=9QX3BQCaxjQAAEuuIQEAAAAMFDADiAMAAgAAAAAAADgdAY4AAwAF2E
-00000000: F5 05 F7 05 00 9A C6 34  00 00 4B AE 21 01 00 00  .......4..K.!...
-00000010: 00 0C 14 30 03 88 03 00  02 00 00 00 00 00 00 38  ...0...........8
-00000020: 1D 01 8E 00 03 00 05   
-
-
-Vdc = 42V 
-42 dec == 2a hex
-
-WS=9QX3BQCaxjQAAE0WIQEAAAAPFDADiAMAAgAAAAAAAEUdAY4AAwAF29
-00000000: F5 05 F7 05 00 9A C6 34  00 00 4D 16 21 01 00 00  .......4..M.!...
-00000010: 00 0F 14 30 03 88 03 00  02 00 00 00 00 00 00 45  ...0...........E
-00000020: 1D 01 8E 00 03 00 05                              .......
-WS=9QX3BQCaxjQAAE2OIQEAAAAQFDADiAMAAgAAAAAAAEUdAY4AAwAFE5
-00000000: F5 05 F7 05 00 9A C6 34  00 00 4D 8E 21 01 00 00  .......4..M.!...
-00000010: 00 10 14 30 03 88 03 00  02 00 00 00 00 00 00 45  ...0...........E
-00000020: 1D 01 8E 00 03 00 05                              .......
-WS=9QX3BQCaxjQAAE4HIQEAAAARFDADiAMAAgAAAAAAAEUdAY4AAwAFE1
-00000000: F5 05 F7 05 00 9A C6 34  00 00 4E 07 21 01 00 00  .......4..N.!...
-00000010: 00 11 14 30 03 88 03 00  02 00 00 00 00 00 00 45  ...0...........E
-00000020: 1D 01 8E 00 03 00 05                              .......
-
 </pre>
 #+END_EXPORT
 
+All of the messages fall into two patterns:
+
+| Message                                                    | Flavor | Contents                                             | Checksum | Key-value pairs | Notes                                                                   |
+| WZ=qcE1dwCaxjQAAAZhIQEAAAAMClP1BfcFAJrGNEg=AE,S=2000011689 | WZ     | qcE1dwCaxjQAAAZhIQEAAAAMClP1BfcFAJrGNEg=             | AE       | S=2000011689    | 2000011689 is the serial number of the Zigbee module inside the gateway |
+| WS=9QX3BQCaxjQAAAbLIQEAAAAAFDADiAEAAgAAAAAAAAAYAY0AAwQF00  | WS     | 9QX3BQCaxjQAAAbLIQEAAAAAFDADiAEAAgAAAAAAAAAYAY0AAwQF | 00       |                 |                                                                         |
+
+The first characters consitute what was named the "flavor" of a message. The flavor determines the syntax of the next parts as well as the message source. After the flavor come the
+messages contents (encoded with URL-safe base64), two hexadecimal digits which I assume is a checksum of some kind and after the comma key-value pairs. There was only one
+key-value pair seen so far and that is 'S' which contains the serial number of the Zigbee module contained within the gateway that is generating the message.
+
+Based on many observations I have deduced that the WZ messages are generated by the gateway itself as they are present even when there are no inverters connected. The schema used to
+calculate what I assume to be the checksum has not been reverse-engineered yet. The meaning of the key-value pairs is obvious at this point. Further information is revealed after
+decoding the base64-encoded payloads. The structure inside is similar for both flavors and a number of common fields are used to encode the source of the message, type, etc. See below:
+
+#+BEGIN_EXPORT html
+<pre>
+WZ=qcE1dwCaxjQAAAZhIQEAAAAMClP1BfcFAJrGNEg=AE,S=2000011689
+00000000  a9 c1 35 77 00 9a c6 34  00 00 07 51 21 01 00 00  |..5w...4...Q!...|
+00000010  00 0f 0a 53 f5 05 f7 05  00 9a c6 34 48           |...S.......4H|
+0000001d
+</pre>
+#+END_EXPORT
+
+|--------------------------------+---------------------+--------------------------------------------------------------|
+| Data                           | Description         | Notes                                                        |
+|--------------------------------+---------------------+--------------------------------------------------------------|
+| a9 c1 35 77 00 9a c6 34        | EUI64 of the source | Bytes are inverted, gateway EUI64 is 34:c6:9a:00:77:35:c1:a9 |
+| 00 00 07 51                    | uptime              | Unit is 500ms                                                |
+| 21 01                          | type                |                                                              |
+| 00 00 00 0f                    | counter             | Sequence number                                              |
+| 0a                             | content length      |                                                              |
+| 53 f5 05 f7 05  00 9a c6 34 48 | content             |                                                              |
+|--------------------------------+---------------------+--------------------------------------------------------------|
+
+Similar for a WS flavored message:
+
+#+BEGIN_EXPORT html
+<pre>
+WS=9QX3BQCaxjQAAAbLIQEAAAAAFDADiAEAAgAAAAAAAAAYAY0AAwQF00  
+00000000  f5 05 f7 05 00 9a c6 34  00 00 06 cb 21 01 00 00  |.......4....!...|
+00000010  00 00 14 30 03 88 01 00  02 00 00 00 00 00 00 00  |...0............|
+00000020  18 01 8d 00 03 04 05                              |.......|
+00000027
+</pre>
+#+END_EXPORT
+
+|--------------------------------------------------------------+---------------------+---------------------------------------------------------------|
+| Data                                                         | Description         | Notes                                                         |
+|--------------------------------------------------------------+---------------------+---------------------------------------------------------------|
+| f5 05 f7 05 00 9a c6 34                                      | EUI64 of the source | Bytes are inverted, inverter EUI64 is 34:c6:9a:00:05:f7:05:f5 |
+| 00 00 06 cb                                                  | uptime              | Unit is 500ms                                                 |
+| 21 01                                                        | type                |                                                               |
+| 00 00 00 00                                                  | counter             | Sequence number                                               |
+| 14                                                           | content length      |                                                               |
+| 30 03 88 01 00 02 00 00 00 00 00 00 00 18 01 8d 00 03 04 05  | content             |                                                               |
+|--------------------------------------------------------------+---------------------+---------------------------------------------------------------|
+
+Most of the interesting information is present in the 'content' section of every message, thus far the messages have been documented in the parser script mentioned above. To quickly
+summarize:
+
+
+|--------+--------+---------------------+-------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------|
+| Flavor |   Type | Desciption          | Example messages                                                                                                  | Notes                                                                                      |
+|--------+--------+---------------------+-------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------|
+| WZ     | 0x2100 | Bootup              | WZ=qcE1dwCaxjQAAAAAIQAAAAAAA1BSAg==96,S=2000011689                                                                |                                                                                            |
+|        |        |                     | WZ=qcE1dwCaxjQAAAAAIQAAAAABGU4SAGS13J5ge-wZ4QAAAAAAAAAAAAAAAAA=DF,S=2000011689                                    |                                                                                            |
+|--------+--------+---------------------+-------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------|
+| WZ     | 0x2101 | Connectivity report | WZ=qcE1dwCaxjQAABDnIQEAAAASClOpwTV3AJrGNEg=9A,S=2000011689                                                        | Sends the EUI64 of other Zigbee devices on the network                                     |
+|        |        |                     | WZ=qcE1dwCaxjQAAAdRIQEAAAAPClP1BfcFAJrGNEg=60,S=2000011689                                                        |                                                                                            |
+|--------+--------+---------------------+-------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------|
+| WS     | 0x2100 | Bootup              | WS=9QX3BQCaxjQAAAB4IQAAAAABPXIBAwX3BfVXU0ktMDAwMDMAAAAAAAAAADwAAAAAMDEtMDItMTIgMDI6MjH__wAAAAAAAAAAAAAAAAAAAAA=29 |                                                                                            |
+|--------+--------+---------------------+-------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------|
+| WS     | 0x2101 | Power measurement   | WS=9QX3BQCaxjQAAE4HIQEAAAARFDADiAMAAgAAAAAAAEUdAY4AAwAFE1                                                         | Contains DC and AC power, AC frequency, efficiency as well as AC voltage (inverter idle)   |
+|--------+--------+---------------------+-------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------|
+| WS     | 0x2102 | Power measurement   | WS=9QX3BQCaxjQAAAdYIQIAAAAAFDADiAEAAgAAAAAAAAAZAY0AAwAF81                                                         | Contains DC and AC power, AC frequency, efficiency as well as AC voltage (inverter online) |
+|--------+--------+---------------------+-------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------|
+
+The 0x2101 and 0x2102 WS messages seem to contain identical data and look to be related to the state of the inverter itself. For example, the 0x2101 messages are sent always, 
+even when the inverter is connected only to the DC side. However the exact difference is not clear at this point.
+
+Based on a screenshot found for a gateway software that is being sold on eBay (https://www.ebay.com/itm/283656242209) it looks like there are additional items reported
+by the inverter which have not yet been located:
+
+- serial number
+- lifetime kWh
+- DC amps
+- temperature
 
 
