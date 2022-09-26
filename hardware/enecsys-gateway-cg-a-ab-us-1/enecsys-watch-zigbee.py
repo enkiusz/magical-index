@@ -322,8 +322,8 @@ if __name__ == "__main__":
 
     log.debug('config', args=args)
 
-    if config.mqtt_broker:
-        broker_url = urlparse(config.mqtt_broker)
+    if config.mqtt_url:
+        broker_url = urlparse(config.mqtt_url)
 
         import paho.mqtt.client as mqtt
         import ssl
