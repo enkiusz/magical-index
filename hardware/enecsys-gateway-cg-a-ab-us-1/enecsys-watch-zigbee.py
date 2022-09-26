@@ -322,8 +322,8 @@ if __name__ == "__main__":
 
     log.debug('config', args=args)
 
-    if config.mqtt_url:
-        broker_url = urlparse(config.mqtt_url)
+    if config.broker_url:
+        broker_url = urlparse(config.broker_url)
 
         import paho.mqtt.client as mqtt
         import ssl
@@ -343,12 +343,12 @@ if __name__ == "__main__":
             mqtt_client.reconnect_delay_set(min_delay=_min_delay, max_delay=_max_delay)
 
         try:
-            log.info('connecting to mqtt', broker=config.mqtt_broker)
+            log.info('connecting to mqtt', broker=config.broker_url)
             mqtt_client.connect(broker_url.netloc, port=mqtt_port)
             mqtt_client.loop_start()
-        except:
+        except Exception as e:
             # Connection to broker failed
-            log.error("Cannot connect to MQTT broker", _exc_info=True)
+            log.error("Cannot connect to MQTT broker", _exc_info=e)
             sys.exit(1)
     else:
         mqtt_client = None
