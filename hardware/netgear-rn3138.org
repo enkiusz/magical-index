@@ -1,9 +1,5 @@
 #+TITLE: Netgear ReadyNAS RN3138
 
-#+BEGIN_EXPORT html
-<base href="netgear-rn3138/"/>
-#+END_EXPORT
-
 * Hardware
 
 The Netgear ReadyNAS 3138 is a 1U rack-mounted NAS server with 4 3.5'' SATA drive slots. I have recently purchased such a device in order to use it as a small home fileserver
@@ -1146,3 +1142,111 @@ sh: can't access tty; job control turned off
 #+END_EXPORT
 
 As you can see we have successfully booted Alpine Linux as an alternative OS on the device.
+* Mods
+** Additional hard disks
+
+The NAS enclosure contains place for 3 additional 2.5'' drives inside, the mainboard has 2 unused SATA connectors. The power supply also has 2 unused SATA power plugs. 
+This setup is perfect for including ZFS L2ARC SSD drives or extra drives for the operating system. A setup like this is visible below:
+
+[[file:netgear-rn3138/netgear-rn3138-additional-2-SFF-drives.jpg][file:netgear-rn3138/thumb-netgear-rn3138-additional-2-SFF-drives.jpg]]
+
+** Internal USB storage connector
+
+The NAS is designed to boot from an internal USB storage device plugged directly into the mainboard using a 2mm pitch 9 pin male header. The pinout of this header is 
+identical to the [[https://pinoutguide.com/Motherboard/usb_2_1_header_pinout.shtml][USB2.0 9-pin]] header found on many mainboards, with only port 1 wired. The header also uses a less standard 2mm pitch instead of the typical IDC ("dupont")
+2.54mm pitch.
+
+[[file:netgear-rn3138/netgear-rn3138-J13-pinout.jpg][file:netgear-rn3138/thumb-netgear-rn3138-J13-pinout.jpg]]
+
+Based on this a simple breakout board can be built to provide a USB-A socket to plug in a different USB storage device. This can be used to quickly swap out different operating systems
+or boot arrangements when maintaining or fixing the device. What you need to keep in mind however is that the connector has a 2mm pitch not the typical 2.54mm. This makes it tricky to 
+use a pre-made perfboard but it's still possible to stick in a 2mm female header forming what is termed a "hedgehog pattern" by electronics professionals 😉.
+
+[[file:netgear-rn3138/netgear-rn3138-2mm-pitch-in-breadboard.jpg][file:netgear-rn3138/thumb-netgear-rn3138-2mm-pitch-in-breadboard.jpg]]
+
+After some drilling, n USB-A connector and jumper wire the following result can be obtained:
+
+[[file:netgear-rn3138/netgear-rn3138-internal-usb-breakout.jpg][file:netgear-rn3138/thumb-netgear-rn3138-internal-usb-breakout.jpg]]
+
+** Voltage, temperature and fan speed monitoring
+
+The voltage rails, chassis fans and chassis temperature sensor seem to be monitored in the IT8732F chip on board. The BIOS Setup Utility can report the following readings:
+
+#+BEGIN_EXPORT html
+<pre>
+       Aptio Setup Utility - Copyright (C) 2013 American Megatrends, Inc.       
+          Advanced                                                              
+┌────────────────────────────────────────────────────┬─────────────────────────┐
+│  Pc Health Status                                  │                         │
+│                                                    │                         │
+│  System temperature3     : +30 ℃                   │                         │
+│  Fan1 Speed              : 5487 RPM                │                         │
+│  Fan2 Speed              : 5769 RPM                │                         │
+│  Fan3 Speed              : 5672 RPM                │                         │
+│  CPUVCORE                : +0.991 V                │                         │
+│  DDR15V_M                : +1.504 V                │                         │
+│  +3V3_SoC                : +3.286 V                │                         │
+│  +5V                     : +4.997 V                │─────────────────────────│
+│  +12V                    : +11.942 V               │→←: Select Screen        │
+│                                                    │↑↓: Select Item          │
+│                                                    │Enter: Select            │
+│                                                    │+/-: Change Opt.         │
+│                                                    │F1: General Help         │
+│                                                    │F2: Previous Values      │
+│                                                    │F3: Optimized Defaults   │
+│                                                    │F4: Save & Exit          │
+│                                                    │ESC: Exit                │
+└────────────────────────────────────────────────────┴─────────────────────────┘
+        Version 2.16.1243. Copyright (C) 2013 American Megatrends, Inc.        
+                                                                             AB
+</pre>
+#+END_EXPORT
+
+When the it87 module is loaded into the linux kernel these stats are represented by files under /sys/class/hwmon/hwmon1. The fan and temperature inputs are pretty easy to figure out
+however the voltage rail to IT87 input mapping is currently unknown.
+
+The IT87 chip provides PWM outputs for fan speed control. These are driven a bit differently than what [[https://github.com/lm-sensors/lm-sensors/blob/master/prog/pwm/pwmconfig][pwmconfig]] and [[https://github.com/lm-sensors/lm-sensors/blob/master/prog/pwm/fancontrol][fancontrol]] assume. This is likely due to the fan driving circuitry
+granting us the following quirks:
+
+- the pwm<n>_enable file does not enable or disable just the PWM like pwmconfig assumes but enables or disables the fan entirely
+- the pwm<n> values are inverted, writing 0 spins up the fan to maximum speed, writing 255 stops the fan entirely
+
+** Chassis buttons and LEDs
+
+The chassis contains a number of status indicator LEDs as well as "Unit Identification" and "Reset" buttons. These are used by the original firmware in order to execute factory reset,
+recovery and other special actions. There are also two leds per disk on the chassis. The dmesg of the original firmware hints that all of this can be driven using GPIOs or other
+device-specific kernel code:
+
+#+BEGIN_EXPORT html
+<pre>
+[    7.012752] readynas_io_init: initializing ReadyNAS I/O.
+[    7.012756] procfs_init: initializing ReadyNAS procfs.
+[    7.012776] pwr_button_state_iniu: initializing ReadyNAS PWR button state hendler for rn313x.
+[    7.012800] button_init: initializing ReadyNAS button set.
+[    7.012804] __button_init: button 'uid7 gpio_it87:55 (POLL)
+[    7.012873] __button_init: button 'reset' gpio_it87:21n (IRQ)
+[    7.013013] rn_button 'reset' IRQ#45
+[    7.015061] input: rn_button as /devices/virtual/input/input2
+[    7.015150] readynas_io_init: initialization successfully completed.
+[    7.015258] readynas_lcd_init: installing ReadyNAS LCD driver.
+[    7.015366] readynas_led_init: installing ReadyNAS LED driver.
+[    7.017734] register_led: registering LED "readynas:green:pwr"
+[    7.017874] register_led: registering LED "readynas:red:err"
+[    7.017974] register_led: registering LED "readynas:blue:uid"
+[    7.018133] register_led: registering LED ".readynas::sata1_pwr"
+[    7.018168] register_led: registering LED ".readynas::sata2_pwr"
+[    7.018201] register_led: registering LED ".readynas::sata3_pwr"
+[    7.018237] register_led: registering LED ".readynas::sata4_pwr"
+[    7.018272] register_led: registering LED "readynas:green:sata1"
+[    7.018303] register_led: registering LED "readynas:green:sata2"
+[    7.018337] register_led: registering LED "readynas:green:sata3"
+[    7.018369] register_led: registering LED "readynas:green:sata4"
+[    7.018401] register_led: registering LED "readynas:red:sata1"
+[    7.018437] register_led: registering LED "readynas:red:sata2"
+[    7.018471] register_led: registering LED "readynas:red:sata3"
+[    7.018506] register_led: registering LED "readynas:red:sata4"
+</pre>
+#+END_EXPORT
+
+The kernel code responsible for the handling of these has not been located yet.
+
