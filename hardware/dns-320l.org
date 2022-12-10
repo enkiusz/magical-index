@@ -66,6 +66,20 @@ The board contains four LEDs with the following purpose:
 | D9    | Red   | SATA2 port activity LED            |
 |-------+-------+------------------------------------|
 
+*** JP1 connector
+The JP1 connector is the bootloader and device operating system console. It runs at 3.3V logic levels with baudrate of 115200 bps, 8 bits, no parity and 1 stop bit. 
+The pinout is the following:
+
+|------------+-------------+-----------------------------|
+| Pin number | Description | Notes                       |
+|------------+-------------+-----------------------------|
+|          1 | RXD         | Square pad, Device <-- Host |
+|          2 | N/C         |                             |
+|          3 | 3.3V        | source                      |
+|          4 | GND         |                             |
+|          5 | TXD         | Device --> Host             |
+|------------+-------------+-----------------------------|
+
 *** Weltrend WT69P3
 
 The WT69P3 is a systems management MCU which controls the power to the board, provides an RTC for time keeping and controls the fan. The MCU is connected via a RS232 link with the
