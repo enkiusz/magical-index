@@ -25,6 +25,7 @@
   - [[file:hardware/uarm.org][The UFactory Uarm]]
   - [[file:hardware/toshiba-n554.org][Toshiba N554 mouse]]
   - [[file:hardware/toyota-corolla.org][Toyota Corolla]]
+  - [[file:hardware/vastra-ss2.org][Vastra SS2 Smart]]
   - [[file:hardware/wh-sp-ws01.org][WH-SP-WS01 Wind speed sensor (anemometer)]]
   - [[file:hardware/wrt-54g.org][WRT-54G]]
 - projects

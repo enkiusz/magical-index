@@ -1,0 +1,90 @@
+#+TITLE: Vastra SS2 Smart 
+#+LANGUAGE: en
+
+#+BEGIN_EXPORT html
+<base href="vastra-ss2/"/>
+#+END_EXPORT
+
+* Hardware
+
+** Boards
+
+|----------+-------------------+--------------------------------------|
+| Board ID | Silkscreen        | Notes                                |
+|----------+-------------------+--------------------------------------|
+| PSU1     | SW3A-POWER V1.3   |                                      |
+| USB      | SW3A-USB V1.3     | Not used in SS2 model (no USB ports) |
+| CON      | SW3A-Control V1.3 |                                      |
+|----------+-------------------+--------------------------------------|
+
+** CON Board (Controller)
+
+Notable parts
+
+|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
+| Designation | Description          | Part identification            | Datasheet                                     | Notes                                                                                                                                         |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
+| U7          | Wireless module      | P/N: WR3, Model: 2.22.33.00348 | See below                                     |                                                                                                                                               |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
+| U3, U4, U5  | Likely an ADC        | BL 0937                        | Might be AD7991                               | one per AC socket                                                                                                                             |
+|             |                      | 1926AYH                        |                                               |                                                                                                                                               |
+|             |                      | D7991OOV                       |                                               |                                                                                                                                               |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
+| U6          | 8051 microcontroller | STC 8F                         | [[https://www.stcmicro.com/stc/stc8f2k64s2.html]] | Current and power measurements                                                                                                                |
+|             |                      | 2K32S2E                        |                                               |                                                                                                                                               |
+|             |                      | A743634                        |                                               |                                                                                                                                               |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
+| J4          | UART connection      | 2.54mm 4P header               | 9600 bits/s, 8 bits, no parity, 1 stop bit    | labels are from the perspective of the host, for example line labeled RXD is where the device *transmits* data, non-isolated from mains AC!!! |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
+| J3          | Power input          | JST XH 4 pin male              |                                               | Label says 5V but it's 3.3V in reality                                                                                                        |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
+
+
+*** WR3 Wireless module 
+
+The WR3 Wireless module is based on the Realtek RTL8710BN chip.
+
+Some people have attempted to replace this module with an ESP-12 to improve compatibility.
+
+[[https://blakadder.com/replace-tuya-esp12/]]
+
+
+Original information on Tuya's site about the module
+[[https://developer.tuya.com/en/docs/iot/wr3-module-datasheet?id=K9g3ainzbj9z1]]
+
+*** J4 UART interface
+
+The J4 UART interface seems to be transmitting periodic data about the AC mains voltage as well as the current draw and total energy for all sockets. This information is fed straight
+to the mobile application.
+
+#+BEGIN_EXPORT html
+<pre>
+Type [C-a] [C-h] to see available commands
+Terminal ready
+226.0     0mA   0.0    0.00     0mA   4.4    0.00     0mA   0.0    0.00 
+226.0     0mA   0.0    0.00   162mA  20.5    0.00     0mA   0.0    0.00 
+226.0     0mA   0.0    0.00   100mA  10.9    0.00     0mA   0.0    0.00 
+226.0     0mA   0.0    0.00   100mA  10.6    0.00     0mA   0.0    0.00 
+226.0     0mA   0.0    0.00   103mA  11.5    0.00     0mA   0.0    0.00 
+226.0     0mA   0.0    0.00    98mA  10.9    0.00     0mA   0.0    0.00 
+226.0     0mA   0.0    0.00   105mA  11.6    0.00     0mA   0.0    0.00 
+^^^^^     ^^^   ^^^    ^^^^
+|         |     |      |
+|         |     |      total energy (kWh)
+|         |     Power (W)
+|         Current 
+Voltage
+          ------------------  --------------------    ------------------
+          Socket 1            Socket 2                Socket 3
+</pre>
+#+END_EXPORT
+
+The power measurement seems off because 226 V * 0.105 A = 23.730 W not 11.6 W like the device indicates (last line for Socket 2).
+
+The UART does not serve any other purpose, there is no traffic observed when the individual sockets are switched on or off. This looks to be controlled by a different 
+set of GPIO pins from the WR3 module.
+
+* Application
+
+The device's controlling application can be downloaded from the Google Play store under the name "Vastra Smart Devices" and package id pl.vastra.android.smartdevices.
+
