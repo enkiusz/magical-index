@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:tdo="http://static.transim.com/core/Transim.CAD/schemas/DrawObjectSVGExtension.xsd" viewBox="69 119 689 392" width="689px" height="392px">
+  <g tdo:type="object" transform="matrix(1 0 0 1 230 200)" id="5fdb76ef13c64d979d1279a77a2d69d0" selectable="true">
+    <polyline points="10,0 10,10" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <polyline points="0,30 20,30" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <polygon points="10,30 20,10 0,10" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <polyline points="10,30 10,40" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <g id="Dio_N" tdo:groupmode="pin" tdo:x="10" tdo:y="40" />
+    <g id="Dio_P" tdo:groupmode="pin" tdo:x="10" tdo:y="0" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 255 205)">
+      <tspan x="0">D1</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 300 200)" id="508d8bf5c7664658b1360c04b57c502e" selectable="true">
+    <polyline points="10,0 10,10" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <polyline points="0,30 20,30" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <polygon points="10,30 20,10 0,10" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <polyline points="10,30 10,40" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <g id="Dio_N" tdo:groupmode="pin" tdo:x="10" tdo:y="40" />
+    <g id="Dio_P" tdo:groupmode="pin" tdo:x="10" tdo:y="0" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 325 205)">
+      <tspan x="0">D2</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 120 300)" id="39ba3c2c81ec4f2eb8a5436abfbb0dd0" selectable="true">
+    <ellipse cx="0" cy="5" rx="5" ry="5" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <line x1="0" y1="10" x2="0" y2="20" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 130 305)">
+      <tspan x="0">MCU_TXD</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 390 400)" id="324f0ec933ff4b2db96842ddd14df337" selectable="true">
+    <ellipse cx="0" cy="5" rx="5" ry="5" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <line x1="0" y1="10" x2="0" y2="20" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 400 405)">
+      <tspan x="0">WIFI_TXD</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 390 300)" id="50bae825b4374f79b4b6e9536778df1d" selectable="true">
+    <ellipse cx="0" cy="5" rx="5" ry="5" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <line x1="0" y1="10" x2="0" y2="20" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 400 305)">
+      <tspan x="0">WIFI_RXD</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 120 400)" id="f80f63c3aa084e2fb85d70abab8ea6f4" selectable="true">
+    <ellipse cx="0" cy="5" rx="5" ry="5" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <line x1="0" y1="10" x2="0" y2="20" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 130 405)">
+      <tspan x="0">MCU_RXD</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 390 470)" id="edc8966e82aa481d8c7336aefb0ba671" selectable="true">
+    <ellipse cx="0" cy="5" rx="5" ry="5" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <line x1="0" y1="10" x2="0" y2="20" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 400 475)">
+      <tspan x="0">GND</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 560 130)" id="a47d86e59071459d9814b19dffb97c6b" selectable="true">
+    <ellipse cx="0" cy="5" rx="5" ry="5" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <line x1="0" y1="10" x2="0" y2="20" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 570 135)">
+      <tspan x="0">SNIFF_RXD</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 560 180)" id="2318fc4faadd4204b2d4dc286e378727" selectable="true">
+    <ellipse cx="0" cy="5" rx="5" ry="5" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+    <line x1="0" y1="10" x2="0" y2="20" stroke="#000000" stroke-width="2" stroke-linejoin="round" fill="none" />
+  </g>
+  <g>
+    <text x="0" y="0" font-size="10" font-family="Arial" font-weight="bold" transform="matrix(1 0 0 1 570 185)">
+      <tspan x="0">SNIFF_GND</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 490 490)" id="7d449c7c0370462099af51703537a65e">
+    <line x1="0" y1="0" x2="0" y2="-290" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 390 490)" id="97a8786844b74540a02e01a930a29822">
+    <line x1="0" y1="0" x2="100" y2="0" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="translate(79,251)">
+    <rect x="0" y="0" width="470" height="250" rx="0" ry="0" stroke="#008000" stroke-width="2" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 490 200)" id="ba053a30d7c64b22a5ae25d2a2913121">
+    <line x1="0" y1="0" x2="70" y2="0" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 120 420)" id="68562a2f525a44c4a2c55fc345e41c05">
+    <line x1="0" y1="0" x2="190" y2="0" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 310 420)" id="e879f3dcdd5f4ad188b5fa2156908f59">
+    <line x1="0" y1="0" x2="80" y2="0" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 240 240)" id="c67b149c1b5d43e0a0223c963ae8cb87">
+    <line x1="0" y1="0" x2="0" y2="80" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 120 320)" id="706ee25cce2b45bebdb6efdd546114a2">
+    <line x1="0" y1="0" x2="120" y2="0" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 240 320)" id="1dabe1a963fa4722a3e131c12117d2d3">
+    <line x1="0" y1="0" x2="150" y2="0" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 310 150)" id="b95acbbe0e23453895be01218a4c01a8">
+    <line x1="0" y1="0" x2="250" y2="0" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 310 200)" id="befc727b5c1d4df1b16ab2ebade1292f">
+    <line x1="0" y1="0" x2="0" y2="-50" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 240 150)" id="ae40418e65144cd1b247106aeacc28b2">
+    <line x1="0" y1="0" x2="70" y2="0" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 310 240)" id="cc6e131138e04b14bdd6b94b022e3cfc">
+    <line x1="0" y1="0" x2="0" y2="180" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="matrix(1 0 0 1 240 150)" id="3c9ebc43f41145acb5133727f5916d4b">
+    <line x1="0" y1="0" x2="0" y2="50" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+  <g tdo:type="object" transform="translate(87,470.299987792969)">
+    <rect x="0" y="0" width="68.4" height="23" rx="0" ry="0" fill="none" />
+    <text x="0" y="0" font-size="10" font-family="Arial" transform="matrix(1 0 0 1 5 11.5)">
+      <tspan x="0" dy="3.3">Inside device</tspan>
+    </text>
+  </g>
+  <g tdo:type="object" transform="translate(581,147.300003051758)">
+    <rect x="0" y="0" width="166.6" height="23" rx="0" ry="0" fill="none" />
+    <text x="0" y="0" font-size="10" font-family="Arial" transform="matrix(1 0 0 1 5 11.5)">
+      <tspan x="0" dy="3.3">3.3V TTL UART &lt;-&gt; USB converter</tspan>
+    </text>
+  </g>
+</svg>

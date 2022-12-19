@@ -1,4 +1,4 @@
-#+TITLE: Vastra SS2 Smart 
+#+TITLE: Vastra SS2 Smart Power Strip
 #+LANGUAGE: en
 
 #+BEGIN_EXPORT html
@@ -6,6 +6,8 @@
 #+END_EXPORT
 
 * Hardware
+
+The hardware inside consists of (apart from the ordinary Schuko sockets) several PCBs connected together with JST XH and pin header connectors.
 
 ** Boards
 
@@ -15,29 +17,46 @@
 | PSU1     | SW3A-POWER V1.3   |                                      |
 | USB      | SW3A-USB V1.3     | Not used in SS2 model (no USB ports) |
 | CON      | SW3A-Control V1.3 |                                      |
+| BUTTON   |                   | Button and LED                       |
 |----------+-------------------+--------------------------------------|
+
+Some photos of the boards:
+
+[[file:internals.jpg][file:thumb-internals.jpg]]
+
+[[file:SW3A-POWER.jpg][file:thumb-SW3A-POWER.jpg]]
+
+[[file:SW3A-Control-WR3.jpg][file:thumb-SW3A-Control-WR3.jpg]]
+
+[[file:SW3A-Control-MCU.jpg][file:thumb-SW3A-Control-MCU.jpg]]
+
+[[file:SW3A-Control-ADC.jpg][file:thumb-SW3A-Control-ADC.jpg]]
+
 
 ** CON Board (Controller)
 
-Notable parts
+Notable parts are 3 ADCs, a MCU and a Tuya WR3 wireless module. Summary below:
 
-|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
-| Designation | Description          | Part identification            | Datasheet                                     | Notes                                                                                                                                         |
-|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
-| U7          | Wireless module      | P/N: WR3, Model: 2.22.33.00348 | See below                                     |                                                                                                                                               |
-|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
-| U3, U4, U5  | Likely an ADC        | BL 0937                        | Might be AD7991                               | one per AC socket                                                                                                                             |
-|             |                      | 1926AYH                        |                                               |                                                                                                                                               |
-|             |                      | D7991OOV                       |                                               |                                                                                                                                               |
-|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
-| U6          | 8051 microcontroller | STC 8F                         | [[https://www.stcmicro.com/stc/stc8f2k64s2.html]] | Current and power measurements                                                                                                                |
-|             |                      | 2K32S2E                        |                                               |                                                                                                                                               |
-|             |                      | A743634                        |                                               |                                                                                                                                               |
-|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
-| J4          | UART connection      | 2.54mm 4P header               | 9600 bits/s, 8 bits, no parity, 1 stop bit    | labels are from the perspective of the host, for example line labeled RXD is where the device *transmits* data, non-isolated from mains AC!!! |
-|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
-| J3          | Power input          | JST XH 4 pin male              |                                               | Label says 5V but it's 3.3V in reality                                                                                                        |
-|-------------+----------------------+--------------------------------+-----------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------|
+|-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
+| Designation | Description          | Part identification            | Datasheet                                     | Notes                                            |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
+| U7          | Wireless module      | P/N: WR3, Model: 2.22.33.00348 | See below                                     |                                                  |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
+| U3, U4, U5  | Likely an ADC        | BL 0937                        | Might be AD7991                               | one per AC socket                                |
+|             |                      | 1926AYH                        |                                               |                                                  |
+|             |                      | D7991OOV                       |                                               |                                                  |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
+| U6          | 8051 microcontroller | STC8F2K32S2E                   | [[https://www.stcmicro.com/stc/stc8f2k64s2.html]] | QFN32 package, measures current and controls     |
+|             |                      | A743634                        | [[file:STC8F-en.pdf]]                             | relays                                           |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
+| J2          | Button & Status LED  | JST XH 4 pin male              |                                               |                                                  |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
+| J4          | UART connection      | 2.54mm 4P header               | 9600 bits/s, 8 bits, no parity, 1 stop bit    | Labels are from the perspective of the host,     |
+|             |                      |                                |                                               | for example line labeled RXD is where the device |
+|             |                      |                                |                                               | *transmits* data, non-isolated from mains AC!!!  |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
+| J3          | Power input          | JST XH 4 pin male              |                                               | Label says 5V but it's 3.3V in reality           |
+|-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
 
 
 *** WR3 Wireless module 
@@ -48,14 +67,66 @@ Some people have attempted to replace this module with an ESP-12 to improve comp
 
 [[https://blakadder.com/replace-tuya-esp12/]]
 
-
 Original information on Tuya's site about the module
 [[https://developer.tuya.com/en/docs/iot/wr3-module-datasheet?id=K9g3ainzbj9z1]]
 
+The connections of the WR3 module can be traced to be as follows:
+
+|------------+----------+------------------------------------------------------------------------------------------------------------------+-----------------------------------------+-------|
+| Pin number | Sybol    | Pin description                                                                                                  | Connection                              | Notes |
+|------------+----------+------------------------------------------------------------------------------------------------------------------+-----------------------------------------+-------|
+|          1 | NC       | Pulled up and not connected, to be compatible with other modules                                                 | No solder pad                           |       |
+|          2 | GPIOA_22 | GPIOA_22, hardware PWM, Pin 31 of the IC                                                                         | No solder pad                           |       |
+|          3 | CHIP_EN  | When software disables the function, connection by a user fails                                                  | pull-up to 3.3V                         |       |
+|          4 | GPIOA_19 | GPIOA_19, a universal I/O port, Pin 30 of the IC                                                                 | No solder pad                           |       |
+|          5 | GPIOA_14 | GPIOA_14, hardware PWM, Pin 13 of the IC                                                                         | No solder pad                           |       |
+|          6 | GPIOA_15 | GPIOA_15, hardware PWM, Pin 14 of the IC                                                                         | No solder pad                           |       |
+|------------+----------+------------------------------------------------------------------------------------------------------------------+-----------------------------------------+-------|
+|          7 | GPIOA_0  | GPIOA_0, which cannot be pulled high when powered on, and                                                        | No solder pad                           |       |
+|            |          | which is configurable after the level is pulled to be high, hardware PWM, Pin 16 of the IC                       |                                         |       |
+|------------+----------+------------------------------------------------------------------------------------------------------------------+-----------------------------------------+-------|
+|          8 | VD33     | Power supply pin (3.3V)                                                                                          | 3.3V power                              |       |
+|          9 | GND      | Power supply reference ground                                                                                    | Ground                                  |       |
+|         10 | ADC      | ADC port, the maximum input voltage is 5V                                                                        | No solder pad                           |       |
+|------------+----------+------------------------------------------------------------------------------------------------------------------+-----------------------------------------+-------|
+|         11 | GPIOA_29 | UART_Log_RXD (used to print the internal information of the module),                                             | No solder pad                           |       |
+|            |          | which can be configured as a universal GPIO.                                                                     |                                         |       |
+|            |          | The module has been pulled up. The pin cannot be triggered at high level                                         |                                         |       |
+|------------+----------+------------------------------------------------------------------------------------------------------------------+-----------------------------------------+-------|
+|         12 | GPIOA_30 | UART_Log_TXD (used to print the internal information of the module), which can be configured as a universal GPIO | No solder pad                           |       |
+|         13 | GPIOA_5  | GPIOA_5, hardware PWM, Pin 28 of IC                                                                              | J2.K2 (button)                          |       |
+|         14 | GPIOA_12 | GPIOA_12, hardware PWM, Pin 17 of IC                                                                             | J2.D2 (LED)                             |       |
+|         15 | RXD      | UART0_RXD (user-side serial interface)                                                                           | U6.2(TXD2/P1.1) (via 100Ω resistor R37) |       |
+|         16 | TXD      | UART0_TXD (user-side serial interface)                                                                           | U6.1(RXD2/P1.0) (via 100Ω resistor R36) |       |
+|------------+----------+------------------------------------------------------------------------------------------------------------------+-----------------------------------------+-------|
+
+*** J2 Button board
+
+|-----------+-------------+-------|
+| Pin label | Description | Notes |
+|-----------+-------------+-------|
+| GND       |             |       |
+| VCC       | 3.3V        |       |
+| K2        | Button      |       |
+| D2        | Blue LED    |       |
+|-----------+-------------+-------|
+
 *** J4 UART interface
 
-The J4 UART interface seems to be transmitting periodic data about the AC mains voltage as well as the current draw and total energy for all sockets. This information is fed straight
-to the mobile application.
+The J4 UART interface is connected to the main STC8F UART which can be used for programming the chip. During operation it sends out periodic data 
+about the AC mains voltage as well as the current draw and total energy for all sockets. It's likely designed to perform calibration in the factory.
+
+
+|------------+-----------+---------------+----------------------+---------------------------------------------|
+| Pin number | Pin label | Description   | Connection           | Notes                                       |
+|------------+-----------+---------------+----------------------+---------------------------------------------|
+|          1 | GND       | Ground        |                      |                                             |
+|          2 | VCC       | 3.3V          |                      |                                             |
+|          3 | TXD       |               | U6.13(P3.0/RxD/INT4) | Can be used for ISP (In System Programming) |
+|          4 | RXD       |               | U6.14(P3.1/TxD)      | Can be used for ISP (In System Programming) |
+|------------+-----------+---------------+----------------------+---------------------------------------------|
+
+The output printed can be interpreted in the following way:
 
 #+BEGIN_EXPORT html
 <pre>
@@ -84,7 +155,469 @@ The power measurement seems off because 226 V * 0.105 A = 23.730 W not 11.6 W li
 The UART does not serve any other purpose, there is no traffic observed when the individual sockets are switched on or off. This looks to be controlled by a different 
 set of GPIO pins from the WR3 module.
 
+*** Tuya Serial Connection
+
+The U6 microcontroller and the U7 Tuya WLAN module are connected with a serial port which uses the TuyaMCU protocol documented here: [[https://tasmota.github.io/docs/TuyaMCU/]]
+and on the Tuya site: https://developer.tuya.com/en/docs/iot/tuya-cloud-universal-serial-port-access-protocol?id=K9hhi0xxtn9cb 
+
+As the TuyaMCU protocol is mostly half-duplex both lines of communication can be sniffed by bridging the TXD and RXD lines with diodes like shown below:
+
+[[file:uart-connection.svg]]
+
+In order to interpret the intercepted data a [[https://gist.github.com/enkiusz/2359d46a6c54e05118d05ff67cff5ccf][simple sniffer]] was created, the data intercepted looks like below:
+
+#+BEGIN_EXPORT html
+<pre>
+$ ./tuyamcu-sniffer.py /dev/ttyUSB0
+2022-12-19 15:51.55 [info     ] opening serial port            url=/dev/ttyUSB0
+2022-12-19 15:51.59 [info     ] frame                          fullpacket=b'55aa00000000ff' payload=b'' proto_ver=<MCUFrameProtoVer.MCU_RX_VER: 0> type=<MCUFrameType.HEAT_BEAT_CMD: 0>
+2022-12-19 15:51.59 [info     ] frame                          fullpacket=b'55aa030000010104' payload=b'01' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.HEAT_BEAT_CMD: 0>
+2022-12-19 15:52.03 [info     ] frame                          fullpacket=b'55aa03070005010100010112' payload=b'0101000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.03 [info     ] frame                          fullpacket=b'55aa03070005020100010113' payload=b'0201000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.03 [info     ] frame                          fullpacket=b'55aa03070005030100010114' payload=b'0301000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.13 [info     ] frame                          fullpacket=b'55aa0307000814020004000008b0e3' payload=b'14020004000008b0' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa0307000868020004000008b037' payload=b'68020004000008b0' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa0307000870020004000008b03f' payload=b'70020004000008b0' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa03070008660200040000009916' payload=b'6602000400000099' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa0307000867020004000001007f' payload=b'6702000400000100' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa03070005010100010112' payload=b'0101000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa03070005020100010113' payload=b'0201000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa03070005030100010114' payload=b'0301000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa00000000ff' payload=b'' proto_ver=<MCUFrameProtoVer.MCU_RX_VER: 0> type=<MCUFrameType.HEAT_BEAT_CMD: 0>
+2022-12-19 15:52.14 [info     ] frame                          fullpacket=b'55aa030000010104' payload=b'01' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.HEAT_BEAT_CMD: 0>
+2022-12-19 15:52.24 [info     ] frame                          fullpacket=b'55aa0307000866020004000000920f' payload=b'6602000400000092' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.24 [info     ] frame                          fullpacket=b'55aa0307000867020004000000f270' payload=b'67020004000000f2' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.24 [info     ] frame                          fullpacket=b'55aa03070005010100010112' payload=b'0101000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.24 [info     ] frame                          fullpacket=b'55aa03070005020100010113' payload=b'0201000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.24 [info     ] frame                          fullpacket=b'55aa03070005030100010114' payload=b'0301000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.29 [info     ] frame                          fullpacket=b'55aa00000000ff' payload=b'' proto_ver=<MCUFrameProtoVer.MCU_RX_VER: 0> type=<MCUFrameType.HEAT_BEAT_CMD: 0>
+2022-12-19 15:52.29 [info     ] frame                          fullpacket=b'55aa030000010104' payload=b'01' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.HEAT_BEAT_CMD: 0>
+2022-12-19 15:52.34 [info     ] frame                          fullpacket=b'55aa0307000866020004000000910e' payload=b'6602000400000091' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.34 [info     ] frame                          fullpacket=b'55aa0307000867020004000000ee6c' payload=b'67020004000000ee' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.34 [info     ] frame                          fullpacket=b'55aa03070005010100010112' payload=b'0101000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.34 [info     ] frame                          fullpacket=b'55aa03070005020100010113' payload=b'0201000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.34 [info     ] frame                          fullpacket=b'55aa03070005030100010114' payload=b'0301000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.44 [info     ] frame                          fullpacket=b'55aa00000000ff' payload=b'' proto_ver=<MCUFrameProtoVer.MCU_RX_VER: 0> type=<MCUFrameType.HEAT_BEAT_CMD: 0>
+2022-12-19 15:52.44 [info     ] frame                          fullpacket=b'55aa030000010104' payload=b'01' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.HEAT_BEAT_CMD: 0>
+2022-12-19 15:52.45 [info     ] frame                          fullpacket=b'55aa03070008660200040000008f0c' payload=b'660200040000008f' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.45 [info     ] frame                          fullpacket=b'55aa0307000867020004000000ef6d' payload=b'67020004000000ef' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.45 [info     ] frame                          fullpacket=b'55aa03070005010100010112' payload=b'0101000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+2022-12-19 15:52.45 [info     ] frame                          fullpacket=b'55aa03070005020100010113' payload=b'0201000101' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.STATE_UPLOAD_CMD: 7>
+</pre>
+#+END_EXPORT
+
+*** Extra hacking connector
+
+In order to simplify hacking an extra connector has been added to the device wired into all of the relevant pins of the WR3 WLAN module:
+
+ 
+|------------+-----------+--------------+-----------------------------+------------------|
+| Pin number | Pin label | Description  | Connection                  | Notes            |
+|------------+-----------+--------------+-----------------------------+------------------|
+|          1 | GND       | Ground       | U7.9(GND)                   | Black heatshrink |
+|          2 |           | UART_Log_RXD | U7.11(GPIOA_29)             |                  |
+|          3 |           | UART_Log_TXD | U7.12(GPIOA_30)             |                  |
+|          4 |           | Button       | U7.13(GPIOA_5), J2.K2       |                  |
+|          5 |           | LED          | U7.14(GPIOA_12), J2.D2      |                  |
+|          6 |           | MCU_TXD      | U7.15(RXD), U6.2(TXD2/P1.1) |                  |
+|          7 |           | MCU_RXD      | U7.16(TXD), U6.1(RXD2/P1.0) |                  |
+|------------+-----------+--------------+-----------------------------+------------------|
+
+*** Log UART interface
+
+The UART_Log_RXD and UART_Log_TXD form an UART interface to the Tuya WR3 module. The port settings are 115200 bits/s, 8n1, the interface is 3.3V TTL logic levels.
+When the device boots without WiFi network connection and without cloud connection the following output can be seen:
+
+#+BEGIN_EXPORT html
+<pre>
+picocom v3.1
+
+port is        : /dev/ttyUSB1
+flowcontrol    : none
+baudrate is    : 115200
+parity is      : none
+databits are   : 8
+stopbits are   : 1
+escape is      : C-a
+local echo is  : no
+noinit is      : no
+noreset is     : no
+hangup is      : no
+nolock is      : no
+send_cmd is    : sz -vv
+receive_cmd is : rz -vv -E
+imap is        : 
+omap is        : 
+emap is        : crcrlf,delbs,
+logfile is     : none
+initstring     : none
+exit_after is  : not set
+exit is        : no
+
+Type [C-a] [C-h] to see available commands
+Terminal ready
+ROM:[V0.1]
+FLASHRATE:4
+BOOT TYPE:0 XTAL:40000000
+IMG1 DATA[1168:10002000]
+IMG1 ENTRY[8000541:100021ef]
+IMG1 ENTER
+CHIPID[000000ff]
+read_mode idx:0, flash_speed idx:0
+calibration_result:[1:9:9][5:d] 
+calibration_result:[2:13:7][1:d] 
+calibration_result:[3:1:1][1:1] 
+calibration_ok:[2:13:7] 
+FLASH CALIB[NEW OK]
+OTA2 ADDR[80d0000]
+OTAx SELE[fffffffc]
+OTA1 USE
+IMG2 DATA[0x809e060:6540:0x10005000]
+IMG2 SIGN[RTKWin(10005008)]
+IMG2 ENTRY[0x10005000:0x800b1a5]
+===== Enter Image 2 ====
+System_Init1
+OSC8M: 8386568 
+boot reason: 0 
+System_Init2
+
+11111111111111111111111111
+interface 0 is initializ[01-ed
+interfa01 18:12:15 ce 1 is iniTUYA Debug][tialized
+
+Initializi.c:22] < TUYng WIFI ...A IOT SDK V:
+LDO M2.0.0 BS:30.ode, BD_Inf04_PT:2.2_LAo: 0 
+N:3.3_CAD:1.0.2_CD:1.0.0 >
+< tuya_
+LDO Modeiot_lib BUI, BD_Info: 0LD AT:2019_ 
+06_21_14_56_08 BY tuya_iot_team AT 8710_2M >
+IOT DEFS < WIFI_GW:1 DEBUG:1 KV_FILE:0 SHUTDOWN_MODE:0 LITTLE_END:1 TLS_MODE:3 ENABLE_LOCAL_LINKAGE:0 ENABLE_CLOUD_OPERATION:0 ENABLE_SUBDEVICE:0 ENABLE_ENGINEER_TO_NORMAL:0 OPERATING_SYSTEM:2 ENABLE_SYS_RPC:0 TY_SECURITY_CHIP:0 RELIABLE_TRANSFER:RELIABLE_TRANSFER ENABLE_LAN_ENCRYPTION:1 ENABLE_SIGMESH:0 >
+
+[01-01 18:12:15 TUYA Debug][tuya_device.c:23] rtlbn_tls_common_9600:1.0.3
+[01-01 18:12:15 TUYA Notice][simple_flash.c:428] key_addr: 0x1eb000   block_sz 4096
+[01-01 18:12:15 TUYA Notice][simple_flash.c:496] get key:
+0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 
+
+WIFI initialized
+
+init_thread(55), Available heap 0x9ea0[01-01 18:12:15 TUYA Notice][tuya_uart.c:125] 1   9600
+[01-01 18:12:15 TUYA Notice][tuya_main.c:368] mf_init succ
+[01-01 18:12:15 TUYA Notice][uart_common.c:2956] uart baud rate:9600----firmware key:kXXXXXXXptn
+[01-01 18:12:15 TUYA Notice][tuya_uart.c:125] 0   9600
+[01-01 18:12:15 TUYA Notice][uart_common.c:3047] uart_task_init ok
+[01-01 18:12:15 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:12:17 TUYA Notice][uart_common.c:3151] cfg_mode:0   firmware_key kXXXXXXXptn
+
+[01-01 18:12:17 TUYA Notice][tuya_iot_wifi_api.c:193] wifi mcu init. pid:qXXXXXXXXw firmwarekey:kXXXXXXXXn v1:1.0.3 v2:1.0.1
+[01-01 18:12:17 TUYA Notice][gw_intf.c:2600] serial_no:6XXXXXXXXXXd
+[01-01 18:12:17 TUYA Notice][gw_intf.c:2631] gw_cntl.gw_wsm.stat:1
+[01-01 18:12:17 TUYA Notice][gw_intf.c:2634] gw_cntl.gw_wsm.nc_tp:1
+[01-01 18:12:17 TUYA Notice][gw_intf.c:2635] gw_cntl.gw_wsm.md:0
+[01-01 18:12:17 TUYA Notice][gw_intf.c:2667] gw_cntl.gw_if.abi:0 input:0
+[01-01 18:12:17 TUYA Notice][gw_intf.c:2668] gw_cntl.gw_if.product_key:qXXXXXXXXXXXXw, input:qXXXXXXXXXXXw
+[01-01 18:12:17 TUYA Notice][gw_intf.c:2669] gw_cntl.gw_if.tp:1, input:1
+[01-01 18:12:17 TUYA Notice][gw_intf.c:2671] gw_cntl.gw_if.firmware_key:kXXXXXXXXXXXn, input:kXXXXXXXXXXn
+
+LDO Mode, BD_Info: 0 
+[01-01 18:12:17 TUYA Notice][tuya_gpio.c:225] id 5 {0x1000312c}
+
+LwIP_DHCP: dhcp stop.
+Deinitializing WIFI ...
+WIFI deinitialized
+Initializing WIFI ...
+LDO Mode, BD_Info: 0 
+
+LDO Mode, BD_Info: 0 
+
+WIFI initialized
+[01-01 18:12:18 TUYA Notice][uart_common.c:2872] wifi status is :1
+[01-01 18:12:18 TUYA Notice][uart_common.c:468] send jump_pack
+
+LwIP_DHCP: dhcp stop.
+Deinitializing WIFI ...
+WIFI deinitialized
+Initializing WIFI ...
+LDO Mode, BD_Info: 0 
+
+LDO Mode, BD_Info: 0 
+
+WIFI initialized
+[01-01 18:12:33 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:12:45 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:13:00 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:13:15 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:13:30 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:13:45 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:14:00 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:14:15 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:14:30 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:14:46 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:15:01 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:15:16 TUYA Notice][uart_common.c:468] send jump_pack
+</pre>
+#+END_EXPORT
+
+When the pairing is initiated in the Android application the following output is logged:
+
+#+BEGIN_EXPORT html
+<pre>
+[01-01 18:17:46 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:18:01 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:18:15 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:18:30 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:18:33 TUYA Notice][gw_intf.c:492] stop smt cfg mthd:0
+
+LwIP_DHCP: dhcp stop.
+Deinitializing WIFI ...
+WIFI deinitialized
+Initializing WIFI ...
+LDO Mode, BD_Info: 0 
+
+LDO Mode, BD_Info: 0 
+
+WIFI initialized
+[01-01 18:18:34 TUYA Notice][uart_common.c:2872] wifi status is :5
+
+RTL8195A[Driver]: set ssid [XXXXXXXXXXXXXX] 
+
+RTL8195A[Driver]: start auth to 00:0e:2e:ba:dd:16
+
+RTL8195A[Driver]: auth success, start assoc
+
+RTL8195A[Driver]: association success(res=3)
+wlan1: 1 DL RSVD page success! DLBcnCount:01, poll:00000001
+
+RTL8195A[Driver]: set pairwise key to hw: alg:4(WEP40-1 WEP104-5 TKIP-2 AES-4)
+
+RTL8195A[Driver]: set group key to hw: alg:4(WEP40-1 WEP104-5 TKIP-2 AES-4) keyid:1
+
+Interface 0 IP address : 10.1.0.13[01-01 18:18:38 TUYA Notice][uart_common.c:2872] wifi status is :6
+[12-15 16:20:13 TUYA Err][smart_frame.c:2060] mqtt async send fail -916
+[12-15 16:20:13 TUYA Err][uart_common.c:2216] sf_obj_dp_report op_ret:-916,out:{"20":2224}
+[12-15 16:20:13 TUYA Err][smart_frame.c:2060] mqtt async send fail -916
+[12-15 16:20:13 TUYA Err][uart_common.c:2216] sf_obj_dp_report op_ret:-916,out:{"104":2224}
+[12-15 16:20:13 TUYA Err][smart_frame.c:2060] mqtt async send fail -916
+[12-15 16:20:13 TUYA Err][uart_common.c:2216] sf_obj_dp_report op_ret:-916,out:{"1":false}
+[12-15 16:20:13 TUYA Notice][mqtt_client.c:1075] mqtt get serve ip success
+[12-15 16:20:13 TUYA Notice][mqtt_client.c:1100] mqtt socket create success. begin to connect
+[12-15 16:20:13 TUYA Notice][mqtt_client.c:1115] mqtt socket connect success. begin to subscribe
+[12-15 16:20:13 TUYA Notice][mqtt_client.c:878] mqtt subscribe success
+[12-15 16:20:13 TUYA Notice][uart_common.c:2872] wifi status is :7
+[12-15 16:20:14 TUYA Notice][wifi_hwl.c:747] ssid XXXXXXXXXX,passwd:XXXXXXXXXXXXX,sec_type:4194308,chan:11
+[12-15 16:20:14 TUYA Notice][gw_intf.c:761] get ap info: ssid:XXXXXXXXXXx,passwd:XXXXXXXXXXXX,chan:11,sec_tp:400004
+[12-15 16:20:14 TUYA Notice][gw_intf.c:762] local ap info: ssid:XXXXXXXXXXX,passwd:XXXXXXXXXXX,chan:11,sec_tp:400004
+[12-15 16:20:17 TUYA Notice][uart_common.c:468] send jump_pack
+[12-15 16:20:29 TUYA Err][smart_frame.c:1234] dp id 19 Skip
+[12-15 16:20:29 TUYA Err][smart_frame.c:1234] dp id 103 Skip
+[12-15 16:20:29 TUYA Err][smart_frame.c:1234] dp id 111 Skip
+[12-15 16:20:29 TUYA Err][smart_frame.c:1234] dp id 112 Skip
+[12-15 16:20:32 TUYA Err][smart_frame.c:1234] dp id 19 Skip
+[12-15 16:20:32 TUYA Err][smart_frame.c:1234] dp id 103 Skip
+[12-15 16:20:32 TUYA Err][smart_frame.c:1234] dp id 111 Skip
+[12-15 16:20:32 TUYA Err][smart_frame.c:1234] dp id 112 Skip
+[12-15 16:20:32 TUYA Notice][app_agent.c:1163] find error socket 3
+[12-15 16:20:32 TUYA Err][app_agent.c:1440] ret:-1 send_len:75 errno:-100
+[12-15 16:20:32 TUYA Err][app_agent.c:1976] __mlp_gw_tcp_send op_ret:-909
+[12-15 16:20:32 TUYA Err][app_agent.c:1386] the socket 3 is fault
+[12-15 16:20:34 TUYA Notice][uart_common.c:468] send jump_pack
+[12-15 16:20:48 TUYA Notice][uart_common.c:468] send jump_pack
+[12-15 16:21:03 TUYA Notice][uart_common.c:468] send jump_pack
+[12-15 16:21:18 TUYA Notice][uart_common.c:468] send jump_pack
+[12-15 16:21:33 TUYA Notice][uart_common.c:468] send jump_pack
+</pre>
+#+END_EXPORT
+
+When the device is in the connected state pressing and holding the button resets all of the settings and reboots the WiFi module:
+
+#+BEGIN_EXPORT html
+<pre>
+[12-15 16:24:04 TUYA Notice][uart_common.c:468] send jump_pack
+[12-15 16:24:19 TUYA Notice][uart_common.c:468] send jump_pack
+[12-15 16:24:26 TUYA Notice][tuya_key.c:441] get key interrupt
+ROM:[V0.1]
+FLASHRATE:4
+BOOT TYPE:0 XTAL:40000000
+IMG1 DATA[1168:10002000]
+IMG1 ENTRY[8000541:100021ef]
+IMG1 ENTER
+CHIPID[000000ff]
+read_mode idx:0, flash_speed idx:0
+calibration_result:[1:9:9][5:d] 
+calibration_result:[2:13:7][1:d] 
+calibration_result:[3:1:1][1:1] 
+calibration_ok:[2:13:7] 
+FLASH CALIB[NEW OK]
+OTA2 ADDR[80d0000]
+OTAx SELE[fffffffc]
+OTA1 USE
+IMG2 DATA[0x809e060:6540:0x10005000]
+IMG2 SIGN[RTKWin(10005008)]
+IMG2 ENTRY[0x10005000:0x800b1a5]
+===== Enter Image 2 ====
+System_Init1
+OSC8M: 8386568 
+boot reason: 7a05 
+System_Init2
+
+11111111111111111111111111
+interface 0 is initializ[01-ed
+interfa01 18:12:15 ce 1 is iniTUYA Debug][tialized
+
+Initializi.c:22] < TUYng WIFI ...A IOT SDK V:
+LDO M2.0.0 BS:30.ode, BD_Inf04_PT:2.2_LAo: 0 
+N:3.3_CAD:1.0.2_CD:1.0.0 >
+< tuya_
+LDO Modeiot_lib BUI, BD_Info: 0LD AT:2019_ 
+06_21_14_56_08 BY tuya_iot_team AT 8710_2M >
+IOT DEFS < WIFI_GW:1 DEBUG:1 KV_FILE:0 SHUTDOWN_MODE:0 LITTLE_END:1 TLS_MODE:3 ENABLE_LOCAL_LINKAGE:0 ENABLE_CLOUD_OPERATION:0 ENABLE_SUBDEVICE:0 ENABLE_ENGINEER_TO_NORMAL:0 OPERATING_SYSTEM:2 ENABLE_SYS_RPC:0 TY_SECURITY_CHIP:0 RELIABLE_TRANSFER:RELIABLE_TRANSFER ENABLE_LAN_ENCRYPTION:1 ENABLE_SIGMESH:0 >
+
+[01-01 18:12:15 TUYA Debug][tuya_device.c:23] rtlbn_tls_common_9600:1.0.3
+[01-01 18:12:15 TUYA Notice][simple_flash.c:428] key_addr: 0x1eb000   block_sz 4096
+[01-01 18:12:15 TUYA Notice][simple_flash.c:496] get key:
+0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX 
+
+WIFI initialized
+
+init_thread(55), Available heap 0x9ea0[01-01 18:12:15 TUYA Notice][tuya_uart.c:125] 1   9600
+[01-01 18:12:15 TUYA Err][mf_test.c:450] ty_cJSON_Parse error
+[01-01 18:12:15 TUYA Err][mf_test.c:450] ty_cJSON_Parse error
+[01-01 18:12:15 TUYA Notice][mf_test.c:237] len=5,in=6,out=0,cmd=7
+[01-01 18:12:15 TUYA Err][mf_test.c:450] ty_cJSON_Parse error
+[01-01 18:12:15 TUYA Notice][tuya_main.c:368] mf_init succ
+[01-01 18:12:15 TUYA Notice][uart_common.c:2956] uart baud rate:9600----firmware key:kXXXXXXXXXXXXXXn
+[01-01 18:12:15 TUYA Notice][tuya_uart.c:125] 0   9600
+[01-01 18:12:15 TUYA Notice][uart_common.c:3047] uart_task_init ok
+[01-01 18:12:15 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:12:18 TUYA Notice][uart_common.c:3151] cfg_mode:0   firmware_key kXXXXXXXXXXXXXXXn
+
+[01-01 18:12:18 TUYA Notice][tuya_iot_wifi_api.c:193] wifi mcu init. pid:qXXXXXXXXXXXw firmwarekey:kXXXXXXXXXXXXXn v1:1.0.3 v2:1.0.1
+[01-01 18:12:18 TUYA Notice][gw_intf.c:2600] serial_no:6XXXXXXXXXXXXXd
+[01-01 18:12:18 TUYA Notice][gw_intf.c:2631] gw_cntl.gw_wsm.stat:1
+[01-01 18:12:18 TUYA Notice][gw_intf.c:2634] gw_cntl.gw_wsm.nc_tp:1
+[01-01 18:12:18 TUYA Notice][gw_intf.c:2635] gw_cntl.gw_wsm.md:0
+[01-01 18:12:18 TUYA Notice][gw_intf.c:2667] gw_cntl.gw_if.abi:0 input:0
+[01-01 18:12:18 TUYA Notice][gw_intf.c:2668] gw_cntl.gw_if.product_key:qXXXXXXXXXXXXXXw, input:qXXXXXXXXXXXXXw
+[01-01 18:12:18 TUYA Notice][gw_intf.c:2669] gw_cntl.gw_if.tp:1, input:1
+[01-01 18:12:18 TUYA Notice][gw_intf.c:2671] gw_cntl.gw_if.firmware_key:kXXXXXXXXXXXXXXn, input:kXXXXXXXXXXXXXXn
+
+LDO Mode, BD_Info: 0 
+[01-01 18:12:18 TUYA Notice][tuya_gpio.c:225] id 5 {0x1000312c}
+
+LwIP_DHCP: dhcp stop.
+Deinitializing WIFI ...
+WIFI deinitialized
+Initializing WIFI ...
+LDO Mode, BD_Info: 0 
+
+LDO Mode, BD_Info: 0 
+
+WIFI initialized
+[01-01 18:12:18 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:12:19 TUYA Notice][uart_common.c:2872] wifi status is :1
+
+LwIP_DHCP: dhcp stop.
+Deinitializing WIFI ...
+WIFI deinitialized
+Initializing WIFI ...
+LDO Mode, BD_Info: 0 
+
+LDO Mode, BD_Info: 0 
+
+WIFI initialized
+[01-01 18:12:33 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:12:44 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:12:59 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:13:14 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:13:29 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:13:44 TUYA Notice][uart_common.c:468] send jump_pack
+[01-01 18:13:59 TUYA Notice][uart_common.c:468] send jump_pack
+
+</pre>
+#+END_EXPORT
+
+
 * Application
 
-The device's controlling application can be downloaded from the Google Play store under the name "Vastra Smart Devices" and package id pl.vastra.android.smartdevices.
+The device's controlling application can be downloaded from the Google Play store under the name "Vastra Smart Devices" and package id [[file:pl.vastra.android.smartdevices.zip][pl.vastra.android.smartdevices]]. This application
+is built based on the Tuya SDKs and it' also possible to use the non-branded "Tuya Smart" application from Tuya to provision and control the device.
 
+** Tuya Protocol Integration data
+
+The device supports both AP and EZ provisioning modes, however the "Vastra Smart Devices" application seems to only implement the EZ mode (can be recognized by the fast blinking 
+pattern when in pairing mode). Unfortunately both modes are insecure and leak the WLAN credentials when provisioning. Please look into References for an article and example
+code to sniff the WLAN credentials off the air for EZ mode.
+
+*** Product info
+
+#+BEGIN_EXPORT html
+<pre>
+2022-12-19 15:31.10 [info     ] frame                          fullpacket=b'55aa0301002a7b2270223a227176656e6b6c78667377736769756177222c2276223a22312e302e31222c226d223a307dd9' payload=b'7b2270223a227176656e6b6c78667377736769756177222c2276223a22312e302e31222c226d223a307d' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.PRODUCT_INFO_CMD: 1>
+➜  ~ python3
+Python 3.10.6 (main, Nov 14 2022, 16:10:14) [GCC 11.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from binascii import unhexlify
+>>> print(unhexlify(b'7b2270223a227176656e6b6c78667377736769756177222c2276223a22312e302e31222c226d223a307d'))
+b'{"p":"qvenklxfswsgiuaw","v":"1.0.1","m":0}'
+>>> 
+</pre>
+#+END_EXPORT
+
+*** Product mode
+
+#+BEGIN_EXPORT html
+<pre>
+2022-12-19 15:31.10 [info     ] frame                          fullpacket=b'55aa0002000001' payload=b'' proto_ver=<MCUFrameProtoVer.MCU_RX_VER: 0> type=<MCUFrameType.WORK_MODE_CMD: 2>
+2022-12-19 15:31.10 [info     ] frame                          fullpacket=b'55aa030200020c0517' payload=b'0c05' proto_ver=<MCUFrameProtoVer.MCU_TX_VER: 3> type=<MCUFrameType.WORK_MODE_CMD: 2>
+</pre>
+#+END_EXPORT
+
+*** Tuya Data Points
+
+|------------+------------+-----------+------------------+-----------------------+---------------------+-----------------------------+--------------------------------+-------------------|
+| dpId (hex) | Identifier | Data Type | Direction        | Description           | Example value (raw) | Example value (interpreted) | Example packet                 | Notes             |
+|------------+------------+-----------+------------------+-----------------------+---------------------+-----------------------------+--------------------------------+-------------------|
+|         01 | switch_1   | Boolean   | Control & Report | Socket 1 power on/off |                  01 | true                        | 55aa03070005010100010112       |                   |
+|         02 | switch_2   | Boolean   | Control & Report | Socket 2 power on/off |                  01 | true                        | 55aa03070005020100010113       |                   |
+|         03 | switch_3   | Boolean   | Control & Report | Socket 3 power on/off |                  01 | true                        | 55aa03070005030100010114       |                   |
+|------------+------------+-----------+------------------+-----------------------+---------------------+-----------------------------+--------------------------------+-------------------|
+|         14 | voltage_1  | Integer   | Report           | Socket 1 voltage      |            000008b0 | 222.4 V                     | 55aa0307000814020004000008b0e3 | Unit is 0.1 V     |
+|         68 | voltage_2  | Integer   | Report           | Socket 2 voltage      |                     |                             | 55aa0307000868020004000008b037 | Unit is 0.1 V     |
+|         70 | voltage_3  | Integer   | Report           | Socket 3 voltage      |                     |                             | 55aa0307000870020004000008b03f | Unit is 0.1 V     |
+|------------+------------+-----------+------------------+-----------------------+---------------------+-----------------------------+--------------------------------+-------------------|
+|         12 | current_1  | Integer   | Report           | Socket 1 current      |            0000004c | 76 mA                       | 55aa03070008120200040000004c75 | Unit is 0.1 A     |
+|         66 | current_2  | Integer   | Report           | Socket 2 current      |            00000099 | 153 mA                      | 55aa03070008660200040000009916 | Unit is 0.1 A     |
+|         6e | current_3  | Integer   | Report           | Socket 3 current      |                     |                             | 55aa030700086e0200040000000085 | Unit is 0.1 A     |
+|------------+------------+-----------+------------------+-----------------------+---------------------+-----------------------------+--------------------------------+-------------------|
+|         13 | power_1    | Integer   | Report           | Socket 1 power        |            0000004c | 10.7 W                      | 55aa03070008120200040000004c75 | Unit is 0.1 W     |
+|         67 | power_2    | Integer   | Report           | Socket 2 power        |            00000100 | 25.6 W                      | 55aa0307000867020004000001007f | Unit is 0.1 W     |
+|         6f | power_3    | Integer   | Report           | Socket 3 power        |                     |                             | 55aa030700086f0200040000000086 | Unit is 0.1 W     |
+|------------+------------+-----------+------------------+-----------------------+---------------------+-----------------------------+--------------------------------+-------------------|
+|         11 | energy_1   | Integer   | Report           | Socket 1 energy       |                     |                             | 55aa03070008110200040000000028 |                   |
+|         65 | energy_2   | Integer   | Report           | Socket 2 energy       |            0000001e | 0.030 kWh                   | 55aa03070008650200040000001e9a | Unit is 0.001 kWh |
+|         6d | energy_3   | Integer   | Report           | Socket 3 energy       |                     |                             | 55aa030700086d0200040000000084 |                   |
+|------------+------------+-----------+------------------+-----------------------+---------------------+-----------------------------+--------------------------------+-------------------|
+
+* References
+
+Description of the differences between AP and EZ pairing modes from a user perspective
+https://support.tuya.com/en/help/_detail/K9hut3w10nby8
+
+The Tuya organization on Github provides example a lot of example code
+https://github.com/tuya/
+
+An alternative firmware for the Tuya devices based on the ESP chips provides a lot of documentation for the 
+TuyaMCU protocol.
+https://tasmota.github.io/docs/TuyaMCU/#anatomy-of-tuya-protocol
+
+Code to sniff the wireless network credentials being transmitted to a Tuya device when using EZ mode
+https://www.elttam.com/blog/ez-mode-pairing/#content
+https://raw.githubusercontent.com/elttam/advisories/master/tuya-ez-mode/live-extract.py
+
+A collection of projects related to reverse-enginnering Tuya devices. Not in any way affiliated with Tuya Inc.
+https://github.com/TuyaAPI
+
+ESPTouch is the original protocol used as the "EZ Mode" pairing protocol for Tuya devices
+https://github.com/EspressifApp/EsptouchForAndroid
+
+Some description of the semantics behind TuyaMCU messages (mirrored)
+[[file:protocol_CurtainM_20190926.pdf]]
