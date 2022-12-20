@@ -1,10 +1,6 @@
 #+TITLE: Vastra SS2 Smart Power Strip
 #+LANGUAGE: en
 
-#+BEGIN_EXPORT html
-<base href="vastra-ss2/"/>
-#+END_EXPORT
-
 * Hardware
 
 The hardware inside consists of (apart from the ordinary Schuko sockets) several PCBs connected together with JST XH and pin header connectors.
@@ -22,15 +18,15 @@ The hardware inside consists of (apart from the ordinary Schuko sockets) several
 
 Some photos of the boards:
 
-[[file:internals.jpg][file:thumb-internals.jpg]]
+[[file:vastra-ss2/internals.jpg][file:vastra-ss2/thumb-internals.jpg]]
 
-[[file:SW3A-POWER.jpg][file:thumb-SW3A-POWER.jpg]]
+[[file:vastra-ss2/SW3A-POWER.jpg][file:vastra-ss2/thumb-SW3A-POWER.jpg]]
 
-[[file:SW3A-Control-WR3.jpg][file:thumb-SW3A-Control-WR3.jpg]]
+[[file:vastra-ss2/SW3A-Control-WR3.jpg][file:vastra-ss2/thumb-SW3A-Control-WR3.jpg]]
 
-[[file:SW3A-Control-MCU.jpg][file:thumb-SW3A-Control-MCU.jpg]]
+[[file:vastra-ss2/SW3A-Control-MCU.jpg][file:vastra-ss2/thumb-SW3A-Control-MCU.jpg]]
 
-[[file:SW3A-Control-ADC.jpg][file:thumb-SW3A-Control-ADC.jpg]]
+[[file:vastra-ss2/SW3A-Control-ADC.jpg][file:vastra-ss2/thumb-SW3A-Control-ADC.jpg]]
 
 
 ** CON Board (Controller)
@@ -47,7 +43,7 @@ Notable parts are 3 ADCs, a MCU and a Tuya WR3 wireless module. Summary below:
 |             |                      | D7991OOV                       |                                               |                                                  |
 |-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
 | U6          | 8051 microcontroller | STC8F2K32S2E                   | [[https://www.stcmicro.com/stc/stc8f2k64s2.html]] | QFN32 package, measures current and controls     |
-|             |                      | A743634                        | [[file:STC8F-en.pdf]]                             | relays                                           |
+|             |                      | A743634                        | [[file:vastra-ss2/STC8F-en.pdf][Datasheet (mirror)]]                            | relays                                           |
 |-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
 | J2          | Button & Status LED  | JST XH 4 pin male              |                                               |                                                  |
 |-------------+----------------------+--------------------------------+-----------------------------------------------+--------------------------------------------------|
@@ -162,7 +158,7 @@ and on the Tuya site: https://developer.tuya.com/en/docs/iot/tuya-cloud-universa
 
 As the TuyaMCU protocol is mostly half-duplex both lines of communication can be sniffed by bridging the TXD and RXD lines with diodes like shown below:
 
-[[file:uart-connection.svg]]
+[[file:vastra-ss2/uart-connection.svg]]
 
 In order to interpret the intercepted data a [[https://gist.github.com/enkiusz/2359d46a6c54e05118d05ff67cff5ccf][simple sniffer]] was created, the data intercepted looks like below:
 
@@ -596,6 +592,175 @@ b'{"p":"qvenklxfswsgiuaw","v":"1.0.1","m":0}'
 |         65 | energy_2   | Integer   | Report           | Socket 2 energy       |            0000001e | 0.030 kWh                   | 55aa03070008650200040000001e9a | Unit is 0.001 kWh |
 |         6d | energy_3   | Integer   | Report           | Socket 3 energy       |                     |                             | 55aa030700086d0200040000000084 |                   |
 |------------+------------+-----------+------------------+-----------------------+---------------------+-----------------------------+--------------------------------+-------------------|
+
+** Tuya Integration Manual
+
+The below is a short howto on controlling the power strip without using the official app but instead integrating it manually with the Tuya cloud. You own Python code can be integrated
+with the Tuya cloud using their OpenAPI REST API, the following short example will be referenced:
+
+#+BEGIN_EXPORT html
+<code>
+import logging
+from env import ENDPOINT, ACCESS_ID, ACCESS_KEY, USERNAME, PASSWORD, DEVICE_ID
+from tuya_iot import (
+    TuyaOpenAPI,
+    AuthType,
+    TUYA_LOGGER
+)
+import time
+
+TUYA_LOGGER.setLevel(logging.DEBUG)
+
+openapi = TuyaOpenAPI(ENDPOINT, ACCESS_ID, ACCESS_KEY, AuthType.CUSTOM)
+
+openapi.connect(USERNAME, PASSWORD)
+
+openapi.get(f'/v1.0/iot-03/devices/{DEVICE_ID}/functions')
+
+state = True
+while True:
+
+    commands = [ dict(code='switch_1', value=state) ]
+    openapi.post(f'/v1.0/iot-03/devices/{DEVICE_ID}/commands', dict(commands=commands))
+    state = not state
+
+    time.sleep(5)
+</code>
+#+END_EXPORT
+
+0. Install the pypi package for the toolkit from https://github.com/tuya/tuya-iot-python-sdk: python3 -m pip install tuya-iot-py-sdk
+1. Create an account on iot.tuya.com.
+2. Create a Cloud Project, set both Industry and Development Method to "Smart Home". Select all Data Centers just to be sure. Take note of the ACCESS_ID and ACCESS_KEY values and put them inside
+   an env.py file alongside the example Python code. The configuration values are imported from it as you can see.
+
+[[file:vastra-ss2/tuya-iot-project.png][file:vastra-ss2/tuya-iot-project-thumb.png]]
+
+1. Install the "Tuya Smart" Android application and add the device there.
+2. Based on the country where your "Tuya Smart" Android app is located select the proper data center in the Devices section of your project. For example, an Android application
+   used on a mobile phone in Poland will be using the "Central Europe Data Center". This can be selected on the right of the Devices panel:
+
+[[file:vastra-ss2/tuya-select-dc.png][file:vastra-ss2/thumb-tuya-select-dc.png]]
+
+For the mapping between countries and data centers servicing them you can look here:
+
+https://developer.tuya.com/en/docs/iot/oem-app-data-center-distributed?id=Kafi0ku9l07qb
+
+4. Link the "Tuya Smart" application with your iot.tuya.com account by going to "Your Account" in Tuya mobile app and selecting the QR code scanning button near the top right of the screen. The
+   QR code you need to scan can be found in the "Link Tuya App Account" section of your project like shown below:
+
+[[file:vastra-ss2/tuya-link-app.png][file:vastra-ss2/thumb-tuya-link-app.png]]
+
+Select "Automatic Link (Recommended)" - this will cause all devices that are added to the Tuya Smart application will be automatically registered in your project.
+Select "Read/Write" for Device Permission if you want to control the device (like switch outputs on/off).
+
+There should be an indication that devices were sucessfully linked to your project. If the count of devices is 0 on this dialog it most likely means that you have not selected the proper Data Center.
+
+[[file:vastra-ss2/tuya-device-notification.png]]
+
+5. You device should now appear on the "All Devices" tab of your project. Take note of the "Device ID" field and put it into env.py created earlier.
+
+[[file:vastra-ss2/tuya-devices-view.png][file:vastra-ss2/thumb-tuya-devices-view.png]]
+
+6. Create a user in the Users tab. The username and password for this user should be stored as the USERNAME and PASSWORD variables in env.py
+
+7. Go to "Service API" in your project and add authorization for the "IoT Core" API:
+
+[[file:vastra-ss2/tuya-service-api-authorizations.png][file:vastra-ss2/thumb-tuya-service-api-authorizations.png]]
+
+8. Our code should now work and toggle the socket 1 on and off every 5 seconds:
+
+#+BEGIN_EXPORT html
+<pre>
+$ python3 device.py
+[2022-12-20 17:30:04,884] [tuya-openapi] Request: method = POST,                 url = https://openapi.tuyaeu.com/v1.0/iot-03/users/login,                params = None,                body = {'username': 'acct-tuyauser@fsck.pl', 'password': '***'},                t = 1671553804884
+[2022-12-20 17:30:05,445] [tuya-openapi] Response: {
+  "result": {
+    "access_token": "***",
+    "expire": 7200,
+    "refresh_token": "***",
+    "uid": "***"
+  },
+  "success": true,
+  "t": 1671553805320,
+  "tid": "8f3d5ae7808311edbff6521277a1eee7"
+}
+[2022-12-20 17:30:05,446] [tuya-openapi] Request: method = GET,                 url = https://openapi.tuyaeu.com/v1.0/iot-03/devices/bfb05d3703a99a4680wz6p/functions,                params = None,                body = None,                t = 1671553805446
+[2022-12-20 17:30:05,511] [tuya-openapi] Response: {
+  "result": {
+    "category": "pc",
+    "functions": [
+      {
+        "code": "switch_1",
+        "desc": "switch 1",
+        "name": "switch 1",
+        "type": "Boolean",
+        "values": "{}"
+      },
+      {
+        "code": "switch_2",
+        "desc": "switch 2",
+        "name": "switch 2",
+        "type": "Boolean",
+        "values": "{}"
+      },
+      {
+        "code": "switch_3",
+        "desc": "switch 3",
+        "name": "switch 3",
+        "type": "Boolean",
+        "values": "{}"
+      },
+      {
+        "code": "countdown_1",
+        "desc": "countdown 1",
+        "name": "countdown 1",
+        "type": "Integer",
+        "values": "{\"unit\":\"s\",\"min\":0,\"max\":86400,\"scale\":0,\"step\":1}"
+      },
+      {
+        "code": "countdown_2",
+        "desc": "countdown 2",
+        "name": "countdown 2",
+        "type": "Integer",
+        "values": "{\"unit\":\"s\",\"min\":0,\"max\":86400,\"scale\":0,\"step\":1}"
+      },
+      {
+        "code": "countdown_3",
+        "desc": "countdown 3",
+        "name": "countdown 3",
+        "type": "Integer",
+        "values": "{\"unit\":\"s\",\"min\":0,\"max\":86400,\"scale\":0,\"step\":1}"
+      },
+      {
+        "code": "switch",
+        "desc": "switch",
+        "name": "switch",
+        "type": "Boolean",
+        "values": "{}"
+      }
+    ]
+  },
+  "success": true,
+  "t": 1671553805460,
+  "tid": "8f756d80808311edbff6521277a1eee7"
+}
+[2022-12-20 17:30:05,512] [tuya-openapi] Request: method = POST,                 url = https://openapi.tuyaeu.com/v1.0/iot-03/devices/bfb05d3703a99a4680wz6p/commands,                params = None,                body = {'commands': [{'code': 'switch_1', 'value': True}]},                t = 1671553805512
+[2022-12-20 17:30:05,603] [tuya-openapi] Response: {
+  "result": true,
+  "success": true,
+  "t": 1671553805551,
+  "tid": "8f7f6f3f808311edbe0bee4d76ea34cc"
+}
+[2022-12-20 17:30:10,609] [tuya-openapi] Request: method = POST,                 url = https://openapi.tuyaeu.com/v1.0/iot-03/devices/bfb05d3703a99a4680wz6p/commands,                params = None,                body = {'commands': [{'code': 'switch_1', 'value': False}]},                t = 1671553810609
+[2022-12-20 17:30:10,702] [tuya-openapi] Response: {
+  "result": true,
+  "success": true,
+  "t": 1671553810650,
+  "tid": "92896dce808311edbff6521277a1eee7"
+}
+^C
+</pre>
+#+END_EXPORT
 
 * References
 
