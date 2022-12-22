@@ -531,7 +531,6 @@ WIFI initialized
 </pre>
 #+END_EXPORT
 
-
 * Application
 
 The device's controlling application can be downloaded from the Google Play store under the name "Vastra Smart Devices" and package id [[file:pl.vastra.android.smartdevices.zip][pl.vastra.android.smartdevices]]. This application
@@ -595,8 +594,8 @@ b'{"p":"qvenklxfswsgiuaw","v":"1.0.1","m":0}'
 
 ** Tuya Integration Manual
 
-The below is a short howto on controlling the power strip without using the official app but instead integrating it manually with the Tuya cloud. You own Python code can be integrated
-with the Tuya cloud using their OpenAPI REST API, the following short example will be referenced:
+The below is a short howto on controlling the power strip without using the official app but instead integrating it manually with the Tuya cloud. A similar guide can be also
+found [[https://github.com/codetheweb/tuyapi/blob/master/docs/SETUP.md][in the tuyapi project]]. You own Python code can be integrated with the Tuya cloud using their OpenAPI REST API, the following short example will be referenced:
 
 #+BEGIN_EXPORT html
 <code>
@@ -763,6 +762,9 @@ $ python3 device.py
 #+END_EXPORT
 
 * References
+
+Tuya cloud integration instruction
+https://github.com/codetheweb/tuyapi/blob/master/docs/SETUP.md
 
 Description of the differences between AP and EZ pairing modes from a user perspective
 https://support.tuya.com/en/help/_detail/K9hut3w10nby8
