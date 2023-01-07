@@ -8,6 +8,7 @@
   - [[file:hardware/brother-ds-720d.org][Brother DS-720D]]
   - [[file:hardware/cubify-cube3d.org][Cubify Cube 3D printer]]
   - [[file:hardware/dns-320l.org][DNS-320L NAS]]
+  - [[file:hardware/dell-powerconnect-2808.org][Dell PowerConnect 2808]]
   - [[file:hardware/edimax-br-6204wg.org][Edimax BR-6204Wg]]
   - [[file:hardware/enecsys-gateway-cg-a-ab-us-1.org][Enecsys Gateway CG-A-AB-US-1]]
   - [[file:hardware/enecsys-smi-360-72.org][Enecsys SMI-360-72 Microinverter]]

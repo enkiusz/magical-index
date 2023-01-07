@@ -1,0 +1,787 @@
+#+TITLE: Dell PowerConnect 2808
+#+LANGUAGE: en
+
+* Introduction
+
+The Dell PowerConnect 2808 is a managed 8 port Gigabit switch.
+
+[[file:dell-powerconnect-2808/main-pcb1.jpg][file:dell-powerconnect-2808/thumb-main-pcb1.jpg]]
+
+[[file:dell-powerconnect-2808/main-pcb2.jpg][file:dell-powerconnect-2808/thumb-main-pcb2.jpg]]
+
+
+* Hardware
+
+
+** Main parts on PCB
+
+|-------------+-----------------------+----------------+-------------------------------------------------------------------------------|
+| Designation | Type                  | Description    | Notes                                                                         |
+|-------------+-----------------------+----------------+-------------------------------------------------------------------------------|
+| U1          | Marvell 88E6218-LG01  | Main CPU       |                                                                               |
+| U2          |                       | Flash memory   | Alternative for U3                                                            |
+| U3          | Intel JS28F640        | Flash memory   |                                                                               |
+| U4,U6,U8    | LVC16244A             | 3-state buffer |                                                                               |
+| U5,U7       | NANYA NT5SV16M16CS-6K | SDRAM          | There is a second one on the bottom of the PCB giving a total of 64 MB of RAM |
+| U13         | Unknown               | Bridge ASIC    | Heatsink glued to top                                                         |
+| U16         | Unknown               | Ethernet PHY   | Heatsink glued to top                                                         |
+| U17         | Unknown               | Ethernet PHY   | Heatsink glued to top                                                         |
+|             |                       |                |                                                                               |
+** Connectors
+
+|-------------+------------------------+-----------------------------|
+| Designation | Footprint              | Description                 |
+|-------------+------------------------+-----------------------------|
+| J1          | 2x10 pin 2.54mm dupont | JTAG                        |
+|-------------+------------------------+-----------------------------|
+| J2          | 1x4 pin 2.54mm dupont  | Serial console              |
+|-------------+------------------------+-----------------------------|
+| J4          | 1x6 pin 2.54mm dupont  | Ethernet P0 of the Main CPU |
+|-------------+------------------------+-----------------------------|
+
+** Serial console (J2)
+
+Serial console is a 3.3V TTL UART running at 9600 bps, 8 bits, 1 stop bit and no parity.
+
+|-----+--------------+-------------------|
+| Pin | Description  | Notes             |
+|-----+--------------+-------------------|
+|   1 | +3.3V output | marked with a dot |
+|   2 | TXD          |                   |
+|   3 | RXD          |                   |
+|   4 | GND          |                   |
+|-----+--------------+-------------------|
+
+** Boot log (normal boot)
+
+#+BEGIN_EXPORT html
+<pre>
+
+------ Performing the Power-On Self Test (POST) ------
+
+UART Channel Loopback Test........................PASS
+
+Testing the System SDRAM..........................PASS
+
+Boot1 Checksum Test...............................PASS
+
+Boot2 Checksum Test...............................PASS
+
+Flash Image Validation Test.......................PASS
+
+
+
+BOOT Software Version 1.0.0.12 Built  08-Feb-2009  17:19:21
+
+                          ##                                   
+ ###########            #####        ######        ######      
+ ##############       #########      ######        ######      
+ ###############     #########       ######        ######      
+ ################  ########## ####   ######        ######      
+ ################ #########  ######  ######        ######      
+ ########################  ######### ######        ######      
+ ######   ##############  ########  #######        ######      
+ ######    ###################### #########        ######      
+ ######    ####################  ##########        ######      
+ ######    ###################  ###########        ######      
+ ######    ################## #############        ######      
+ ######   #################################        ######      
+ ################################################# ############
+ ################  ################  ############# ############
+ ################   ##############   ############# ############
+ ###############      ##########     ############# ############
+ ##############        ########      ############# ############
+ ###########             ####        ############# ############
+                          ##                                   
+ Board Type - PowerConnect 2808
+ PowerConnect 2808 board based on FireFox 88E6218 ARM946E-S processor  
+ 64 MByte SDRAM. I-Cache 8 KB. D-Cache 8 KB. Cache Enabled.
+
+
+MAC Address   :  5c:26:0a:f8:a4:a2.
+
+Autoboot in 2 seconds - press RETURN or Esc. to abort and enter prom.
+Preparing to decompress... 
+ 100%
+Decompressing SW from image-1
+ 100%
+
+OK
+Running from RAM...
+Operational Mode old state managed; new state managed
+Operational Mode - mode is managed
+
+*********************************************************************
+ Running  SW  Ver. 1.0.0.38  Date  12-Jan-2010  Time  09:19:40 ***
+*********************************************************************
+
+HW version is 00.00.02
+Base Mac address is: 5c:26:0a:f8:a4:a2
+Dram size is  : 64M bytes
+Dram first block size is  : 46380K bytes
+Dram first PTR is  : 0x12B5000
+Flash size is: 8M
+01-Jan-2000 00:00:04 %CDB-I-LOADCONFIG: Loading startup configuration.
+Device configuration:
+Slot 1 - PowerConnect 2808
+
+------------------------------------
+-- Unit Standalone                --
+------------------------------------
+
+Tapi Version: v1.3.3.1
+Core Version: v1.3.3.1
+01-Jan-2000 00:00:14 %INIT-I-InitCompleted: Initialization task is completed
+
+
+01-Jan-2000 00:00:14 %SNMP-I-CDBITEMSNUM: Number of startup configuration items loaded: 46
+
+console> 01-Jan-2000 00:00:17 %LINK-W-Down:  g1
+01-Jan-2000 00:00:17 %LINK-W-Down:  g2
+01-Jan-2000 00:00:17 %LINK-W-Down:  g3
+01-Jan-2000 00:00:18 %LINK-W-Down:  g4
+01-Jan-2000 00:00:18 %LINK-W-Down:  g5
+01-Jan-2000 00:00:18 %LINK-W-Down:  g6
+01-Jan-2000 00:00:18 %LINK-W-Down:  g7
+01-Jan-2000 00:00:18 %LINK-W-Down:  g8
+</pre>
+#+END_EXPORT
+
+
+** Default configuration dump
+
+#+BEGIN_EXPORT html
+<pre>
+console# show tech-support config 
+------------------ show clock ------------------
+00:00:39 (UTC+0)  Jan 1 2000
+No time source
+------------------ show system ------------------
+System Description:                       8-port 10/100/1000 Gigabit Switch
+System Up Time (days,hour:min:sec):       00,00:00:39
+System Contact:                           
+System Name:                              
+System Location:                          
+System MAC Address:                       5c:26:0a:f8:a4:a2
+System Object ID:                         1.3.6.1.4.1.674.10895.3026
+Type:                                     
+HW version    00.00.02
+------------------ show system mode ------------------
+
+Feature                 State
+-------------------     ---------
+Qos:                    Active
+Policy-based-vlans:     Active
+
+------------------ show ip interface ------------------
+
+
+  Gateway IP Address        Activity status       Type   
+----------------------- ----------------------- -------- 
+
+
+      IP Address                I/F            Type    
+----------------------- -------------------- --------- 
+192.168.2.1/24          vlan 1               Static    
+
+------------------ show interfaces configuration ------------------
+                                               Flow    Admin     Back   Mdix
+Port     Type         Duplex  Speed  Neg      control  State   Pressure Mode
+-------- ------------ ------  -----  -------- -------  -----   -------- ----
+g1       1G-Copper    Full    1000   Enabled  Off      Up      Disabled Auto
+g2       1G-Copper    Full    1000   Enabled  Off      Up      Disabled Auto
+g3       1G-Copper    Full    1000   Enabled  Off      Up      Disabled Auto
+g4       1G-Copper    Full    1000   Enabled  Off      Up      Disabled Auto
+g5       1G-Copper    Full    1000   Enabled  Off      Up      Disabled Auto
+g6       1G-Copper    Full    1000   Enabled  Off      Up      Disabled Auto
+g7       1G-Copper    Full    1000   Enabled  Off      Up      Disabled Auto
+g8       1G-Copper    Full    1000   Enabled  Off      Up      Disabled Auto
+
+                                  Flow    Admin 
+Ch       Type    Speed  Neg      control  State 
+-------- ------- -----  -------- -------  ----- 
+ch1         --     --   Enabled  Off      Up      
+ch2         --     --   Enabled  On       Up      
+ch3         --     --   Enabled  On       Up      
+ch4         --     --   Enabled  On       Up      
+ch5         --     --   Enabled  On       Up      
+ch6         --     --   Enabled  On       Up      
+ch7         --     --   Enabled  On       Up      
+ch8         --     --   Enabled  On       Up      
+------------------ show interfaces status ------------------
+                                             Flow Link          Back   Mdix
+Port     Type         Duplex  Speed Neg      ctrl State       Pressure Mode
+-------- ------------ ------  ----- -------- ---- ----------- -------- -------
+g1       1G-Copper      --      --     --     --  Down           --     --    
+g2       1G-Copper      --      --     --     --  Down           --     --    
+g3       1G-Copper      --      --     --     --  Down           --     --    
+g4       1G-Copper      --      --     --     --  Down           --     --    
+g5       1G-Copper      --      --     --     --  Down           --     --    
+g6       1G-Copper      --      --     --     --  Down           --     --    
+g7       1G-Copper      --      --     --     --  Down           --     --    
+g8       1G-Copper      --      --     --     --  Down           --     --    
+
+                                          Flow    Link        
+Ch       Type    Duplex  Speed  Neg      control  State       
+-------- ------- ------  -----  -------- -------  ----------- 
+ch1         --     --      --      --       --    Not Present 
+ch2         --     --      --      --       --    Not Present 
+ch3         --     --      --      --       --    Not Present 
+ch4         --     --      --      --       --    Not Present 
+ch5         --     --      --      --       --    Not Present 
+ch6         --     --      --      --       --    Not Present 
+ch7         --     --      --      --       --    Not Present 
+ch8         --     --      --      --       --    Not Present 
+------------------ show interfaces port-channel ------------------
+Gathering information...
+Channel  Ports
+-------  -----
+ch1     
+ch2     
+ch3     
+ch4     
+ch5     
+ch6     
+ch7     
+ch8     
+------------------ show vlan ------------------
+
+Vlan       Name                   Ports                Type     Authorization 
+---- ----------------- --------------------------- ------------ ------------- 
+ 1           1                 g1,ch(1-8)             other       Required    
+100        user                    g1               permanent     Required    
+101         mgc                  g(1-8)             permanent     Required    
+200        voice                   g1               permanent     Required    
+500      lan-mgmt                  g1               permanent     Required    
+510      wlan-mgmt                 g1               permanent     Required    
+
+------------------ show interfaces switchport ------------------
+Port : g1
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+100                user                 Tagged           Static        
+101                mgc                  Tagged           Static        
+200               voice                 Tagged           Static        
+500              lan-mgmt               Tagged           Static        
+510             wlan-mgmt               Tagged           Static        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : g2
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 101
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+101                mgc                 Untagged          Static        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : g3
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 101
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+101                mgc                 Untagged          Static        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : g4
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 101
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+101                mgc                 Untagged          Static        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : g5
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 101
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+101                mgc                 Untagged          Static        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : g6
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 101
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+101                mgc                 Untagged          Static        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : g7
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 101
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+101                mgc                 Untagged          Static        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : g8
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 101
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+101                mgc                 Untagged          Static        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : ch1
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : ch2
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : ch3
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : ch4
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : ch5
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : ch6
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : ch7
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+Port : ch8
+Port Mode: General
+Gvrp Status: disabled
+Ingress Filtering: true
+Acceptable Frame Type: admitAll
+Ingress UnTagged VLAN ( NATIVE ): 1
+ 
+Port is member in: 
+ 
+Vlan               Name               Egress rule Port Membership Type 
+---- -------------------------------- ----------- -------------------- 
+ 1                  1                  Untagged          System        
+
+ 
+Forbidden VLANS: 
+Vlan               Name               
+---- -------------------------------- 
+
+ 
+Classification rules: 
+------------------ spanning tree info ------------------
+
+
+Spanning tree enabled mode RSTP
+Default port cost method:  short
+
+
+
+  Root ID    Priority    32768
+             Address     5c:26:0a:f8:a4:a2
+             This switch is the root
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Number of topology changes 0 last change occurred 00:00:52 ago
+  Times:  hold 1, topology change 35, notification 2
+          hello 2, max age 20, forward delay 15
+
+Interfaces
+ Name   State   Prio.Nbr   Cost     Sts   Role PortFast       Type        
+------ -------- -------- --------- ------ ---- -------- ----------------- 
+  g1   enabled   128.1      100     Dsbl  Dsbl    No            -         
+  g2   enabled   128.2      100     Dsbl  Dsbl    No            -         
+  g3   enabled   128.3      100     Dsbl  Dsbl    No            -         
+  g4   enabled   128.4      100     Dsbl  Dsbl    No            -         
+  g5   enabled   128.5      100     Dsbl  Dsbl    No            -         
+  g6   enabled   128.6      100     Dsbl  Dsbl    No            -         
+  g7   enabled   128.7      100     Dsbl  Dsbl    No            -         
+  g8   enabled   128.8       4      Dsbl  Dsbl    No            -         
+ ch1   enabled  128.1000     4      Dsbl  Dsbl    No            -         
+ ch2   enabled  128.1001     4      Dsbl  Dsbl    No            -         
+ ch3   enabled  128.1002     4      Dsbl  Dsbl    No            -         
+ ch4   enabled  128.1003     4      Dsbl  Dsbl    No            -         
+ ch5   enabled  128.1004     4      Dsbl  Dsbl    No            -         
+ ch6   enabled  128.1005     4      Dsbl  Dsbl    No            -         
+ ch7   enabled  128.1006     4      Dsbl  Dsbl    No            -         
+ ch8   enabled  128.1007     4      Dsbl  Dsbl    No            -         
+
+
+------------------ show bridge multicast address-table ------------------
+
+Multicast address table for VLANs in MAC-GROUP bridging mode:
+
+Vlan    Mac Address         Type                       Ports                  
+---- ----------------- -------------- --------------------------------------- 
+
+
+Forbidden ports for multicast addresses:
+
+Vlan    Mac Address                            Ports                          
+---- ----------------- ------------------------------------------------------ 
+
+------------------ show ip igmp snooping groups ------------------
+
+
+Vlan   Group        Source        Include Ports        Exclude Ports     Comp. 
+       Address      Address                                              Mode  
+---- ------------ ------------ -------------------- -------------------- ----- 
+
+
+IGMP Reporters that are forbidden statically:
+
+Vlan   Group        Source                          Ports                      
+       Address      Address                                                    
+---- ------------ ------------ ----------------------------------------------- 
+
+------------------ show dot1x ------------------
+
+802.1x is disabled
+
+         Admin              Oper          Reauth   Reauth     Username
+Port     Mode               Mode          Control  Period
+-------- ------------------ ------------- -------- ---------- -----------------
+g1       Force Authorized   Authorized*   Disabled 3600       n/a              
+g2       Force Authorized   Authorized*   Disabled 3600       n/a              
+g3       Force Authorized   Authorized*   Disabled 3600       n/a              
+g4       Force Authorized   Authorized*   Disabled 3600       n/a              
+g5       Force Authorized   Authorized*   Disabled 3600       n/a              
+g6       Force Authorized   Authorized*   Disabled 3600       n/a              
+g7       Force Authorized   Authorized*   Disabled 3600       n/a              
+g8       Force Authorized   Authorized*   Disabled 3600       n/a              
+
+ Port is down or not present
+
+------------------ show dot1x users ------------------
+------------------ show interfaces counters ------------------
+
+      Port       InUcastPkts  InMcastPkts  InBcastPkts    InOctets   
+---------------- ------------ ------------ ------------ ------------ 
+       g1             0            0            0            0       
+       g2             0            0            0            0       
+       g3             0            0            0            0       
+       g4             0            0            0            0       
+       g5             0            0            0            0       
+       g6             0            0            0            0       
+       g7             0            0            0            0       
+       g8             0            0            0            0       
+
+      Port       OutUcastPkts OutMcastPkts OutBcastPkts  OutOctets   
+---------------- ------------ ------------ ------------ ------------ 
+       g1             0            0            0            0       
+       g2             0            0            0            0       
+       g3             0            0            0            0       
+       g4             0            0            0            0       
+       g5             0            0            0            0       
+       g6             0            0            0            0       
+       g7             0            0            0            0       
+       g8             0            0            0            0       
+
+       Ch        InUcastPkts  InMcastPkts  InBcastPkts    InOctets   
+---------------- ------------ ------------ ------------ ------------ 
+      ch1             0            0            0            0       
+      ch2             0            0            0            0       
+      ch3             0            0            0            0       
+      ch4             0            0            0            0       
+      ch5             0            0            0            0       
+      ch6             0            0            0            0       
+      ch7             0            0            0            0       
+      ch8             0            0            0            0       
+
+       Ch        OutUcastPkts OutMcastPkts OutBcastPkts  OutOctets   
+---------------- ------------ ------------ ------------ ------------ 
+      ch1             0            0            0            0       
+      ch2             0            0            0            0       
+      ch3             0            0            0            0       
+      ch4             0            0            0            0       
+      ch5             0            0            0            0       
+      ch6             0            0            0            0       
+      ch7             0            0            0            0       
+      ch8             0            0            0            0       
+------------------ show users ------------------
+
+   Username       Protocol          Location         
+--------------- ------------ ----------------------- 
+                   Serial            0.0.0.0         
+
+------------------ show sessions ------------------
+
+Connection   Host                            Address             Port    Byte
+
+-----------  ----------------------------    ------------------- ------  ------
+------------------ show logging file ------------------
+Logging is enabled.
+Console Logging: Level info. Console Messages: 0 Dropped.
+Buffer Logging: Level info. Buffer Messages: 10 Logged, 10 Displayed, 20 Max.
+File Logging: Level error. File Messages: 0 Logged, 11 Dropped.
+2 messages were not logged
+
+Application filtering control
+Application                 Event                       Status
+--------------------        --------------------        ---------
+AAA                         Login                       Enabled 
+File system                 Copy                        Enabled 
+
+
+------------------ show logging ------------------
+Logging is enabled.
+Console Logging: Level info. Console Messages: 0 Dropped.
+Buffer Logging: Level info. Buffer Messages: 10 Logged, 10 Displayed, 20 Max.
+File Logging: Level error. File Messages: 0 Logged, 11 Dropped.
+2 messages were not logged
+
+Application filtering control
+Application                 Event                       Status
+--------------------        --------------------        ---------
+AAA                         Login                       Enabled 
+File system                 Copy                        Enabled 
+
+
+01-Jan-2000 00:00:18 :%LINK-W-Down:  g8
+   
+01-Jan-2000 00:00:18 :%LINK-W-Down:  g7
+   
+01-Jan-2000 00:00:18 :%LINK-W-Down:  g6
+   
+01-Jan-2000 00:00:18 :%LINK-W-Down:  g5
+   
+01-Jan-2000 00:00:18 :%LINK-W-Down:  g4
+   
+01-Jan-2000 00:00:18 :%LINK-W-Down:  g3
+   
+01-Jan-2000 00:00:18 :%LINK-W-Down:  g2
+   
+01-Jan-2000 00:00:18 :%LINK-W-Down:  g1
+   
+01-Jan-2000 00:00:15 :%SNMP-I-CDBITEMSNUM: Number of startup configuration items loaded: 46
+   
+01-Jan-2000 00:00:15 :%INIT-I-InitCompleted: Initialization task is completed
+   
+------------------ show snmp community ------------------
+
+ Community-String      IP address            access        
+------------------ ------------------- ------------------- 
+       noc               0.0.0.0            Read Only      
+
+console# show 
+  ip                   IP information
+  tech-support         Show system information
+console# show 
+% Incomplete command
+console# 
+console# 
+console# 01-Jan-2000 00:02:26 %INIT-I-Startup: Cold Startup
+</pre>
+#+END_EXPORT
