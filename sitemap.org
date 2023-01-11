@@ -7,6 +7,7 @@
   - [[file:hardware/avantree-audition.org][Avantree Audition]]
   - [[file:hardware/brother-ds-720d.org][Brother DS-720D]]
   - [[file:hardware/cubify-cube3d.org][Cubify Cube 3D printer]]
+  - [[file:hardware/dlink-dir-655.org][D-Link DIR-655 Wireless Router]]
   - [[file:hardware/dns-320l.org][DNS-320L NAS]]
   - [[file:hardware/dell-powerconnect-2808.org][Dell PowerConnect 2808]]
   - [[file:hardware/edimax-br-6204wg.org][Edimax BR-6204Wg]]

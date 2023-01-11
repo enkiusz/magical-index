@@ -1,0 +1,87 @@
+#+TITLE: D-Link DIR-655 Wireless Router
+#+LANGUAGE: en
+
+* Introduction
+
+The D-Link DIR-655 is a 802.11 bgn and gigabit Ethernet wireless router. Its basic hardware is described on [[https://wikidevi.wi-cat.ru/Main_Page][wikidevi]] with multiple hardware revisions.
+
+* Hardware
+
+The main PCB with the main shield and heatpads removed reveals the main chip and the Ethernet bridge:
+
+[[file:dlink-dir-655/pcb.jpg][file:dlink-dir-655/thumb-pcb.jpg]]
+
+** Main parts
+
+Main parts are documented on wikidevi.
+
+** Connectors
+
+|------------+-----------------------+------------------+------------------------------------------------------|
+| Designator | Footprint             | Description      | Notes                                                |
+|------------+-----------------------+------------------+------------------------------------------------------|
+| J1         | 2x5 pin 2.54mm dupont | Debug connector? | Unpopulated, 4 MHz clocked synchronous signal output |
+| J2         | 10P 1mm FPC           | JTAG?            | Unpopulated                                          |
+|------------+-----------------------+------------------+------------------------------------------------------|
+
+*** J1 connector
+
+|------------+--------------+-------------------------------------|
+| Pin number | Description  | Notes                               |
+|------------+--------------+-------------------------------------|
+|          1 | DATA         |                                     |
+|------------+--------------+-------------------------------------|
+|          2 | Unknown      | Pullup to 3.3V, occasional glitches |
+|------------+--------------+-------------------------------------|
+|          3 | GND          |                                     |
+|------------+--------------+-------------------------------------|
+|          4 | Unknown      | 0V, likely N/C                      |
+|------------+--------------+-------------------------------------|
+|          5 | Unknown      | 0V, likely N/C                      |
+|------------+--------------+-------------------------------------|
+|          6 | CLK          | 4 MHz clock                         |
+|------------+--------------+-------------------------------------|
+|          7 | Unknown      | 0V, likely N/C                      |
+|------------+--------------+-------------------------------------|
+|          8 | Unknown      | Pull-up to 3.3V when powerup        |
+|------------+--------------+-------------------------------------|
+|          9 | +3.3V output |                                     |
+|------------+--------------+-------------------------------------|
+|         10 | Unknown      | Pull-up to 3.3V when powerup        |
+|------------+--------------+-------------------------------------|
+
+A signal trace from the J1 connector has been obtained using a Saleae Logic analyzer. The dump can be downloaded [[file:dlink-dir-655/DIR655-J1-poweron.sal][here]]. 
+Attempts at decoding the signal were made using the SPI decoder have not revealed any ASCII communications - the protocol
+working here looks to be binary in nature.
+
+*** J2 connector
+
+The trace from this connector has not yet been obtained.
+
+** The IP7150U CPU
+
+The UBICOM IP7150U CPU is a non-standard (that is not MIPS, ARM or any other common ISA) architecture CPU with hardware threads designed for telecommunications
+equipment made by the now defunct [[https://en.wikipedia.org/wiki/Ubicom][Ubicom]] company now being a part of Qualcomm. There is no official alternative Linux builds for this CPU, there has been a GPL
+blob released by dlink [[http://pmdap.dlink.com.tw/PMD/GetAgileFile?itemNumber=GPL1100001&fileName=DIR655B1_FW200NAb33_GPL.rar&fileSize=8.1487082E8;]] There have been
+some attempts to build the firmware by James Hillard (https://github.com/jameshilliard/openwrtubicomstaging). Another source of information about this CPU is the 
+now-defunct Ubicom wiki archived on the Wayback machine: https://web.archive.org/web/http://developer.ubicom.com/wiki/index.php. Unfortunately it looks like a
+"Ubicom Programming Dongle" is recommended for programming and debugging the SoC. The dongle is descrived as functionally equivalent to a JTAG header therefore
+it's possible that equivalent operations can be performed by any other JTAG dongle. It's not known where the official dongle can be purchased.
+
+
+* References
+
+A brochure about IP7100 CPUs
+[[file:dlink-dir-655/DSASW0044772.pdf]]
+
+Some links to the toolchain a ubicom32 kernel build from openwrt
+https://reverseengineering.stackexchange.com/questions/2720/what-is-the-ubicom32-toolchain-and-where-can-i-find-it
+
+A datasheet ([[file:dlink-dir-655/IP5K-DDS-51xx.pdf][mirrored]]) for the Ubicom IP51xx processors which might have the same ISA as the IP71xx
+http://www.texim-europe.com/getfile.aspx?id=68544
+
+Information about the Western Digital N900 which is based on a similar SoC (Ubicom I8K)
+https://openwrt.org/toh/western_digital/n900
+
+GPL downloads for the Western Digital N900
+https://support-en.wd.com/app/products/product-detailweb/p/179
