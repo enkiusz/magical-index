@@ -2,10 +2,6 @@
 #+LANGUAGE: en
 #+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
 
-#+BEGIN_EXPORT html
-<base href="enecsys-smi-360-72-microinverter/"/>
-#+END_EXPORT
-
 * Intro
 
 This is a page describing my notes about the Enecsys SMI-360-72 microinverter with main focus on reverse-engineering the 802.15.4 (Zigbee) communications protocol used for 
@@ -14,16 +10,16 @@ monitoring of the microinverter parameters by a Enecsys Gateway device documente
 * Zigbee Radio
 
 The inverter contains a [[https://octopart.com/etrx2-pa-telegesis-19255118][ETRX2-PA]] Zigbee module manufactured by Telegesis. This module is based on now [[https://www.silabs.com/documents/public/pcns/2112141160-End-of-Life-Notification-for-EM250-and-EM260-IC-Products.pdf][end-of-life]] EM250 chip sold by Silicon Labs. It's been built by a company 
-called [[https://en.wikipedia.org/wiki/Ember_(company)][Ember]] which has been since acquired by Silicon Labs. A [[https://datasheet.octopart.com/EM250-RTR-Ember-datasheet-129456.pdf][datasheet]] for the chip is available. Unfortunately, it uses an obscure XAP2b microprocessor core (more docs [[https://www.cambridgeconsultants.com/sites/default/files/documents/resources/asics-sb-011_v2.22.pdf][here]]) 
+called [[https://en.wikipedia.org/wiki/Ember_(company)][Ember]] which has been since acquired by Silicon Labs. A [[https://datasheet.octopart.com/EM250-RTR-Ember-datasheet-129456.pdf][datasheet]] ([[file:enecsys-smi-360-72-microinverter/Ember-EM250-RTR-datasheet.pdf][mirror]]) for the chip is available. Unfortunately, it uses an obscure XAP2b microprocessor core (more docs [[https://www.cambridgeconsultants.com/sites/default/files/documents/resources/asics-sb-011_v2.22.pdf][here]] ([[file:enecsys-smi-360-72-microinverter/asics-sb-011_v2.22.pdf][mirror]]) 
 with no open-source compiler or instruction set published. The microcontroller designer (Cambridge Consultants, add another company to the vendor soup) has apparently licensed an 
-IDE called xIDE to Silicon Labs as this software is what they are selling to their customers in order to develop custom firmware. No free licenses for this software seem to be 
+IDE called xIDE (some docs [[file:enecsys-smi-360-72-microinverter/asics-sb-002_v2.8.pdf][here]]) to Silicon Labs as this software is what they are selling to their customers in order to develop custom firmware. No free licenses for this software seem to be 
 available. 
 
 Some remnants of the development kit brochures can be found on [[https://media.digikey.com/pdf/Data%20Sheets/Ember%20PDF's/EM250%20Kit%20Fact%20Sheet.pdf][Digikey]] and I have reached out to a single non-Chinese company which lists the development kits on their website:
 - https://nigeo.pl/em250-dev-ember-kit-dev-for-em250-mag-267495-5.php
 - https://nigeo.pl/em250-jmp-ember-kit-jump-start-for-em250-mag-267494-5.php
 
-As a sidenote, the EM250 is also used in the popular XBee and XBee-PRO Zigbee RF modules models XBEE2, XBEEPRO2 as described in their [[https://usermanual.wiki/Digi/XBEEPRO2.Revised-Used-Manual][User manual]]. This has also been independently
+As a sidenote, the EM250 is also used in the popular XBee and XBee-PRO Zigbee RF modules models XBEE2, XBEEPRO2 as described in their [[https://usermanual.wiki/Digi/XBEEPRO2.Revised-Used-Manual][User manual]] ([[file:enecsys-smi-360-72-microinverter/XBEEPRO2.Revised-Used-Manual-1544897.pdf][mirror]]). This has also been independently
 confirmed on the Digi (maker of XBee) [[https://www.digi.com/support/forum/6928/ember-znet-firmwares-on-xbee-series-2-modules][forums]].
 
 * Random links
@@ -46,7 +42,7 @@ B
 https://www.microchip.com/forums/m304986.aspx
 
 The documentation for the EM250 development kit. Contains instructions on hardware setup and xIDE installation:
-[[https://www.mouser.com/catalog/specsheets/silicon%20laboratories_108.pdf]]
+[[https://www.mouser.com/catalog/specsheets/silicon%20laboratories_108.pdf]] ([[file:enecsys-smi-360-72-microinverter/silicon laboratories_108.pdf][mirror]])
 
 
 Some people selling what appears to be a USB Zigbee WIFI gateway. They provide xIDE screenshots and claim to have the original source code from ENECSYS. Their product is pretty
