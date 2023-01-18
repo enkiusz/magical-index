@@ -41,6 +41,7 @@ B
 #+END_EXPORT
 https://www.microchip.com/forums/m304986.aspx
 
+
 The documentation for the EM250 development kit. Contains instructions on hardware setup and xIDE installation:
 [[https://www.mouser.com/catalog/specsheets/silicon%20laboratories_108.pdf]] ([[file:enecsys-smi-360-72-microinverter/silicon laboratories_108.pdf][mirror]])
 
@@ -50,3 +51,5 @@ pricey (300 USD) but I suppose all of this expensive Imaginary Property needed t
 https://www.ebay.pl/itm/283656242209
 
 
+The inverter installation guide
+[[file:enecsys-smi-360-72-microinverter/installationGuideEnecsys.pdf]]
