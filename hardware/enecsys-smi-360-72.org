@@ -53,3 +53,7 @@ https://www.ebay.pl/itm/283656242209
 
 The inverter installation guide
 [[file:enecsys-smi-360-72-microinverter/installationGuideEnecsys.pdf]]
+
+
+A very detailed teardown and reverse-engineering thread focused on the power-conversion electronics.
+https://www.elektroda.pl/rtvforum/topic3855360.html
