@@ -9,6 +9,71 @@ however so it's just a plain RN3138.
 
 All of the currently available information about the device has been moved to [[https://wikidevi.wi-cat.ru/Netgear_ReadyNAS_3138][wikidevi]].
 
+** Main board
+
+[[file:netgear-rn3138/Netgear-RN3138-mainboard1.jpg][file:netgear-rn3138/thumb-Netgear-RN3138-mainboard1.jpg]]
+
+*** Connectors on the mainboard
+
+|-------------+-------------------+---------------------------------+--------------------------------------+-------------|
+| Designator  | Footprint         | Pinout                          | Description                          | Notes       |
+|-------------+-------------------+---------------------------------+--------------------------------------+-------------|
+| J1          | 1x3 2.54mm Dupont | Unknown                         | Unknown (possibly CMOS reset jumper) | Unpopulated |
+| J2          | 1x4 2.54mm Dupont | 1-3.3V, 2-RXD, 3-TXD, 4-GND     | Serial console                       |             |
+| J3          | 2x2 2mm Dupont    | [[https://wikidevi.wi-cat.ru/Netgear_ReadyNAS_3138][Documented on Wikidevi]]          | Serial console                       |             |
+| J4, J5      | 1x4 2.54mm Dupont | Unknown                         | Unknown                              | Unpopulated |
+| LED1        | LED               | Unknown                         | UI LED (back)                        |             |
+| S4          | microswitch       | Wired to IT8732F pin 13 (GP35?) | Unknown                              | Unpopulated |
+| S5          | microswitch       | Wired to IT8732F pin 75 (GP43?) | Unknown                              | Unpopulated |
+| S6          | microswitch       | Unknown                         | UI button (back)                     |             |
+| J13         | 2x5 2mm Dupont    | documented below                | internal USB port                    |             |
+| J18,J19,J20 | JST-XH 3 pin      | 3-wire PC fan                   | Chassis fans                         |             |
+| J21         | 1x2 2.54mm Dupont | Unknown                         | Unknown                              | Unpopulated |
+| J22         | 2x5 2.54mm Dupont | documented below                | LPC connector                        | Unpopulated |
+| CN1         | 2x5 JST           | documented below                | Front panel                          |             |
+| J15         | 1x5 JST           | Unknown                         | Front USB connector                  |             |
+|-------------+-------------------+---------------------------------+--------------------------------------+-------------|
+
+**** LPC Connector
+
+The mainboard contains an unpopulated 2x5 Dupont connector wired to the CPU and to the IT8732F Super I/O chip. Based on some trace routing together with a pinout of the IT8732F chip
+this looks to be an [[https://en.wikipedia.org/wiki/Low_Pin_Count][LPC]] connector. The pinout is the following:
+
+|---------+-------------+-------------------------------------------------------+-------|
+| J22 Pin | IT8732F Pin | Pin Function (based on a related IT8782F chip pinout) | Notes |
+|---------+-------------+-------------------------------------------------------+-------|
+|       1 |             |                                                       |       |
+|       2 |          42 | LAD1                                                  |       |
+|       3 |          49 | CLKIN                                                 | LCLK  |
+|       4 |          41 | LAD0                                                  |       |
+|       5 |          40 | LFRAME#                                               |       |
+|       6 |             |                                                       |       |
+|       7 |          44 | LAD3                                                  |       |
+|       8 |         GND |                                                       |       |
+|       9 |          43 | LAD2                                                  |       |
+|      10 |         GND |                                                       |       |
+|---------+-------------+-------------------------------------------------------+-------|
+
+One mandatory LPC pin missing is LRESET# but according to Wikipedia this can be connected to the PCIRST# so might not be wired directly to the Super I/O chip. Unfortunately, my 
+logic analyzer is too slow to gather a trace of the signals on this connector (LCLK is 33.3 MHz).
+
+**** Front panel connector
+
+|------------+------------------+-----------------------------+-----------------------------------------------------------|
+| Pin number | Front board side | Mainboard side              | Notes                                                     |
+|------------+------------------+-----------------------------+-----------------------------------------------------------|
+|          1 | +3.3V            |                             |                                                           |
+|          2 | UI LED anode     |                             |                                                           |
+|          3 | PWR button       |                             | short to GND when pressed                                 |
+|          4 | ⚠ LED            | IT8732F pin 79 (GP40?)      | cathode, anode wired to +3.3V                             |
+|          5 | Reset button     | IT8732F pin 14 (GP34?)      | short to GND when pressed                                 |
+|          6 | UI LED cathode   |                             |                                                           |
+|          7 | UI button        | Connected to S6 on the back | short to GND when pressed, can be wired to IT8732F pin 57 |
+|          8 | 🖧 LAN LED        |                             | cathode, anode wired to +3.3V                             |
+|          9 | GND              |                             |                                                           |
+|         10 | ⏻ Power LED      |                             |                                                           |
+|------------+------------------+-----------------------------+-----------------------------------------------------------|
+
 ** Network traffic observed when NAS is booting
 
 #+BEGIN_EXPORT html
