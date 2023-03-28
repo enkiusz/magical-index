@@ -17,3 +17,79 @@ Also there is an MPG chart more useful for US-based viewers:
 [[file:fuel-corolla-public-mpg.png]]
 
 In the interest of full disclosure there is also the [[file:fuel-corolla.dat][input data]] and [[file:fuel-corolla-public.gnuplot][gnuplot script]] to generate the charts.
+
+** Device CD-Text support results
+
+|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+--------+-----------------------|
+| Head unit identification | AVC-LAN Connector on head unit side | Accessory type      | Accessory identification  | AVC-LAN Connector on accessory side | Result | Notes                 |
+|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+--------+-----------------------|
+| OE no. 86120-02380       | [[https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_W58814_Head_Unit_pinout.shtml][CN702 12P]]                           | CD Changer          | Front: TM0461             | R4 connector                        | OK     | CD-Text not supported |
+| Ref no. CQ-TS7471LC      |                                     |                     | Type: 74833               |                                     |        |                       |
+| ID no. W58814            |                                     |                     | OE no. 08601-00910        |                                     |        |                       |
+| Type: W58814             |                                     |                     | Ref no. CX-CS0721F        |                                     |        |                       |
+| Toyota code: e13         |                                     |                     | Toyota code: e13          |                                     |        |                       |
+| Datecode: 022018         |                                     |                     | Datecode: 020209          |                                     |        |                       |
+| Manufacturer: Panasonic  |                                     |                     | Manufacturer: Panasonic   |                                     |        |                       |
+|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+--------+-----------------------|
+|                          |                                     | CD Changer          | Front: TM0461             | R4 connector                        |        |                       |
+|                          |                                     |                     | Type: 74833               |                                     |        |                       |
+|                          |                                     |                     | OE no. 08601-00911        |                                     |        |                       |
+|                          |                                     |                     | Ref no. CX-CS0722FC       |                                     |        |                       |
+|                          |                                     |                     | Toyota code: e13          |                                     |        |                       |
+|                          |                                     |                     | Datecode: 020209          |                                     |        |                       |
+|                          |                                     |                     | Manufacturer: Panasonic   |                                     |        |                       |
+|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+--------+-----------------------|
+|                          |                                     | CD Changer          | Front: TM0461             | R4 connector                        |        |                       |
+|                          |                                     |                     | Type: 74833               |                                     |        |                       |
+|                          |                                     |                     | OE no. 08601-00912        |                                     |        |                       |
+|                          |                                     |                     | Ref no. CX-CS0723FC       |                                     |        |                       |
+|                          |                                     |                     | Toyota code: e13          |                                     |        |                       |
+|                          |                                     |                     | Datecode: 020209          |                                     |        |                       |
+|                          |                                     |                     | Manufacturer: Panasonic   |                                     |        |                       |
+|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+--------+-----------------------|
+|                          |                                     | CD Changer emulator | APPS2Car                  | No connector                        | OK     |                       |
+|                          |                                     |                     | [[https://www.wiki-tech.com]] |                                     |        |                       |
+|                          |                                     |                     |                           |                                     |        |                       |
+|                          |                                     |                     |                           |                                     |        |                       |
+|                          |                                     |                     |                           |                                     |        |                       |
+|                          |                                     |                     |                           |                                     |        |                       |
+|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+--------+-----------------------|
+
+[[https://www.priuswiki.de/index.php?title=Audiosystem&oldid=13774][Prius wiki article about Prius audio system mentioning support for CD-Text]]
+
+|----------------+--------------------------+---------+-----------------------------------------------|
+| Accessory type | Accessory identification | Offer   | Notes                                         |
+|----------------+--------------------------+---------+-----------------------------------------------|
+| CD Changer     | Front: TM0561            |         | Prius, [[https://servicemanuals.us/panasonic/car-audio/cx-cs0820fa.html][Service manual]]                         |
+|                | Type: 74835              |         |                                               |
+|                | OE no. 08601-00907       |         |                                               |
+|                | Ref no. CX-CS0820FA      |         |                                               |
+|                | Manufacturer: Panasonic  |         |                                               |
+|----------------+--------------------------+---------+-----------------------------------------------|
+| CD Changer     | Front: TF0411            | [[https://allegro.pl/oferta/toyota-prius-01-zmieniarka-cd-08601-00893-12747197680][allegro]] | Prius                                         |
+|                | Type: 34245              |         |                                               |
+|                | OE no. 08601-00893       |         |                                               |
+|                | Ref no. 113001-56310151  |         |                                               |
+|                | Toyota code: e13         |         |                                               |
+|                | Datecode: 020319         |         |                                               |
+|                | Manufacturer: Fujitsu    |         |                                               |
+|----------------+--------------------------+---------+-----------------------------------------------|
+| CD Changer     | Front: TF0411            | [[https://allegro.pl/oferta/zmieniarka-odtwarzacz-cd-toyota-prius-08601-00906-11618050560][allegro]] | Prius, weird as labels do not match the above |
+|                | Type: 34245              |         |                                               |
+|                | OE no. 08601-00906       |         |                                               |
+|                | Ref no. 113001-56310151  |         |                                               |
+|                | Toyota code: e13         |         |                                               |
+|                | Datecode: 020319         |         |                                               |
+|                | Manufacturer: Fujitsu    |         |                                               |
+|----------------+--------------------------+---------+-----------------------------------------------|
+| iPod interface | OE no. PZ473-00261-A0    |         |                                               |
+
+[[https://adoc.pub/yaris-5dv-hatchback.html][CD-Text from iPod in Yaris 5dv hatchback]]
+
+Attachment code for an official iPod connector to Toyota Yaris from the above site is PZ473-00261-A0
+
+This attachment is also mentioned for Toyota RAV4
+
+https://manualzz.com/doc/5191320/tarif-accessoires-rav4-2005
+
+[[file:46fe114aefafac38d14de01a67f2cadeb1bfbd6abc9e518f01891ce4c8f49ae0.pdf][A summary of audio options for Toyota]] containing various front codes and the description of the accessories.
