@@ -1,0 +1,113 @@
+#+TITLE: Second Life UPS Mark II
+
+* Introduction
+
+The Secondlife UPS Mark II was envisioned as a successor to the first [[file:secondlife-ups.org]] model with the general changes as below
+
+- increased battery capacity
+- increased power budget
+- circuit simplification
+- modularity
+- improved load connectors
+- various other usability improvements (for example moving the fuses to the front of the enclosure)
+- better documentation 
+
+The basic premise is to provide a UPS which instead of typical 230V can provide typical low voltages suitable for powering of sensors, routers, 802.11 access points modems, switches, 
+small embedded systems (like a Raspberry Pi) and other small devices. It's design is focused around a few stabilised voltage buses providing 12V and 5V respectively as well as a
+"direct" rail (labelled later as V_rail) which is connected directly to the battery or AC power supply. The peculiarity of this bus is that the voltage on it has a significant swing - from 11.2 V when
+operating on an almost depleted battery towards 24V when operating on AC power. This 
+
+*** More battery capacity
+
+In order to provide more power as well as longer runtime a bigger 1U case has been chosen for the project. The new battery pack is 4S24P.
+
+Battery capacity is 300 Wh, 
+
+
+*** More power
+
+The list of equipment in my home rack has changed, some equipment has been replaced, there is some new equipment as well. Some of the
+new equipment will be powered by wide input range DC-DC converters so they can be powered directly from the battery rail (V_rail).
+I measured the amount of current draw during normal operation and came up with the following estimates:
+
+
+As the voltage on the V_batt bus is not constant and changes from 11.2V when operating on a discharged battery and 24V when operating on AC its more useful to specify it's performance
+in terms of power not current.
+
+#+NAME: devices
+|---------------------------+----------------------------+-----------------------+----------------------+-----------------------------+------------------------+-----------------------------------------------------------------------------------------------------------|
+| Device                    | 12V Current [A] (measured) | 12V Current [A] (max) | 5V Current [A] (max) | V_rail power [W] (measured) | V_rail power [W] (max) | Notes                                                                                                     |
+|---------------------------+----------------------------+-----------------------+----------------------+-----------------------------+------------------------+-----------------------------------------------------------------------------------------------------------|
+| Old Router                |                            |                       |                      |                         9.6 |                        | A small form factor PC (to be retired)                                                                    |
+| New Router                |                            |                     2 |                      |                             |                        | NS-320???                                                                                                 |
+| Old/Backup GPON Modem     |                            |                   0.5 |                      |                             |                        | To be retired                                                                                             |
+| New GPON Modem            |                            |                   0.5 |                      |                             |                        |                                                                                                           |
+| Core Ethernet switch      |                       1.33 |                     4 |                      |                             |                        |                                                                                                           |
+| Planet GSD-800S switch    |                            |                       |                      |                             |                     21 | PoE injected                                                                                              |
+| Ubiquity Unify AC Lite AP |                       0.16 |                  0.54 |                      |                             |                        | Via boost converter and PoE injectde, rated at 6.5 W (see [[https://dl.ui.com/datasheets/unifi/UniFi_AC_APs_DS.pdf][datasheet]]), passive 24V PoE Mode B (230V/0.02A) |
+| Raspberry Pi              |                            |                       |                  2.1 |                             |                        |                                                                                                           |
+| Gate magnetic lock        |                       0.25 |                       |                      |                             |                        |                                                                                                           |
+| [[https://wikidevi.wi-cat.ru/Netgear_ReadyNAS_3138][Network Attached Storage]]  |                            |                       |                      |                          40 |                    100 | Built-in ATX power supply is 180W but real power draw has not exceeded 100W                               |
+| Network Video Recorder    |                            |                       |                      |                             |                     40 | Boost converter to 48V                                                                                    |
+| Security Cameras (total)  |                       0.75 |                       |                      |                             |                        |                                                                                                           |
+|---------------------------+----------------------------+-----------------------+----------------------+-----------------------------+------------------------+-----------------------------------------------------------------------------------------------------------|
+| Total                     |                       2.49 |                  7.54 |                  2.1 |                        49.6 |                    161 |                                                                                                           |
+|---------------------------+----------------------------+-----------------------+----------------------+-----------------------------+------------------------+-----------------------------------------------------------------------------------------------------------|
+#+TBLFM: @>$2=vsum(@II..@III)::@>$3=vsum(@II..@III)::@>$4=vsum(@II..@III)::@>$5=vsum(@II..@III)::@>$6=vsum(@II..@III)
+
+*** Capacity planning for power buses
+
+For all currently used devices, the measured power/current is 3-4 times lower than the device's maximum ratings. This leads to an assumption that if we dimension the system for the 
+maximum rated power for all devices and add a +20% capacity factor we should operate safely and have room for future growth.
+
+We take into account an efficiency of 0.8 for the buck converters and assume that the lowest voltage seen by the system will be 11.2V which corresponds to the BMS cutoff voltage
+of 2.8V per cell.
+
+Maximum current and power values for each bus:
+
+#+NAME: bus_load_capacity
+|---+-------------------------------+-------------+-----------------+---------------+-------------------------------+-----------------------------|
+| $ | capacity_factor=1.2           |             |                 |               |                               |                             |
+| $ | minimum_battery_voltage=11.2  |             |                 |               |                               |                             |
+| $ | voltage_on_ac=24              |             |                 |               |                               |                             |
+| $ | buck_converter_efficiency=0.8 |             |                 |               |                               |                             |
+|---+-------------------------------+-------------+-----------------+---------------+-------------------------------+-----------------------------|
+|   | Bus                           | Voltage [V] | Max current [A] | Max power [W] | V_rail load on batt power [A] | V_rail load on AC power [A] |
+|---+-------------------------------+-------------+-----------------+---------------+-------------------------------+-----------------------------|
+| # | 12 V                          |          12 |           9.048 |       108.576 |                     12.117857 |                       4.524 |
+| # | 5 V                           |           5 |            2.52 |          12.6 |                       1.40625 |                       0.525 |
+| # | Direct                        |             |                 |         193.2 |                         17.25 |                        8.05 |
+|---+-------------------------------+-------------+-----------------+---------------+-------------------------------+-----------------------------|
+| # | Total                         |             |                 |       314.376 |                     30.774107 |                      13.099 |
+|---+-------------------------------+-------------+-----------------+---------------+-------------------------------+-----------------------------|
+#+TBLFM: @6$4=remote(devices, @>$3) * $capacity_factor::@7$4=remote(devices, @>$4) * $capacity_factor::@8$5=remote(devices, @>$6) * $capacity_factor
+#+TBLFM: @6$5=$3 * $4::@7$5=$3 * $4
+#+TBLFM: @6$6=$-1 / $buck_converter_efficiency / $minimum_battery_voltage::@7$6=$-1 / $buck_converter_efficiency / $minimum_battery_voltage::@8$6=$-1 / $minimum_battery_voltage
+#+TBLFM: @9$5=vsum(@III..@IIII)::@9$6=vsum(@III..@IIII)
+#+TBLFM: $7=$5 / $voltage_on_ac
+
+
+The above calculations allow us to select proper fuses for the different buses. It can also be seen that an AC power supply with at least 300W is needed to power
+the loads with some room needed to charge the battery. For this reason a 400W power supply has been selected (see summary in BOM).
+
+
+
+
+
+* Bill of Materials
+
+Shipping costs are not included.
+
+|---------------------+--------------------+-----------------------------------------------------------------------+------+--------+----------------------+------------------+---------------|
+| Item                | Type               | Description                                                           | Unit | Amount | Price per unit [USD] | Line total [USD] | Purchase date |
+|---------------------+--------------------+-----------------------------------------------------------------------+------+--------+----------------------+------------------+---------------|
+| AC Power supply     | [[https://www.aliexpress.com/item/32950139524.html][Coleen CB-400W-24V]] | AC 230V, 24V/16.6A                                                    | pcs  |      1 |                21.86 |            21.86 | @2023-04-07   |
+| Main battery switch | [[https://www.tme.eu/pl/katalog/przelaczniki-typu-rocker_100054/?art=R13133L01BBRL2][R13133L01BBRL2]]     | ROCKER; SPST; Poz: 2; ON-OFF; 30A/24VDC; czarny; LED; 12VDC; -20÷85°C | pcs  |      1 |                 2.41 |             2.41 | @2023-04-07   |
+| Main fuse socket    | [[https://www.tme.eu/pl/katalog/gniazda-bezpiecznikowe-na-panel_113040/?art=PMG-KB-01-Q2S][PMG-KB-01-Q2S]]      | Gniazdo; 10,3x38,1mm; 30A; na panel; Otw: Ø22,4mm; UL94V-1; 600VAC    | pcs  |      1 |                 9.63 |             9.63 | @2023-04-07   |
+|---------------------+--------------------+-----------------------------------------------------------------------+------+--------+----------------------+------------------+---------------|
+| Total               |                    |                                                                       |      |        |                      |             33.9 |               |
+|---------------------+--------------------+-----------------------------------------------------------------------+------+--------+----------------------+------------------+---------------|
+#+TBLFM: $7=$5 * $6::@>$7=vsum(@II..@III)
+
+
+
