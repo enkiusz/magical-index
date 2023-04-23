@@ -12,7 +12,10 @@ The Secondlife UPS Mark II was envisioned as a successor to the first [[file:sec
 - various other usability improvements (for example moving the fuses to the front of the enclosure)
 - better documentation 
 
-The basic premise is to provide a UPS which instead of 230V AC can provide typical low voltages suitable for powering of sensors, routers, 802.11 access points modems, switches, embedded systems (like a Raspberry Pi) and other small devices. It's design is focused around a few stabilised voltage buses providing 12V and 5V respectively as well as a "direct" rail (labelled later as V_rail) which is connected directly to the battery or AC power supply. The peculiarity of this bus is that the voltage on it has a significant swing - from 11.2 V when operating on an almost depleted battery towards 24V when operating on AC power.
+The basic premise is to provide a UPS which instead of 230V AC can provide typical low voltages suitable for powering of sensors, routers, 802.11 access points
+modems, switches, embedded systems (like a Raspberry Pi) and other small devices. It's design is focused around a few stabilised voltage buses providing 12V and
+5V respectively as well as a "direct" rail (labelled later as V_rail) which is connected directly to the battery or AC power supply. The peculiarity of this bus
+is that the voltage on it has a significant swing - from 11.2 V when operating on an almost depleted battery towards 24V when operating on AC power.
 
 *** More battery capacity
 
@@ -24,9 +27,10 @@ Battery capacity is 300 Wh,
 
 *** More power
 
-The list of equipment in my home rack has changed, some equipment has been replaced, there is some new equipment as well. Some of the new equipment will be powered by wide input range DC-DC converters so they can be powered directly from the battery rail (V_rail). I measured the amount of current draw during normal operation and came up with the following estimates:
-
-As the voltage on the V_batt bus is not constant and changes from 11.2V when operating on a discharged battery and 24V when operating on AC its more useful to specify it's performance in terms of power not current.
+The list of equipment in my home rack has changed, some equipment has been fsgfsdafsd replaced, there is some new equipment as well. Some of the new equipment
+will be powered by wide input range DC-DC converters so they can be powered directly from the battery rail (V_rail). I measured the amount of current draw
+during normal operation and came up with the following estimates. As the voltage on the V_rail bus is not constant and changes from 11.2V when operating on a
+discharged battery and 24V when operating on AC its more useful to specify it's performance in terms of power not current.
 
 #+CAPTION: Devices connected to the UPS
 #+ATTR_HTML: :border 2 :rules all :frame border
@@ -51,7 +55,8 @@ As the voltage on the V_batt bus is not constant and changes from 11.2V when ope
 
 *** Capacity planning for power buses
 
-We take into account an efficiency of 0.8 for the buck converters and assume that the lowest voltage seen by the system will be 11.2V which corresponds to the BMS cutoff voltage of 2.8V per cell.
+We take into account an efficiency of 0.8 for the buck converters and assume that the lowest voltage seen by the system will be 11.2V which corresponds to the
+BMS cutoff voltage of 2.8V per cell.
 
 #+CAPTION: Maximum current and power values for each bus
 #+NAME: bus_load_capacity
@@ -73,7 +78,8 @@ We take into account an efficiency of 0.8 for the buck converters and assume tha
 #+TBLFM: @5$6=$-1 / $buck_converter_efficiency / $minimum_battery_voltage::@6$6=$-1 / $buck_converter_efficiency / $minimum_battery_voltage::@7$6=$-1 / $minimum_battery_voltage
 #+TBLFM: @>$5=vsum(@III..@IIII)::@>$6=vsum(@III..@IIII)
 
-The above calculations allow us to select proper fuses for the different buses. It can also be seen that an AC power supply with at least 300W is needed to power the loads with some room needed to charge the battery. For this reason a 400W power supply has been selected (see summary in BOM).
+The above calculations allow us to select proper fuses for the different buses. It can also be seen that an AC power supply with at least 300W is needed to
+power the loads with some room needed to charge the battery. For this reason a 400W power supply has been selected (see summary in BOM).
 
 *** Ideal Diode circuit
 
