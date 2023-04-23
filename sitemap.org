@@ -23,6 +23,7 @@
   - [[file:hardware/netgear-rn3138.org][Netgear ReadyNAS RN3138]]
   - [[file:hardware/oneplus-one.org][OnePlus One]]
   - [[file:hardware/pzem-016.org][PZEM-016 energy monitor]]
+  - [[file:hardware/shrack-upsdd-R-400.org][Shrack UPS USDD-R 400]]
   - [[file:hardware/rc-plane.org][Simple RC plane]]
   - [[file:hardware/uarm.org][The UFactory Uarm]]
   - [[file:hardware/toshiba-n554.org][Toshiba N554 mouse]]

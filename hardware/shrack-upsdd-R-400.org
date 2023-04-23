@@ -1,0 +1,24 @@
+#+TITLE: Shrack UPS USDD-R 400
+#+LANGUAGE: en
+
+
+This is a short note on the discontinued Shrack [[https://www.schrack.com/shop/usdd400.html][Genio USDD-R 400]] UPS (EAN code 9004840378757). This is a tower or rackmount UPS with 4000VA of power that is
+currently used as backup in my house. It operates with a DC voltage of nominal 108 V_dc which is significantly higher than 12V or 24V in consumer grade UPSes
+but 10 AGM lead-cell in batteries in series does the trick here. Another nice thing that I found about this UPS (which was missing its internal batteries when I
+purchased it) was the BATTERY EXTENSION connector on the back.
+
+[[file:shrack-ups-usdd-r-400/back-connectors.jpg][file:shrack-ups-usdd-r-400/thumb-back-connectors.jpg]]
+
+The BATTERY EXTENSION connector was not easy to recognize on first glance. After a while I stumbled by accident on a matching connector from WIELAND - the
+[[https://octopart.com/92.954.4453.0-wieland-68095496?r=sp][GST18I5 Pole Flat Male Connector]] available from multiple distributors and with the [[file:shrack-ups-usdd-r-400/92.954.4053.1.PDF][datasheet]] mirrored.
+
+
+* References
+
+
+[[file:shrack-ups-usdd-r-400/k_usdd_en.pdf][Datasheet for the GENIO Online UPS series]]
+
+[[file:shrack-ups-usdd-r-400/a_usdd_en.pdf][Manual for the GENIO Dual Maxi - USDDxxx which covers the USDD400 model]]
+
+[[file:shrack-ups-usdd-r-400/a_usddbe_en.pdf][An application note on "REPLACEMENT OF THE BATTERY INSERTION BOX"]]
+
