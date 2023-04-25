@@ -1,0 +1,91 @@
+
+metadata:
+  title: CD Changer DIY wiring harness
+
+connectors:
+  # Reference: https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_W58814_Head_Unit_pinout.shtml
+  # Reference: https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_CQ-TS7471A_Head_Un_pinout.shtml
+  CN702:
+    type: CN702 12P CONNECTOR
+    manufacturer: TE Connectivity
+    mpn: 1318774-1
+    subtype: female
+    pincount: 12
+    pinlabels:
+      - SHLD  # 1.  Shield Ground
+      - RP    # 2.  R⊕
+      - RN    # 3.  R⊖
+      - LP    # 4.  L⊕
+      - LN    # 5.  L⊖
+      - MUTE  # 6.  Mute
+      - GND   # 7.  Ground
+      - N_C   # 8.  Not Connected
+      - BUSP  # 9.  Bus Communication ⊕ (TX⊕)
+      - BUSN  # 10. Bus Communication ⊖ (TX⊖)
+      - ACC   # 11. Power Supply, ACC
+      - BATT  # 12. Power Supply, B⊕
+    
+  DE9_M:
+    subtype: male
+    pincount: 9
+
+  DE9_F:
+    subtype: female
+    pincount: 9
+
+  # Reference: https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_CX-LS0170F_CX-LS09_pinout.shtml
+  CN701_1:
+    type: CN701-1 12P POWER CONNECTOR
+    subtype: female
+    pincount: 12
+    pinlabels:
+      - RP    # 1.  Audio Rch Output R⊕
+      - LP    # 2.  Audio Lch Output L⊕
+      - SGND  # 3.  Signal Ground
+      - MUTE  # 4.  Mute
+      - BATT  # 5.  Power Supply, B⊕
+      - RN    # 6.  Audio Rch Output R⊖
+      - LN    # 7.  Audio Lch Output L⊖
+      - GND   # 8.  Ground
+      - BUSN  # 9.  Communication Signal TX ⊖
+      - BUSP  # 10. Communication Signal TX ⊕
+      - TXT   # 11. Communication Signal TXT || EJECT
+      - ACC   # 12. Power Supply, ACC
+
+
+cables:
+  CABLE8:
+    wirecount: 8
+
+  B1:
+    wirecount: 11
+    category: bundle
+    color_code: DIN
+    colors:
+      - YE   # 1.  Yellow
+      - GY   # 2.  Grey
+      - GN   # 3.  Green
+      - WHBU # 4.  LIGHTBLUE
+      - WH   # 5.  White
+      - BN   # 6.  Brown
+      - BU   # 7.  Blue
+      - BK   # 8.  Black
+      - OG   # 9.  Orange
+      - WHGN # 10. LIGHTGREEN
+      - RD   # 11. Red
+
+connections:
+  -
+    # 1. SHLD not connected
+    # 6. Mute not connected
+    - CN702:  [ 2,3,4,5, 7, 9,10,11,12 ]
+    - CABLE8: [ 1,2,3,2, 4, 5,6, 7, 8  ]
+    # Pin 1 not connected
+    - DE9_M:  [ 9,6,7,6, 8, 3,4, 5, 2  ]
+
+  -
+      # Pin 1 not connected
+    - DE9_F:   [2,3, 4,5,  6,6, 7, 8,8, 9]
+    - B1:      [5,10,9,11, 6,7, 2, 8,3, 1]
+    - CN701_1: [5,10,9,12, 6,7, 2, 8,3, 1]
+

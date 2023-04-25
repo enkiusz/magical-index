@@ -1,0 +1,17 @@
+Id	Description	Qty	Unit	Designators	Manufacturer	MPN
+1	Cable, 8 wires	0	m	CABLE8		
+2	Connector, CN701-1 12P POWER CONNECTOR, female, 12 pins	1		CN701_1		
+3	Connector, CN702 12P CONNECTOR, female, 12 pins	1		CN702	TE Connectivity	1318774-1
+4	Connector, female, 9 pins	1		DE9_F		
+5	Connector, male, 9 pins	1		DE9_M		
+6	Wire, BK	0	m	B1		
+7	Wire, BN	0	m	B1		
+8	Wire, BU	0	m	B1		
+9	Wire, GN	0	m	B1		
+10	Wire, GY	0	m	B1		
+11	Wire, OG	0	m	B1		
+12	Wire, RD	0	m	B1		
+13	Wire, WH	0	m	B1		
+14	Wire, WHBU	0	m	B1		
+15	Wire, WHGN	0	m	B1		
+16	Wire, YE	0	m	B1		

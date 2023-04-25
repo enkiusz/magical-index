@@ -93,3 +93,7 @@ This attachment is also mentioned for Toyota RAV4
 https://manualzz.com/doc/5191320/tarif-accessoires-rav4-2005
 
 [[file:46fe114aefafac38d14de01a67f2cadeb1bfbd6abc9e518f01891ce4c8f49ae0.pdf][A summary of audio options for Toyota]] containing various front codes and the description of the accessories.
+
+*** DIY development wire harness
+
+[[file:diy-iebus-harness.svg]]
