@@ -75,6 +75,11 @@ graph {
    </tr>
   </table>
  </td></tr>
+ <tr><td>
+  <table border="0" cellspacing="0" cellpadding="3" cellborder="1"><tr>
+   <td balign="left">CQ-TS7471LC (W58814 OE 86120-02380) Radio</td>
+  </tr></table>
+ </td></tr>
 </table>
 > fillcolor="#FFFFFF" shape=box style=filled]
 	DE9_M [label=<
@@ -234,6 +239,11 @@ graph {
     <td>ACC</td>
    </tr>
   </table>
+ </td></tr>
+ <tr><td>
+  <table border="0" cellspacing="0" cellpadding="3" cellborder="1"><tr>
+   <td balign="left">CX-CS0721F (TM0461 OE 08601-00910) CD Changer</td>
+  </tr></table>
  </td></tr>
 </table>
 > fillcolor="#FFFFFF" shape=box style=filled]

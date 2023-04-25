@@ -24,7 +24,8 @@ connectors:
       - BUSN  # 10. Bus Communication ⊖ (TX⊖)
       - ACC   # 11. Power Supply, ACC
       - BATT  # 12. Power Supply, B⊕
-    
+    notes: CQ-TS7471LC (W58814 OE 86120-02380) Radio
+
   DE9_M:
     subtype: male
     pincount: 9
@@ -51,6 +52,7 @@ connectors:
       - BUSP  # 10. Communication Signal TX ⊕
       - TXT   # 11. Communication Signal TXT || EJECT
       - ACC   # 12. Power Supply, ACC
+    notes: CX-CS0721F (TM0461 OE 08601-00910) CD Changer
 
 
 cables:
