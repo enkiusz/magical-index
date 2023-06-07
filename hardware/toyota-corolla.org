@@ -20,41 +20,63 @@ In the interest of full disclosure there is also the [[file:fuel-corolla.dat][in
 
 ** Device CD-Text support results
 
-|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
-| Head unit identification | AVC-LAN Connector on head unit side | Accessory type      | Accessory identification  | AVC-LAN Connector on accessory side | Result    | Notes                 |
-|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
-| OE no. 86120-02380       | [[https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_W58814_Head_Unit_pinout.shtml][CN702 12P]]                           | CD Changer          | Front: TM0461             | R4 connector                        | OK        | CD-Text not supported |
-| Ref no. CQ-TS7471LC      |                                     |                     | Type: 74833               |                                     |           |                       |
-| ID no. W58814            |                                     |                     | OE no. 08601-00910        |                                     |           |                       |
-| Type: W58814             |                                     |                     | Ref no. CX-CS0721F        |                                     |           |                       |
-| Toyota code: e13         |                                     |                     | Toyota code: e13          |                                     |           |                       |
-| Datecode: 022018         |                                     |                     | Datecode: 020209          |                                     |           |                       |
-| Manufacturer: Panasonic  |                                     |                     | Manufacturer: Panasonic   |                                     |           |                       |
-| [[file:cqts7471a.pdf][Service Manual]]           |                                     |                     |                           |                                     |           |                       |
-|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
-|                          |                                     | CD Changer          | Front: TM0461             | R4 connector                        | No owned  |                       |
-|                          |                                     |                     | Type: 74833               |                                     |           |                       |
-|                          |                                     |                     | OE no. 08601-00911        |                                     |           |                       |
-|                          |                                     |                     | Ref no. CX-CS0722FC       |                                     |           |                       |
-|                          |                                     |                     | Toyota code: e13          |                                     |           |                       |
-|                          |                                     |                     | Datecode: 020209          |                                     |           |                       |
-|                          |                                     |                     | Manufacturer: Panasonic   |                                     |           |                       |
-|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
-|                          |                                     | CD Changer          | Front: TM0461             | R4 connector                        | Not owned |                       |
-|                          |                                     |                     | Type: 74833               |                                     |           |                       |
-|                          |                                     |                     | OE no. 08601-00912        |                                     |           |                       |
-|                          |                                     |                     | Ref no. CX-CS0723FC       |                                     |           |                       |
-|                          |                                     |                     | Toyota code: e13          |                                     |           |                       |
-|                          |                                     |                     | Datecode: 020209          |                                     |           |                       |
-|                          |                                     |                     | Manufacturer: Panasonic   |                                     |           |                       |
-|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
-|                          |                                     | CD Changer emulator | APPS2Car                  | No connector                        | OK        |                       |
-|                          |                                     |                     | [[https://www.wiki-tech.com]] |                                     |           |                       |
-|                          |                                     |                     |                           |                                     |           |                       |
-|                          |                                     |                     |                           |                                     |           |                       |
-|                          |                                     |                     |                           |                                     |           |                       |
-|                          |                                     |                     |                           |                                     |           |                       |
-|--------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
+|-----------------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
+| Head unit identification          | AVC-LAN Connector on head unit side | Accessory type      | Accessory identification  | AVC-LAN Connector on accessory side | Result    | Notes                 |
+|-----------------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
+| OE no. 86120-02380                | [[https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_W58814_Head_Unit_pinout.shtml][CN702 12P]]                           | CD Changer          | Front: TM0461             | R4 connector                        | OK        | CD-Text not supported |
+| Ref no. CQ-TS7471LC               |                                     |                     | Type: 74833               |                                     |           |                       |
+| ID no. W58814                     |                                     |                     | OE no. 08601-00910        |                                     |           |                       |
+| Type: W58814                      |                                     |                     | Ref no. CX-CS0721F        |                                     |           |                       |
+| Toyota code: e13                  |                                     |                     | Toyota code: e13          |                                     |           |                       |
+| Datecode: 022018                  |                                     |                     | Datecode: 020209          |                                     |           |                       |
+| Manufacturer: Panasonic           |                                     |                     | Manufacturer: Panasonic   |                                     |           |                       |
+| [[file:cqts7471a.pdf][Service Manual]]                    |                                     |                     |                           |                                     |           |                       |
+|-----------------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
+| OE no. 86120-12880                |                                     |                     |                           |                                     |           |                       |
+| Ref no. CQ-TS7471A                |                                     |                     |                           |                                     |           |                       |
+| Type: W58814                      |                                     |                     |                           |                                     |           |                       |
+| Toyota code: e13                  |                                     |                     |                           |                                     |           |                       |
+| Datecode: 022018                  |                                     |                     |                           |                                     |           |                       |
+| Manufacturer: Matsushita Electric |                                     |                     |                           |                                     |           |                       |
+| Serial no. 73707                  |                                     |                     |                           |                                     |           |                       |
+| Label no. YEFM01663A              |                                     |                     |                           |                                     |           |                       |
+|-----------------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
+|                                   |                                     | CD Changer          | Front: TM0461             | R4 connector                        | No owned  |                       |
+|                                   |                                     |                     | Type: 74833               |                                     |           |                       |
+|                                   |                                     |                     | OE no. 08601-00911        |                                     |           |                       |
+|                                   |                                     |                     | Ref no. CX-CS0722FC       |                                     |           |                       |
+|                                   |                                     |                     | Toyota code: e13          |                                     |           |                       |
+|                                   |                                     |                     | Datecode: 020209          |                                     |           |                       |
+|                                   |                                     |                     | Manufacturer: Panasonic   |                                     |           |                       |
+|-----------------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
+|                                   |                                     | CD Changer          | Front: TM0461             | R4 connector                        | Not owned |                       |
+|                                   |                                     |                     | Type: 74833               |                                     |           |                       |
+|                                   |                                     |                     | OE no. 08601-00912        |                                     |           |                       |
+|                                   |                                     |                     | Ref no. CX-CS0723FC       |                                     |           |                       |
+|                                   |                                     |                     | Toyota code: e13          |                                     |           |                       |
+|                                   |                                     |                     | Datecode: 020209          |                                     |           |                       |
+|                                   |                                     |                     | Manufacturer: Panasonic   |                                     |           |                       |
+|-----------------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
+|                                   |                                     | CD Changer emulator | APPS2Car                  | No connector                        | OK        |                       |
+|                                   |                                     |                     | [[https://www.wiki-tech.com]] |                                     |           |                       |
+|                                   |                                     |                     |                           |                                     |           |                       |
+|                                   |                                     |                     |                           |                                     |           |                       |
+|                                   |                                     |                     |                           |                                     |           |                       |
+|                                   |                                     |                     |                           |                                     |           |                       |
+|-----------------------------------+-------------------------------------+---------------------+---------------------------+-------------------------------------+-----------+-----------------------|
+
+** Replacement connectors for Toyota units
+
+The connectors on the back of a Toyota head unit can be replaced with the following replacement connector types.
+
+|--------+----------------------------+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------|
+| Unit   | Toyota Connector Reference | Replacement connector | Replacement connector description                                                                                                               |
+|--------+----------------------------+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------|
+| W58814 | [[https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_W58814_Head_Unit_pinout.shtml][CN702 12P]]                  | [[https://www.te.com/usa-en/product-1318774-1.html][TE 1318774-1]]          | Housing for Female Terminals, Wire-to-Board / Wire-to-Device / Wire-to-Wire, 12 Position, .087 in [2.2 mm] Centerline, TH/.025 Connector System |
+| W58814 | [[https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_W58814_Head_Unit_pinout.shtml][CN703 20P]]                  | TBD                   |                                                                                                                                                 |
+| W58814 | [[https://pinoutguide.com/Car-Stereo-Toyota-Lexus/Toyota_W58814_Head_Unit_pinout.shtml][CN704 8P]]                   | [[https://www.te.com/usa-en/product-1376352-1.html][TE 1376352-1]]          | Housing for Female Terminals, Wire-to-Wire / Wire-to-Device / Wire-to-Board, 8 Position, .087 in [2.2 mm] Centerline, TH/.025 Connector System  |
+|--------+----------------------------+-----------------------+-------------------------------------------------------------------------------------------------------------------------------------------------|
+
 
 [[https://www.priuswiki.de/index.php?title=Audiosystem&oldid=13774][Prius wiki article about Prius audio system mentioning support for CD-Text]]
 
