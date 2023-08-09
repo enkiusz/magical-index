@@ -2,7 +2,7 @@
 
 * Introduction
 
-The Secondlife UPS Mark II was envisioned as a successor to the first [[file:secondlife-ups.org]] model with the general changes as below
+The Secondlife UPS Mark II was envisioned as a successor to the [[file:secondlife-ups.org][Secondlife UPS Mark I]] model with the following improvements:
 
 - increased battery capacity
 - increased power budget
@@ -12,27 +12,35 @@ The Secondlife UPS Mark II was envisioned as a successor to the first [[file:sec
 - various other usability improvements (for example moving the fuses to the front of the enclosure)
 - better documentation 
 
-The basic premise is to provide a short depth (~25 mm) rack mountable UPS which instead of 230V AC can provide typical low voltages suitable for 
-powering of CCTV cameras, sensors, routers, 802.11 access points modems, switches, embedded systems (like a Raspberry Pi) and other small devices. 
-This approach is advantegous both in terms of saving rack space where a PDU does not have to be mounted as well as potential power efficiency savings 
+The basic premise is to provide a short depth (~250 mm) rack mountable UPS which instead of 230V AC can provide typical low voltages suitable for 
+powering of CCTV cameras, sensors, routers, 802.11 access points, modems, switches, embedded systems (like a Raspberry Pi) and other small devices. 
+This approach is advantegous in terms of saving rack space where a PDU does not have to be mounted as well as potential power efficiency gains
 of having fewer AC <-> DC power conversion steps.
 
-The UPS design is focused around a few stabilised voltage buses providing 12V and 5V respectively as well as a "direct" rail (labelled later as V_rail)
+The UPS design is built using off-the-shelf or recycled components with a few custom made printed circuit boards. Most notably, the UPS is designed to
+be enclosed using typical 19″ Ethernet switches. These can be obtained very cheap or even given away for free when equipment is discarded. Apart from a
+reusability solarpunk vibe Ethernet switch enclosures provide us with ready-made cutouts in their front panels. These originally house Ethernet connectors
+and have typical dimensions. This fact makes it easy to build a modular UPS device with standarised parts.
+
+Even though any Ethernet 19″ rack switch enclosure can be used for this build, this particular UPS is going to be housed in an enclosure from a
+damaged [[https://wikidevi.wi-cat.ru/Netgear_GS748T_v4][Netgear GS748T]] switch.
+
+The UPS design is focused around two buses providing standard 12V and 5V voltages using buck converters as well as a "direct" bus (labeled later as V_rail)
 which is connected directly to the battery or AC power supply. The peculiarity of this bus is that the voltage on it has a significant swing - from 11.2V 
-when operating on an almost depleted battery towards 24V when operating on AC power.
+when operating on an almost depleted battery towards 24V when operating on AC power. The advantage of using V_rail is that its current capacity is not limited
+by the DC-DC buck converters and can power more power-hungry equipment - for example a [[https://wikidevi.wi-cat.ru/Netgear_ReadyNAS_RN3138][Netgear RN3138 NAS]].
 
 *** More battery capacity
 
-In order to provide more power as well as longer runtime, the UPS will contain Lithium-Ion battery pack with a 4S24P layout build from refurbished 18650 cells
-with a capacity of around 300 Wh. All of the components will be housed in a chassis from a damaged [[https://wikidevi.wi-cat.ru/Netgear_GS748T_v4][Netgear GS748T]] switch disposed of for recycling.
+In order to provide more power as well as longer runtime, the UPS will contain a 4S24P Lithium-Ion battery pack built from refurbished 18650 cells having a capacity
+of around 600 Wh (if 2000 mAh cells are used).
 
-*** More power capacity
+*** More power
 
-The list of equipment in my home rack has changed, some equipment has been replaced, there is some new equipment as well. Some of the new equipment
-will be powered by wide input range DC-DC converters so they can be powered directly from the battery rail (V_rail). I measured the amount of current draw
-during normal operation for each piece of equipment and came up with the following calculations for the power budget requirements of the UPS. As the voltage 
-on the V_rail bus is not constant and changes from 11.2V when operating on a discharged battery and 24V when operating on AC its more useful to specify 
-it's performance in terms of power not current.
+After [[file:secondlife-ups.org][Secondlife UPS Mark I]] has been deployed there have been a number of changes and additions to my home infrastructure equipment rack. Power requirements have
+increased. In order to come up with more detailed power requirements for each voltage  I measured the amount of current draw during normal operation for each
+piece of equipment and came up with the following calculations for the power budget requirements of the UPS. As the voltage on the V_rail bus is not constant and
+changes from 11.2V when operating on a discharged battery and 24V when operating on AC its more useful to specify it's performance in terms of power not current.
 
 #+CAPTION: Devices connected to the UPS
 #+ATTR_HTML: :border 2 :rules all :frame border
@@ -83,79 +91,151 @@ We take into account an efficiency of 0.8 for the buck converters and assume tha
 
 All of the above calculations allow us to select:
 
-- internal wiring diameter
-- internal and external connectors
-- proper fuses
-- buck converter maximum power and current
+- internal wiring cross-section (AWG)
+- internal and external connector types
+- fuses
+- buck converters maximum power and current
 - AC power supply maximum power and current
 
-It can be seen that an AC power supply with at least 300W is needed to power the loads with some room needed to charge the battery. For this reason a 400W power 
-supply has been selected (see summary in BOM).
+An AC power supply with at least 300W is needed to power the loads with some room needed to charge the battery. For this reason a 400W power supply has been selected
+(see summary in BOM).
 
-*** Ideal Diode circuit
+*** Solid-state operation
 
 Instead of the previously used relay-based power path switching scheme a solid-state power switch based on MOSFETs driven by the LTC4416 PowerPath controller will be used.
 
-*** Battery pack 
+@@@ -- ideal diode circuit --
 
 *** Modularity
 
-**** Fanout boards and fuse boards
+One disadvantage of the previous Secondlife UPS design was the fact that the front connectors where loads can be powered were placed on hand-made breadboard PCBs.
+After some thought I have decided that this approach makes the design hard to replicate and adapt. To improve this I designed a number of standard sized PCBs that
+host common load connectors and fuse sockets. All of the PCBs fit into cutouts in Ethernet switch enclosures hosting 4x2 Ethernet ports. This is the most common
+cutout size in an Ethernet switch and it allows a user to mix and match modules based on their needs. Currently the available modules include:
 
-**** Improved load connectors
+- a fanout with 8 x DEGSON 13EDGVC-3.5 pluggable load connectors with a power indicator LED, this module is designed to power low-power loads
+- a fanout with 6 x XT-60 pluggable load connectors with a power indicator LED, this module is designed to power high-power loads
+- a fuse module containing two fuse sockets accepting typical 5x20mm glass fuses
+- a fuse module containing one fuse socket accepting a 6.3mmx32mm glass fuse
 
+All of these modules share a common mechanical design and can be used to build many types of front panel layouts. If the project is successful I'm planning to
+design other modules such as a PoE injector or a battery SoC (State of Charge) indicator module. Another future improvement idea is a 3D-printable drilling guide
+which will help with precision while drilling mounting holes in the enclosure.
+
+As an example in the Secondlife UPS described in this document the following modules are mounted on a long (48 port) cutout in the enclosure:
+
+- one fanout with 8 x DEGSON 13EDGVC-3.5 pluggable load connectors module powered by the 5V bus
+- one fanout with 8 x DEGSON 13EDGVC-3.5 pluggable load connectors module powered by the 12V bus
+- one fuse module containing two fuse sockets accepting typical 5x20mm glass fuses protecting the 12V and 5V buses
+- one fanout with 6 x XT-60 pluggable load connectors module powered by the V_rail bus
+- one fuse module containing one fuse socket accepting a 6.3mmx32mm glass fuse protecting the V_rail bus
+
+[[file:secondlife-ups-MkII/assembled-front-panel.jpg][file:secondlife-ups-MkII/thumb-assembled-front-panel.jpg]]
+
+The exposed through-hole component leads have been covered with hot glue. In the future dedicated 3D-printable plastic covers might be introduced for
+each specific module which can be screwed on to improve the aesthetics.
 
 * Overall schematics
+
+The overall schematics of the UPS. Some modules (for example the ideal diode circuit or the BMS) are drawn on a conceptual level only.
+
+@@@ update @@@
 [[file:secondlife-ups-MkII/hw.svg]]
 
 * Build instructions
 
 ** Planning
 
--- photo of first layout of internal components --
-   
+As the initial step all of the parts need to be placed in the enclosure to check if everything will fit, plan overall wiring and airflow.
+
 [[file:secondlife-ups-MkII/initial-placement.jpg][file:secondlife-ups-MkII/thumb-initial-placement.jpg]]
 
+Please note, that the cells should be placed in the cell holders or mock cells need to be used to plan the layout.
+
 ** Enclosure preparation
+
+The steps below describe the preparation of an empty 19″ 1U enclosure for placement of UPS submodules. Most internal components from the device that you
+are reusing should be removed, some like AC sockets, grounding lugs or fans can be left in the case.
+
 *** Stud removal
-- photo with marked studs -
 
-[[file:secondlife-ups-MkII/studs-marked.jpg][file:secondlife-ups-MkII/thumb-studs-marked.jpg]]
-
-Thoroughly deburr the corners of the drilled holes with a deburring tool or a Dremel. Leftover burrs can damage a cell's insulation sleeve and cause a short.
-Drill with a 5mm metal drill
-Drill from the bottom of the case
-Use a puncturing tool for easier drilling. A cheap one can be bought for 2-3 EUR.
-Support the chassis with 40mmx40mm wood cubes to prevent bending
-
-- photo with studs removed -
+After placing the batteries, AC power supply, DC-DC converters, BMS and other components some studs will need to be removed:
 
 [[file:secondlife-ups-MkII/studs-removed.jpg][file:secondlife-ups-MkII/thumb-studs-removed.jpg]]
 
+Some notes on the process:
+
+- Thoroughly deburr the corners of the drilled holes with a deburring tool or a Dremel. Leftover burrs can damage 18650 cell insulation sleeves and cause a short.
+- Drill with a 5mm metal drill
+- Drill from the bottom of the case
+- Use a puncturing tool for easier drilling. A cheap one can be bought for 2-3 EUR.
+- Support the chassis with 40mmx40mm wood cubes to prevent bending
+
+** Front panel assembly
+
+As described before the front panel is built up out of modular PCBs screwed to the front of the enclosure with screws and nuts.
+
+The module PCBs have M2.5 screw holes drilled and in my case I used M2.5 x 8mm screws, washers and nuts to attach the modules. Each module covers the space of
+4x2 RJ45 ports which is a typical cutout size for Ethernet switches.
+
+Plan your layout first taking into consideration the routing of internal wires and other components like the power supply and batteries which can be pretty big.
+Plan for some clearance between elements.
+
+[[file:secondlife-ups-MkII/layout.jpg][file:secondlife-ups-MkII/thumb-layout.jpg]]
+
+Usually the front of the enclosure can be detached from the rest of the case and this should be done first.
+
+Tools needed for attaching the modules to the enclosure front:
+- drill press (optimal)
+- hand drill (usable)
+- a 3mm metal drill
+- dremel or [[https://www.mcmaster.com/products/deburring-tools/][deburring tool]]
+- hole punch
+- sharp pen for hole marking
+
+The module PCBs can be placed inside or outside the front panel assembly depending on how the front panel latches onto the rest of the enclosure.
+
+[[file:secondlife-ups-MkII/mount-inside.jpg][file:secondlife-ups-MkII/thumb-mount-inside.jpg]]
+
+[[file:secondlife-ups-MkII/mount-outside.jpg][file:secondlife-ups-MkII/thumb-mount-outside.jpg]]
+
+In my case the PCBs needed to be mounted outside with screws pointing outwards in order for the enclosure front to fit the rest of the case. Test the
+entire assembly process in order to be confident that there will be no problems later.
+
 *** Mounting the main battery fuse
 
+The main battery fuse socket should be selected to handle the battery current and be easily mountable in the enclosure. The most practical sockets are those
+that can be mounted with just round holes. The fuse selected needs to be a DC fuse rated for the voltage that the battery operates on. Those types of fuses
+can be often found distributed under the "solar" or PV categories. The fuse that I used in my build is linked in the BOM at the end. As the fuse socket is
+pretty large, care needs to be taken to drill the main mounting hole exactly on the center of the back plane.
 
-- main battery fuse marked -
+[[file:secondlife-ups-MkII/fuse-socket-marked.jpg][file:secondlife-ups-MkII/thumb-fuse-socket-marked.jpg]] 
 
-[[file:secondlife-ups-MkII/fuse-socket-marked.jpg][file:secondlife-ups-MkII/thumb-fuse-socket-marked.jpg]]
-
-- main battery fuse mounted
-
-M4 screws were used for mounting, 22mm hole was drilled with a step drill. 
-remember about lubricant, my [[https://www.metabo.com/com/en/tools/cordless-tools/screwdriving-drilling-chiselling-stirring/cordless-drills-screwdrivers/powermaxx-bs-12-bl-q-601045800-cordless-drill-screwdriver.html?listtype=search&searchparam=BS%2B12][Metabo BS 12 BL Q]] 20 Nm cordless drill was struggling a bit but you can do it with some patience
-deburr the holes
+In my socket, M4 screws were used for mounting, 22mm hole was drilled with a step drill. Remember about lubricant, my [[https://www.metabo.com/com/en/tools/cordless-tools/screwdriving-drilling-chiselling-stirring/cordless-drills-screwdrivers/powermaxx-bs-12-bl-q-601045800-cordless-drill-screwdriver.html?listtype=search&searchparam=BS%2B12][Metabo BS 12 BL Q]] 20 Nm cordless drill
+was struggling a bit but you can do it with some patience.
 
 [[file:secondlife-ups-MkII/fuse-socket-mounted1.jpg][file:secondlife-ups-MkII/thumb-fuse-socket-mounted1.jpg]]
 
 [[file:secondlife-ups-MkII/fuse-socket-mounted2.jpg][file:secondlife-ups-MkII/thumb-fuse-socket-mounted2.jpg]]
 
+** Circuit assembly
+
+The BMS, ideal diode circuit and DC-DC converters are mounted on a baseplate made from a prototype PCB using some of the leftover studs in the enclosure:
+
+[[file:secondlife-ups-MkII/circuit-baseboard.jpg][file:secondlife-ups-MkII/thumb-circuit-baseboard.jpg]]
+
+All of the other modules can be then mounted either with either screws or doublesided tape:
+
+[[file:secondlife-ups-MkII/circuit-mounted-modules.jpg][file:secondlife-ups-MkII/thumb-circuit-mounted-modules.jpg]]
+
 ** Battery assembly
-*** Plan detailed battery placement and wiring
+*** Battery cell selection
 
-0- internal screws and clearances
-- cable management
+The 18650 cells used for the making of the battery pack can be new or refurbished from e-bike, cordless tools, old laptop batteries or other sources. Consult
+more specialised forums like [[https://secondlifestorage.com/index.php][Secondlife storage]] for tips on selecting, obtaining and testing reused 18650 cells. Two critical points to keep in mind are:
 
-*** Cell gathering, testing and ma
+- always check the specifications for the cells you are using (find and read datasheets) so as not to exceed current or voltage limits
+- measure and match the discharge capacity and internal resistance of the cells in a battery pack to be as close as possible
 
 *** Nickel strip thickness calculations
 
@@ -181,92 +261,92 @@ two 0.3mm strips. Additionally, the strips that I am using are 8mm wide not 7mm 
 
 *** Welding the cells
 
-The general approach is to connect the cells together with 8mm wide nickel strips using spot welding. In order to facilitate cell charge verification and equalization
+The general approach is to connect the cells together with 8mm wide nickel strips using spot welding. In order to facilitate cell voltage verification and equalization
 within each of the 24P blocks first only one side of the block (the positive cell terminals in my case) is welded first, then cells charge is equalized and then the second 
 cell terminals (negative cell terminals in my case) are welded together. Most welds are performed with 0.1mm and 0.12mm nickel strips but the terminal connections for the 
 entire battery are built out of 0.3mm strips for designed current capacity.
 
-- welding jig -
+A welding jig is used to keep the cells in place during welding. Such a jig can be purchased or manufactured by yourself as it's simply a set of four pieces of wood
+with a long slot cut alongside their length. The design for such a jig can be found below:
 
 file:secondlife-ups-MkII/welding-jig.svg
 
-- cells in welding jig -
+The cells for each of the four 24P blocks are inserted into 4x2 cell holders refurbished from old "hoverboard" battery packs and aligned using the jig.
+This is recommended as the welded nickel strips cannot be used as the only mechanical support for the cells:
 
-The cells are first connected together 
 [[file:secondlife-ups-MkII/cells-inside-jig.jpg][file:secondlife-ups-MkII/thumb-cells-inside-jig.jpg]]
 
-The strip can be savely secured to the cells by using small magnets:
+Nickel strips are secured to the cells using small neodymium magnets to not move during the welding process:
 
 [[file:secondlife-ups-MkII/cell-tacking-magnets.jpg][file:secondlife-ups-MkII/thumb-cell-tacking-magnets.jpg]]
 
-The strips are welded to the cells using a [[https://www.keenlab.de/][kWeld from Keenlab]] spot welder powered by a [[https://www.lrp.cc/en/product/hv-stock-spec-graphene-3-7300mah-hardcase-battery-76v-lipo-130c65c-1/][HV Stock Spec GRAPHENE-3 7300mAh Hardcase battery - 7.6V LiPo - 130C/65C]]. The effect
-of welding both 0.1mm and 0.12mm thickness strips that connect the cells 
+The strips are welded to the cells using a [[https://www.keenlab.de/][kWeld from Keenlab]] spot welder powered by a [[https://www.lrp.cc/en/product/hv-stock-spec-graphene-3-7300mah-hardcase-battery-76v-lipo-130c65c-1/][HV Stock Spec GRAPHENE-3 7300mAh Hardcase battery - 7.6V LiPo - 130C/65C]].
+The effect of welding both 0.1mm and 0.12mm thickness strips that connect the cells can be seen below:
 
 [[file:secondlife-ups-MkII/cells-welded-first-side.jpg][file:secondlife-ups-MkII/thumb-cells-welded-first-side.jpg]]
-
-- equalizing -
 
 The cells in all four 24P blocks are first checked with a voltmeter and if some of them have self-discharged below 4V they are charged individually. I use a DIY "charger"
 which connects together 5 cheap "Li-Ion charger" modules based around the popular [[https://octopart.com/tp4056x-42-esop8-toppower-125439323?r=sp][TP4056]] chip. 
 
 [[file:secondlife-ups-MkII/cells-equalized.jpg][file:secondlife-ups-MkII/thumb-cells-equalized.jpg]]
 
-- terminal strips -
-
-The strips used for terminal current collectors (providing the positive and negative for the entire battery) are welded longer than the length of the block to be bent together
+The strips used for terminal current collectors (providing the positive and negative for the entire battery) are longer than the length of the block to be bent together
 and soldered to 4mm² wires.
 
 [[file:secondlife-ups-MkII/terminal-current-collectors.jpg][file:secondlife-ups-MkII/thumb-terminal-current-collectors.jpg]]
 
 [[file:secondlife-ups-MkII/terminal-wire-soldered.jpg][file:secondlife-ups-MkII/thumb-terminal-wire-soldered.jpg]]
 
+After all blocks are welded and equalized they are aligned side-by-side in the welding jig and connected with more 0.1mm/0.12mm strips. This process can be seen below. Care needs
+to be taken at this stage in order to properly orient the blocks taking into account the polarity as well as final wiring in the enclosure. A quick photo summary of
+these steps can be found below:
 
-After all blocks are welded and equalized they are put side-by-side in the welding jig and connected with more 0.1mm/0.12mm strips. This process can be seen below. Care needs
-to be taken at this stage in order to properly orient the blocks taking into account the polarity as well as final wiring in the enclosure.
+[[file:secondlife-ups-MkII/blocks-inside-jig.jpg][file:secondlife-ups-MkII/thumb-blocks-inside-jig.jpg]]
 
-*** Attaching thermal sensors and voltage sense wires
+[[file:secondlife-ups-MkII/interblock-nickel-strips.jpg][file:secondlife-ups-MkII/thumb-interblock-nickel-strips.jpg]]
 
-*** Forming and securing the battery
+[[file:secondlife-ups-MkII/interblock-nickel-strips-welded.jpg][file:secondlife-ups-MkII/thumb-interblock-nickel-strips-welded.jpg]]
 
-*** Testing the battery
+Additional tips on the cell welding process are:
 
-** Front panel assembly
+- take some old cells and practice welding settings and technique with different nickel strip thickness before starting to weld the battery
+- as a rule of thumb for a proper weld, when you pull off the strip from the cell there should be a hold left in the strip, in other words the weld should be stronger than
+  the nickel strip itself
+- keep the cells and nickel strip clean (degrease with isopropyl alcohol if required) and use work cotton gloves during assembly
+- for best results use pure nickel strips, some places sell nickel plated steel strips which are cheaper but have more resistance
 
-The front panel assembly is built using modules 
-Materials
-- module boards
-- 4 x M2.5x8mm screws and nuts per module
+*** Attaching voltage sense wires
 
-Each module covers the space of 4x2 RJ45 ports which is a typical cutout size for switches.
+The voltage sense wires are soldered to allow the BMS to measure the voltage for each 24P block and react accordingly when voltage limits are reached:
 
-Tools needed:
-- drill press (optimal)
-- hand drill (suboptimal but usable)
-- dremel or [[https://www.mcmaster.com/products/deburring-tools/][deburring tool]]
-- center punch
-- sharp pen for hole marking
+[[file:secondlife-ups-MkII/voltage-sense-wires.jpg][file:secondlife-ups-MkII/thumb-voltage-sense-wires.jpg]]
 
-Steps
-Tips: Blank PCBs are good for alingnment because lining them up is easier
+*** Final assembly
 
-Lay out the module PCBs on the front panel
-[[file:secondlife-ups-MkII/layout.jpg][file:secondlife-ups-MkII/thumb-layout.jpg]]
+The final assembly involves isolating and securing all exposed nickel strips and wires with electrical tape:
 
-Drill with 3mm drill
+[[file:secondlife-ups-MkII/blocks-isolation.jpg][file:secondlife-ups-MkII/thumb-blocks-isolation.jpg]]
 
-Mount the PCBs one by one for best alignment
+After this the pack is bent into a flat shape:
 
-Use M2.5 screws for assembly
+[[file:secondlife-ups-MkII/flattened-battery-pack.jpg][file:secondlife-ups-MkII/thumb-flattened-battery-pack.jpg]]
 
-Holes need to be deburred with a deburring tool or dremel
+This allows the pack to be slided into the enclosure:
 
-The module PCBs can be placed inside or outside the front panel assembly depending on how the front panel latches onto the rest of the enclosure.
+[[file:secondlife-ups-MkII/battery-pack-inserted.jpg][file:secondlife-ups-MkII/thumb-battery-pack-inserted.jpg]]
 
-[[file:secondlife-ups-MkII/mount-inside.jpg][file:secondlife-ups-MkII/thumb-mount-inside.jpg]]
+*** Attaching thermal fuses
 
-[[file:secondlife-ups-MkII/mount-outside.jpg][file:secondlife-ups-MkII/thumb-mount-outside.jpg]]
+During battery assembly sense wires and thermal fuses are attached. 4 thermal fuses connected in series are 60°C Normally-Connected fuses. They are attached to
+the battery cells using a thermally conductive glue. Magnets are used to secure the sensors as the glue takes around 24h to fully solidify. 
 
+[[file:secondlife-ups-MkII/thermal-fuses.jpg][file:secondlife-ups-MkII/thumb-thermal-fuses.jpg]]
 
+* Final assembly photo
+
+The final UPS assembled before the chassis being closed:
+
+[[file:secondlife-ups-MkII/final-assembly.jpg][file:secondlife-ups-MkII/thumb-final-assembly.jpg]]
 
 * Bill of Materials
 
@@ -291,5 +371,3 @@ The module PCBs can be placed inside or outside the front panel assembly dependi
 | Total                               |                           |                                                                                                                              |      |        |                      |            64.18 |                  |                     |
 |-------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------+------+--------+----------------------+------------------+------------------+---------------------|
 #+TBLFM: $7=$5 * $6::@>$7=vsum(@II..@III)
-
-
