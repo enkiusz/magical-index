@@ -49,7 +49,7 @@ changes from 11.2V when operating on a discharged battery and 24V when operating
 | Device                      | 12V Current [A] (measured) | 12V Current [A] (max) | 5V Current [A] (max) | V_rail power [W] (measured) | V_rail power [W] (max) | Notes                                                                                                     |
 |-----------------------------+----------------------------+-----------------------+----------------------+-----------------------------+------------------------+-----------------------------------------------------------------------------------------------------------|
 | Router                      |                            |                     5 |                      |                             |                        | Axiomtek NA342                                                                                            |
-| GPON Modem                  |                            |                   0.5 |                      |                             |                        |                                                                                                           |
+| GPON Modem                  |                            |                   0.5 |                      |                             |                        | [[https://halny.com/portfolio/hl-1ge][HALNY HL-1GE]]                                                                                              |
 | Core Ethernet switch        |                       1.33 |                     4 |                      |                             |                        |                                                                                                           |
 | Planet GSD-800S switch      |                            |                       |                      |                             |                     21 | PoE injected                                                                                              |
 | Ubiquity Unify AC Lite AP   |                       0.16 |                  0.54 |                      |                             |                        | Via boost converter and PoE injected, rated at 6.5 W (see [[https://dl.ui.com/datasheets/unifi/UniFi_AC_APs_DS.pdf][datasheet]]), passive 24V PoE Mode B (230V/0.02A) |
@@ -104,7 +104,7 @@ An AC power supply with at least 300W is needed to power the loads with some roo
 
 Instead of the previously used relay-based power path switching scheme a solid-state power switch based on MOSFETs driven by the LTC4416 PowerPath controller will be used.
 
-@@@ -- ideal diode circuit --
+[[file:secondlife-ups-MkII/ideal-diode.svg][file:secondlife-ups-MkII/ideal-diode.png]]
 
 *** Modularity
 
@@ -139,8 +139,7 @@ each specific module which can be screwed on to improve the aesthetics.
 
 The overall schematics of the UPS. Some modules (for example the ideal diode circuit or the BMS) are drawn on a conceptual level only.
 
-@@@ update @@@
-[[file:secondlife-ups-MkII/hw.svg]]
+[[file:secondlife-ups-MkII/hw.svg][file:secondlife-ups-MkII/hw.png]]
 
 * Build instructions
 
