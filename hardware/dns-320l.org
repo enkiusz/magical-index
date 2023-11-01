@@ -34,6 +34,7 @@ you would have in a laptop or PC. The NAS has it's page on both [[https://deviwi
 devices based on the 88F6702 SoC used are:
 - [[https://wikidevi.wi-cat.ru/LaCie_CloudBox][LaCie CloudBox]] for which the mainline kernel has a  [[https://github.com/torvalds/linux/blob/8bc9e6515183935fa0cccaf67455c439afe4982b/arch/arm/boot/dts/marvell/kirkwood-cloudbox.dts][DTS file]]
 - [[https://git.openwrt.org/?p=openwrt/openwrt.git;a=commit;h=d2c3131b3fcc55d9c26abdb7cd3c32d3827c10ed][ZyXEL NSA310S]] for which there exists [[https://git.openwrt.org/?p=openwrt/openwrt.git;a=commit;h=d2c3131b3fcc55d9c26abdb7cd3c32d3827c10ed][OpenWRT support]]
+- Medion MD86783 Lifecloud NAS, some information on [[https://forum.doozan.com/read.php?2,32877][doozan forum]] and [[https://github.com/mibodhi/u-boot-kirkwood/pull/9/files][u-boot-kirkwood github]]
 
 The main board looks like this:
 
