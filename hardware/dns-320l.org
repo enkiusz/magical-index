@@ -30,7 +30,8 @@ the stock firmware and in the kernel that I have built so I suspect it's some ha
 There are differences between the A3 and A4 versions in the type of memory chips and used Ethernet transformer. Other than that I have not noticed any differences.
 
 The system is based on a Marvell Kirkwood 1GHz SOC, other chips include an Ethernet controller, flash, RAM as well as an MCU which is a systems management controller similar to what
-you would have in a laptop or PC. The NAS has it's page on both [[https://deviwiki.com/wiki/D-Link_DNS-320L_rev_A1][deviwiki]] and new [[https://wikidevi.wi-cat.ru/D-Link_DNS-320L_rev_A1][wikidevi]] where detailed information about the chips on the board can be found. The main board looks like this:
+you would have in a laptop or PC. The NAS has it's page on both [[https://deviwiki.com/wiki/D-Link_DNS-320L_rev_A1][deviwiki]] and new [[https://wikidevi.wi-cat.ru/D-Link_DNS-320L_rev_A1][wikidevi]] where detailed information about the chips on the board can be found. Different
+devices based on the 88F6702 SoC used are [[https://wikidevi.wi-cat.ru/LaCie_CloudBox][LaCie CloudBox]] which contain a [[https://github.com/torvalds/linux/blob/8bc9e6515183935fa0cccaf67455c439afe4982b/arch/arm/boot/dts/marvell/kirkwood-cloudbox.dts][DTS file]] for this device. The main board looks like this:
 
 [[file:board1.jpg][file:thumb-board1.jpg]]
 
