@@ -31,7 +31,12 @@ There are differences between the A3 and A4 versions in the type of memory chips
 
 The system is based on a Marvell Kirkwood 1GHz SOC, other chips include an Ethernet controller, flash, RAM as well as an MCU which is a systems management controller similar to what
 you would have in a laptop or PC. The NAS has it's page on both [[https://deviwiki.com/wiki/D-Link_DNS-320L_rev_A1][deviwiki]] and new [[https://wikidevi.wi-cat.ru/D-Link_DNS-320L_rev_A1][wikidevi]] where detailed information about the chips on the board can be found. Different
-devices based on the 88F6702 SoC used are [[https://wikidevi.wi-cat.ru/LaCie_CloudBox][LaCie CloudBox]] which contain a [[https://github.com/torvalds/linux/blob/8bc9e6515183935fa0cccaf67455c439afe4982b/arch/arm/boot/dts/marvell/kirkwood-cloudbox.dts][DTS file]] for this device. The main board looks like this:
+devices based on the 88F6702 SoC used are:
+- [[https://wikidevi.wi-cat.ru/LaCie_CloudBox][LaCie CloudBox]] for which the mainline kernel has a  [[https://github.com/torvalds/linux/blob/8bc9e6515183935fa0cccaf67455c439afe4982b/arch/arm/boot/dts/marvell/kirkwood-cloudbox.dts][DTS file]]
+- [[https://git.openwrt.org/?p=openwrt/openwrt.git;a=commit;h=d2c3131b3fcc55d9c26abdb7cd3c32d3827c10ed][ZyXEL NSA310S]] for which there exists [[https://git.openwrt.org/?p=openwrt/openwrt.git;a=commit;h=d2c3131b3fcc55d9c26abdb7cd3c32d3827c10ed][OpenWRT support]]
+- Medion MD86783 Lifecloud NAS, some information on [[https://forum.doozan.com/read.php?2,32877][doozan forum]] and [[https://github.com/mibodhi/u-boot-kirkwood/pull/9/files][u-boot-kirkwood github]]
+
+The main board looks like this:
 
 [[file:board1.jpg][file:thumb-board1.jpg]]
 
@@ -51,7 +56,9 @@ devices based on the 88F6702 SoC used are [[https://wikidevi.wi-cat.ru/LaCie_Clo
 |        |         |                       |                       |                                  |
 |--------+---------+-----------------------+-----------------------+----------------------------------|
 
-In order to access the unpopulated pads on the board I soldered two pin connectors, because the JP2 pitch was smaller than the standard 2.54mm pinheads I had I used some wire
+The exact datasheet for the Marvell 88F6702 is nowhere to be found, however according to the [[https://web.archive.org/web/20131126152744/http://www.marvell.com.cn/guide/assets/data/marvell_psg.pdf][Marvell Product Selection Guide]]
+and other available info this SoC looks to be compatible with Marvell 88F6281. In order to access the unpopulated pads on the
+board I soldered two pin connectors, because the JP2 pitch was smaller than the standard 2.54mm pinheads I had I used some wire
 to route it to where it can be accessed:
 
 [[file:connectors1.jpg][file:thumb-connectors.jpg]]
@@ -466,6 +473,7 @@ Model: ST31000524AS                             Firm: JC4A     Ser#:            
 #+END_EXPORT
 
 Some of these variables are [[http://www.denx.de/wiki/view/DULG/UBootEnvVariables][documented]], some seem to be Marvell or Kirkwood specific cruft. The bootloader version is ancient, according to github, [[https://github.com/u-boot/u-boot/releases/tag/U-Boot-1_1_4][version 1.1.4]] was released in 2005.
+
 
 
 * Original firmware
