@@ -57,9 +57,9 @@ The main board looks like this:
 |--------+---------+-----------------------+-----------------------+----------------------------------|
 
 The exact datasheet for the Marvell 88F6702 is nowhere to be found, however according to the [[https://web.archive.org/web/20131126152744/http://www.marvell.com.cn/guide/assets/data/marvell_psg.pdf][Marvell Product Selection Guide]]
-and other available info this SoC looks to be compatible with Marvell 88F6281. In order to access the unpopulated pads on the
-board I soldered two pin connectors, because the JP2 pitch was smaller than the standard 2.54mm pinheads I had I used some wire
-to route it to where it can be accessed:
+and other available info this SoC looks to be a faster 1GHz clock variant of the Marvell 88F6192. In order to access the
+unpopulated pads on the board I soldered two pin connectors, because the JP2 pitch was smaller than the standard 2.54mm
+pinheads I had I used some wire to route it to where it can be accessed:
 
 [[file:connectors1.jpg][file:thumb-connectors.jpg]]
 
