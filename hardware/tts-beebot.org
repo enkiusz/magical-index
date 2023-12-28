@@ -1,0 +1,158 @@
+#+Title: TTS Bee-Bot Unofficial Service Manual
+#+LANGUAGE: en
+
+
+* TLDR
+
+This is an unofficial "service manual" for the TTS Bee-Bot educational robot discussing common failures I've seen with it. Fixes to those
+problems are provided in the form of replacement part recommendations as well as replacement PCBs.
+
+* Metadata
+
+A service manual (even an "unofficial" one) needs some kind of revision control. This is provided in the table below:
+
+|------------+----------+------------------|
+|       Date | Revision | Description      |
+|------------+----------+------------------|
+| 2024-01-02 |        1 | Initial revision |
+|------------+----------+------------------|
+
+* Intro
+
+The [[https://www.tts-international.com/bee-bot-programmable-floor-robot/1015268.html][TTS Bee-Bot Programmable Floor Robot]] is an educational desktop robot geared towards teaching children simple programming concepts. The robot replays a
+sequence of movement steps (Forward, Back, Turn Left 90°, Turn Right 90°) which are programmed using buttons on its back. The robot provides audio and
+visual feedback for the child.
+
+In case it's not obvious, this website is not affiliated with TTS in any way and the Bee-Bot® name is used purely for product
+identification purposes. This unofficial service manual is (to the best of my knowledge) not endorsed by TTS.
+
+
+* Hardware overview
+
+[[file:tts-beebot/outside.jpg][file:tts-beebot/thumb-outside.jpg]]
+
+The robot is relatively well designed and easy to disassemble. The bottom provides access to the battery bay, the USB-B charging connector and 4 screws
+marked with red circles which need to be unscrewed to split the two halves:
+
+[[file:tts-beebot/bottom.jpg][file:tts-beebot/thumb-bottom.jpg]]
+
+A well thought out part of the robot design is that when the top cover is removed the robot can still be operated while having access to it's internals:
+
+[[file:tts-beebot/inside.jpg][file:tts-beebot/thumb-inside.jpg]]
+
+There are two PCBs visible, the horizontal PCB is the main CPU, the vertical PCB is the USB charger board which controls charging and power to the robot.
+
+
+* Observed failures
+
+There are two failures which I have seen happen with the robots I've come across:
+
+- inability to charge using the USB-B connector
+- speaker stops working
+
+Although my sample size is not large (a small fleet of 4 units), all of the robots have manifested at least one of the above problems. Solutions to
+both of those have been described in detail below.
+
+Together with those there are also other more predictable issues such as the Lithium-Ion battery loosing capacity over time which is important for
+an educational toy that needs to work for an entire school day to be usable in classrooms. 
+
+*** USB Charger PCB 
+
+All of the charging failures are caused by a damaged USB Charger PCB board which looks like chemical corrosion. The situation is interesting because
+the damage on all four examined PCBs looks very similar and no other signs of liquid ingress have been observed:
+
+[[file:tts-beebot/four-charger-boards.jpg][file:tts-beebot/thumb-four-charger-boards.jpg]]
+
+The details of the "corrosion" can be seen in detail on one of the boards still mounted inside the robot:
+
+[[file:tts-beebot/original-charger-pcb.jpg][file:tts-beebot/thumb-original-charger-pcb.jpg]]
+
+A replacement board has been designed in KiCad built around the very popular TP4056 charger chip plus some external vanilla components. The schematics for
+the board is shown below:
+
+[[file:tts-beebot/usb_charger.png]]
+
+The replacement board has certain improvements from the original, specifically:
+- the charging LED is dual color giving a more usable indication of charging state
+- the board has the possibility to connect a temperature sensor to the Li-Ion cell, this would however require changing the battery connector and would
+  make the robot incompatible with original batteries
+
+PCB manufacturing has been sponsored by [[https://www.pcbway.com/]] and I must say that the service they provided has been excellent.
+The traces, drill precision, hole plating and silkscreen quality are top-notch for any hacker's purposes :).
+
+One of the finished PCB can be seen below:
+
+[[file:tts-beebot/new-pcb.jpg][file:tts-beebot/thumb-new-pcb.jpg]]
+
+The PCB is two-sided but all of the SMT components are mounted on one side only. The packages used are 1206 and 0603 making it perfectly possible to
+assemble the board by hand. If you pay close attention you might notice that the original charging PCB has a few extra components which are missing on the
+new board - a SOT-23 transistor plus a few resistors and a capacitor. Initially I could not properly reverse engineer the purpose or operation of this extra
+circuit therefore I decided to simply omit it as my testbench tests did not suggest it's needed for the operation of the robot.
+
+The new PCB fits perfectly on the original spot with the charging LED leads bent like the original board. The LED mount point with the PCB has been
+secured with some small amount of hot glue to help with mechanical strength:
+
+
+[[file:tts-beebot/new-pcb-fit.jpg][file:tts-beebot/thumb-new-pcb-fit.jpg]]
+
+The original wires are resoldered to the new board and the robot is confirmed to work again with USB charging. This process is aided by the fact that the
+wire holes are arranged in the same configuration (albeit mirrored) than on the original PCB. After checking the functionality of the robot I discovered
+the reason for the additional circuit on the original board. The capacitor on the main controller PCB needs to be discharged when the robot is switched
+off as it browns out the CPU in an undefined state. The result is that quickly switching the robot off and on doesn't properly reset it. I have botched
+on a circuit that performs this role after mounting the replacement boards:
+
+[[file:tts-beebot/anti-glitch-circuit.jpg][file:tts-beebot/thumb-anti-glitch-circuit.jpg]]
+
+After this the robot works much more reliably when powered on and off. Of course this change will be implemented in the next revision of the replacement
+charger PCB.
+
+*** Speaker replacement
+
+The speaker is placed on the back side of the robot and is pushed down with a plastic post secured by a foam pad which unfortunately means that its replacement
+requires the disassembly of all of the large robot parts, no wires apart from the speaker wires need to be unsoldered fortunately:
+
+[[file:tts-beebot/speaker.jpg][file:tts-beebot/thumb-speaker.jpg]]
+
+The speaker failure can be diagnosed with a multimeter as a lack of connectivity between the speaker terminals instead of the nominal 8Ω resistance. This
+failure is caused by the coil being burned by excessive current and this can be clearly noticed as part of the diaphragm is darkened:
+
+[[file:tts-beebot/coil-damage.jpg][file:tts-beebot/thumb-coil-damage.jpg]]
+
+The exact reason for this failure is unknown. By looking at the speaker driver circuit we can try an educated guess:
+
+[[file:tts-beebot/speaker-circuit.png]]
+
+
+The speaker is directly wired to a transistor therefore if the CPU output pin gets stuck in the 'ON' state for extended periods of time, excessive current
+will flow throught the speaker coil. This problem can likely be fixed by adding some kind of capacitive coupling to the circuit but this "short"
+project has become long enough already. Fixes for the speaker circuit have been left for a future revision of this document.
+
+Fortunately the speaker is a vanilla part that can be easily purchased, the exact size needs to be matched though. Especially the height is important
+as the height of the plastic pole pushing the speaker down cannot be adjusted. I have measured the original speaker and found a suitable replacement
+on [[https://www.farnell.com]], the purchase link is down in the [[Replacement parts summary][Replacement parts summary table]] below.
+Here is the new (much thinner) speaker mounted with 4 foam pads flued to reach the previous height:
+
+[[file:tts-beebot/new-speaker.jpg][file:tts-beebot/thumb-new-speaker.jpg]]
+
+*** Battery
+
+When the battery capacity fades an original replacement battery can be ordered or a DIY battery can be built using a Molex Microblade 51005 Series used in
+small RC models. It can be easily purchased from multiple sources. The cell used is a Lithium-Ion 3.7V pouch cell. The dimensions of the battery bay
+can be referenced in the [[Replacement parts summary][Replacement parts summary table]] below.
+
+
+* Replacement parts summary
+
+This table summarizes the various replacement parts that can be either ordered or built by an average skilled hacker or maker. Detailed specifications as well
+as links to PCB layouts and ordering links are included.
+
+|-----------+----------------------------+----------------------------------------------+-----------------------------------------------------------------------+----------------------------+-------------------+------------------------------------------------------------------------------------------------------------------------------------------|
+| Source    | Part Name                  | Part Number                                  | Specifications                                                        | Compatible Bee-Bot Marking | Purchase links    | Notes                                                                                                                                    |
+|-----------+----------------------------+----------------------------------------------+-----------------------------------------------------------------------+----------------------------+-------------------+------------------------------------------------------------------------------------------------------------------------------------------|
+| TTS       | Replacement Battery        | IT10069                                      |                                                                       |                            | [[https://www.tts-group.co.uk/bee-bot%2Fblue-bot-replacement-battery/1015414.html][Manufacturer site]] | Original replacement part                                                                                                                |
+| [[https://pop.fsck.pl][fsck.pl]]   | TTS BEEBOT USB CHARGER PCB | N/A                                          | [[file:tts-beebot/rev-B1.zip][Kicad project]]                                                         | EL00363-03-17              |                   | DIY assembly required, SMT soldering                                                                                                     |
+| [[https://www.kingstate.com.tw/][KINGSTATE]] | Speaker                    | KINGSTATE KDMG26008                          | 26.5mm dia, 7mm height, 8Ω, 0.25W                                     | EL00363-03-17              | [[https://uk.farnell.com/kingstate/kdmg26008/loudspeaker-micro/dp/1502731][Farnell]]           | Any matching specifications can be used                                                                                                  |
+| Molex     | Battery connector          | 051005-0200 (housing) + 500138000 (terminal) | Molex Microblade 51005 Series 2.0mm Pitch Wire-to-Wire Receptacle, 2P | EL00363-03-17              | [[https://uk.farnell.com/molex-partner-stock/51005-0200/connector-housing-rcpt-2pos-2mm/dp/4239920][Farnell]]           | Can be used together with a 3.7V Lithium-Ion pouch cell to build a replacement battery. The battery bay is 32mmx36mm wide and 10mm deep. |
+|-----------+----------------------------+----------------------------------------------+-----------------------------------------------------------------------+----------------------------+-------------------+------------------------------------------------------------------------------------------------------------------------------------------|
+
+

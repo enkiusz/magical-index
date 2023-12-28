@@ -25,6 +25,7 @@
   - [[file:hardware/pzem-016.org][PZEM-016 energy monitor]]
   - [[file:hardware/shrack-upsdd-R-400.org][Shrack UPS USDD-R 400]]
   - [[file:hardware/rc-plane.org][Simple RC plane]]
+  - [[file:hardware/tts-beebot.org][TTS Bee-Bot Unofficial Service Manual]]
   - [[file:hardware/uarm.org][The UFactory Uarm]]
   - [[file:hardware/toshiba-n554.org][Toshiba N554 mouse]]
   - [[file:hardware/toyota-corolla.org][Toyota Corolla]]
