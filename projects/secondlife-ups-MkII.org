@@ -102,7 +102,7 @@ An AC power supply with at least 300W is needed to power the loads with some roo
 
 *** Solid-state operation
 
-Instead of the previously used relay-based power path switching scheme a solid-state power switch based on MOSFETs driven by the LTC4416 PowerPath controller will be used.
+Instead of the previously used relay-based power path switching scheme a solid-state power switch ([[file:secondlife-ups-MkII/ideal-diode-rev-A1.zip][KiCad files]]) based on MOSFETs driven by the LTC4416 PowerPath controller will be used.
 
 [[file:secondlife-ups-MkII/ideal-diode.svg][file:secondlife-ups-MkII/ideal-diode.png]]
 
@@ -113,10 +113,10 @@ After some thought I have decided that this approach makes the design hard to re
 host common load connectors and fuse sockets. All of the PCBs fit into cutouts in Ethernet switch enclosures hosting 4x2 Ethernet ports. This is the most common
 cutout size in an Ethernet switch and it allows a user to mix and match modules based on their needs. Currently the available modules include:
 
-- a fanout with 8 x DEGSON 13EDGVC-3.5 pluggable load connectors with a power indicator LED, this module is designed to power low-power loads
-- a fanout with 6 x XT-60 pluggable load connectors with a power indicator LED, this module is designed to power high-power loads
-- a fuse module containing two fuse sockets accepting typical 5x20mm glass fuses
-- a fuse module containing one fuse socket accepting a 6.3mmx32mm glass fuse
+- a fanout with 8 x DEGSON 13EDGVC-3.5 pluggable load connectors with a power indicator LED, this module is designed to power low-power loads ([[file:secondlife-ups-MkII/fanout_15EDGVC-3.5_2x4xRJ45-rev-A1.zip][KiCad files]])
+- a fanout with 6 x XT-60 pluggable load connectors with a power indicator LED, this module is designed to power high-power loads ([[file:secondlife-ups-MkII/fanout_XT60_2x4xRJ45-rev-A1.zip][KiCad files]])
+- a fuse module containing two fuse sockets accepting typical 5x20mm glass fuses ([[file:secondlife-ups-MkII/fuses_2x5x20_2x4xRJ45-rev-A1.zip][KiCad files]])
+- a fuse module containing one fuse socket accepting a 6.3mmx32mm glass fuse ([[file:secondlife-ups-MkII/fuses_1x6.3x32_2x4xRJ45-rev-A1.zip][KiCad files]])
 
 All of these modules share a common mechanical design and can be used to build many types of front panel layouts. If the project is successful I'm planning to
 design other modules such as a PoE injector or a battery SoC (State of Charge) indicator module. Another future improvement idea is a 3D-printable drilling guide
