@@ -14,7 +14,7 @@ A service manual (even an "unofficial" one) needs some kind of revision control.
 |------------+----------+------------------|
 |       Date | Revision | Description      |
 |------------+----------+------------------|
-| 2024-01-02 |        1 | Initial revision |
+| 2024-01-01 |        1 | Initial revision |
 |------------+----------+------------------|
 
 * Intro
@@ -130,7 +130,7 @@ project has become long enough already. Fixes for the speaker circuit have been 
 Fortunately the speaker is a vanilla part that can be easily purchased, the exact size needs to be matched though. Especially the height is important
 as the height of the plastic pole pushing the speaker down cannot be adjusted. I have measured the original speaker and found a suitable replacement
 on [[https://www.farnell.com]], the purchase link is down in the [[Replacement parts summary][Replacement parts summary table]] below.
-Here is the new (much thinner) speaker mounted with 4 foam pads flued to reach the previous height:
+Here is the new (much thinner) speaker mounted with 4 foam pads glued to reach the previous height:
 
 [[file:tts-beebot/new-speaker.jpg][file:tts-beebot/thumb-new-speaker.jpg]]
 
@@ -150,7 +150,7 @@ as links to PCB layouts and ordering links are included.
 | Source    | Part Name                  | Part Number                                  | Specifications                                                        | Compatible Bee-Bot Marking | Purchase links    | Notes                                                                                                                                    |
 |-----------+----------------------------+----------------------------------------------+-----------------------------------------------------------------------+----------------------------+-------------------+------------------------------------------------------------------------------------------------------------------------------------------|
 | TTS       | Replacement Battery        | IT10069                                      |                                                                       |                            | [[https://www.tts-group.co.uk/bee-bot%2Fblue-bot-replacement-battery/1015414.html][Manufacturer site]] | Original replacement part                                                                                                                |
-| [[https://pop.fsck.pl][fsck.pl]]   | TTS BEEBOT USB CHARGER PCB | N/A                                          | [[file:tts-beebot/rev-B1.zip][Kicad project]]                                                         | EL00363-03-17              |                   | DIY assembly required, SMT soldering                                                                                                     |
+| [[https://pop.fsck.pl/hardware/tts-beebot.html][fsck.pl   | TTS BEEBOT USB CHARGER PCB | N/A                                          | [[file:tts-beebot/rev-B1.zip][Kicad project]]                           | EL00363-03-17              |                   | DIY assembly required, SMT soldering                                                                                                     |
 | [[https://www.kingstate.com.tw/][KINGSTATE]] | Speaker                    | KINGSTATE KDMG26008                          | 26.5mm dia, 7mm height, 8Ω, 0.25W                                     | EL00363-03-17              | [[https://uk.farnell.com/kingstate/kdmg26008/loudspeaker-micro/dp/1502731][Farnell]]           | Any matching specifications can be used                                                                                                  |
 | Molex     | Battery connector          | 051005-0200 (housing) + 500138000 (terminal) | Molex Microblade 51005 Series 2.0mm Pitch Wire-to-Wire Receptacle, 2P | EL00363-03-17              | [[https://uk.farnell.com/molex-partner-stock/51005-0200/connector-housing-rcpt-2pos-2mm/dp/4239920][Farnell]]           | Can be used together with a 3.7V Lithium-Ion pouch cell to build a replacement battery. The battery bay is 32mmx36mm wide and 10mm deep. |
 |-----------+----------------------------+----------------------------------------------+-----------------------------------------------------------------------+----------------------------+-------------------+------------------------------------------------------------------------------------------------------------------------------------------|
