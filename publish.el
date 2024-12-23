@@ -23,7 +23,7 @@
          :with-creator nil
          :language "en"
          :html-metadata-timestamp-format "%Y-%m-%d %H:%M"
-         :html-postamble "<p class=\"author\">Author: %a &lt;%e&gt;</p><p><a href=\"https://fediring.net/previous?host=pop.fsck.pl\">←</a><a href=\"https://fediring.net/\">Fediring</a><a href=\"https://fediring.net/next?host=pop.fsck.pl\">→</a></p>"
+         :html-postamble "<div><h3>Links</h3><p><a href=\"https://github.com/enkiusz\">Github</a>&nbsp;&nbsp;<a href=\"https://git.sr.ht/~enkiusz/\">Sourcehut</a>&nbsp;&nbsp;<a href=\"https://hackaday.io/projects/hacker/159106\">Hackaday</a></p><p><a href=\"https://fediring.net/previous?host=pop.fsck.pl\">←</a>&nbsp;&nbsp;<a href=\"https://fediring.net/\">Fediring</a>&nbsp;&nbsp;<a href=\"https://fediring.net/next?host=pop.fsck.pl\">→</a></p></div>"
          )
 
         ("magical-index-static"
