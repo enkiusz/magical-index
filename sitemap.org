@@ -32,6 +32,7 @@
   - [[file:hardware/vastra-ss2.org][Vastra SS2 Smart Power Strip]]
   - [[file:hardware/wh-sp-ws01.org][WH-SP-WS01 Wind speed sensor (anemometer)]]
   - [[file:hardware/wrt-54g.org][WRT-54G]]
+  - [[file:hardware/zketech-ebc-a20.org][ZKETECH EBC-A20 Battery Tester]]
 - projects
   - [[file:projects/cell-precharger.org][A Lithium-Ion Cell Precharger]]
   - [[file:projects/archive.org][Archive]]
