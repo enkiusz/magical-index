@@ -23,6 +23,42 @@ which implements features useful for larger-scale lithium-ion cell refurbishment
 The charger is bundled with a software package called [[https://www.megacellmonitor.com/][Megacell Monitor]] which allows for a degree of remote control, setup and automation of the charger. It can also store
 the cell information in an SQL database, print labels or calculate pack layouts based on the cells inside it's database.
 
+* Updating the software
+
+The [[https://www.youtube.com/watch?v=CsYUwWIS6D0][official video]] concerning updating the firmware on the Megacell Charger shows the usage of [[https://github.com/marcelstoer/nodemcu-pyflasher][NodeMCU pyFlasher]] to update the firmware. This tool is however only available for
+download on Windows. As the firware is running on an ESP8266 the well-known [[https://github.com/espressif/esptool][esptool tool]] from Espressif can also be used to flash the firmware. The example below provides a
+commandline log for the flashing of the [[https://github.com/alex3dbros/megacnc/blob/main/Megacell%20Firmwares/CellDoctor.production.ino.1.0.2_MCCRegular.bin][most recent version published]] on Github:
+
+#+BEGIN_EXPORT html
+<pre>
+➜  MegaCell Charger 16 esptool --baud 115200 --after no_reset write_flash --flash_size detect --flash_mode dio 0x00000 CellDoctor.production.ino.1.0.2_MCCRegular.bin 
+esptool.py v4.7.0
+Found 33 serial ports
+Serial port /dev/ttyUSB0
+Connecting....
+Detecting chip type... Unsupported detection protocol, switching and trying again...
+Connecting....
+Detecting chip type... ESP8266
+Chip is ESP8266EX
+Features: WiFi
+Crystal is 26MHz
+MAC: bc:ff:4d:81:67:86
+Uploading stub...
+Running stub...
+Stub running...
+Configuring flash size...
+Auto-detected Flash size: 4MB
+Flash will be erased from 0x00000000 to 0x00078fff...
+Compressed 494512 bytes to 347044...
+Wrote 494512 bytes (347044 compressed) at 0x00000000 in 30.6 seconds (effective 129.2 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Staying in bootloader.
+➜  MegaCell Charger 16 
+</pre>
+#+END_EXPORT
+
 * The protocol
 
 The protocol is based on HTTP, the charger has to be connected to a 802.11 WLAN network and obtains it's IP address using DHCP. The following requests are understood by
