@@ -1,5 +1,5 @@
 #+TITLE: Labeling scheme
-#+FILETAGS: noexport
+#+FILETAGS: :noexport:
 
 * Intro
 

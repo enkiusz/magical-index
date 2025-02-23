@@ -1,5 +1,5 @@
 #+TITLE: iot power meter
-#+FILETAGS: noexport
+#+FILETAGS: :noexport:
 
 * Hackable
 

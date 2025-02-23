@@ -1,4 +1,5 @@
 #+TITLE: Reed switches as cell fuses
+#+FILETAGS: :noexport:
 
 #+BEGIN_EXPORT html
 <base href="reed-fuse/"/>

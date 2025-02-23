@@ -1,5 +1,5 @@
 #+TITLE: Arduino workshops
-#+FILETAGS: noexport
+#+FILETAGS: :noexport:
 
 Buttons - state machines
 While loops - potentiometers and leds

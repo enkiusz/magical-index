@@ -1,7 +1,7 @@
 #+TITLE: Rotor
-#+FILETAGS: noexport
+#+FILETAGS: :noexport:
 
-* Detection of I2C memory using bus pirate
+* Detection of I2C memory using bus pirate :noexport:
 
 
 #+BEGIN_SRC

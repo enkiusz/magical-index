@@ -1,5 +1,5 @@
 #+TITLE: Personal Clout
-#+FILETAGS: noexport
+#+FILETAGS: :noexport:
 
 * PC
 

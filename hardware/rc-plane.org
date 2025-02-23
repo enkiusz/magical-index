@@ -1,7 +1,7 @@
 #+TITLE: Simple RC plane
 #+LANGUAGE: en
 #+CREATOR: Emacs 25.2.2 (Org mode 9.1.13)
-#+FILETAGS: noexport
+#+FILETAGS: :noexport:
 
 * A 
 Receiver

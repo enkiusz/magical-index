@@ -17,6 +17,10 @@ The ZKETECH EBC-A20 is a battery tester with integrated charging and discharging
 The device is pretty popular and there are multiple places where a manual can be downloaded with more detailed specifications.
 The focus of this article is the control and monitoring interface provided by the battery tester
 
+tldr; 
+
+You can use the code on [[https://gist.github.com/enkiusz/6408645efd622b8a638a14957cd37f47][Github gists]]
+
 * Control interface
 
 The device is equipped with a Mini USB socket on the back where a provided cable is connected. The cable contains a USB <-> serial converter
@@ -30,7 +34,7 @@ The physical layer of the control interface is a 9600 bps, 8 bit, *odd parity*.
 
 ** Control protocol
 
-*** Packet structure
+*** Packet structure and field encoding
 
 The control protocol exchanges packets (also called "frames" in this document) between the controller PC and the battery tester.
 The packets are binary encoded, a typical packet is shown below in hexadecimal:
@@ -44,15 +48,15 @@ fa 0c 00 00 02 1e 00 00 00 00 00 0a 01 3c 00 0a 09 24 f8
 The basic structure of the encoded packet is shown below:
 
 |-------------+--------+-----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+-----+-------|
-|             | Offset | 0   | 1  |  2 |  3 |  4 |  5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |  17 | 18  | Notes |
+|             | Offset | 0   | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17  | 18  | Notes |
 |-------------+--------+-----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+-----+-------|
-| /           |        | <>  | <  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |  > |  <> | <>  |       |
-| Value       |        | fa  | 0c | 00 | 00 | 02 | 1e | 00 | 00 | 00 | 00 | 00 | 0a | 01 | 3c | 00 | 0a | 09 |  24 | f8  |       |
+| /           |        | <>  | <  |    |    |    |    |    |    |    |    |    |    |    |    |    |    | >  | <>  | <>  |       |
+| Value       |        | fa  | 0c | 00 | 00 | 02 | 1e | 00 | 00 | 00 | 00 | 00 | 0a | 01 | 3c | 00 | 0a | 09 | 24  | f8  |       |
 |-------------+--------+-----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+-----+-------|
 | Description |        | SOF |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    | CRC | EOF |       |
 |-------------+--------+-----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+-----+-------|
 
-Each packet begins with a 0xfa byte and ands with 0xf8. These are marked with *SOF* and *EOF*. The *payload* are the bytes between offset 1
+Each packet begins with a 0xfa byte and ends with 0xf8. These are labeled as *SOF* and *EOF*. The *payload* are the bytes between offset 1
 and 16 (inclusively). A packet also contains a "CRC" which is a simple checksum not an actual [[https://en.wikipedia.org/wiki/Cyclic_redundancy_check][Cyclic redundancy check]]. It can be calculated by
 performing a XOR operation on the payload bytes:
 
@@ -62,8 +66,9 @@ performing a XOR operation on the payload bytes:
 >>>
 #+END_SRC
 
-A number of packet types sent by the battery tester to the PC or vice-versa have been identified, an example of which is the packet sent when
-the controlling software requests cell charging:
+A number of packet types sent by the battery tester to the PC or vice-versa have been identified. They are listed in a table below. In order to help in understanding the
+details about each packet type and example packet and its description has been shown below. This packet is sent by the PC to the charger when the controlling software requests
+cell charging:
 
 
 |------------------+--------+-----+----+----+----+----+----+------+------+-----+-----+-------|
@@ -78,13 +83,13 @@ the controlling software requests cell charging:
 |------------------+--------+-----+----+----+----+----+----+------+------+-----+-----+-------|
 
 
-The first payload byte is the packet type identifier - 0x21 represents the *Start charging* packet. Next there are 3 16-bit fields encoding:
+The first payload byte is the packet type (PT) identifier - 0x21 represents the *Start charging* packet. Next there are 3 16-bit fields encoding:
 
 - the charging current (in units of 10 mA)
 - the charging voltage (in units of 10 mV)
 - the cutoff current (in units of 10 mA)
 
-Each of those values is encoded using the following scheme:
+Each 16-bit field value is encoded with 2 bytes using the following scheme:
 
 #+BEGIN_SRC python
 >>> I1 = 0x00
@@ -95,55 +100,88 @@ Each of those values is encoded using the following scheme:
 
 In effect this is a "base240" encoding and it's purpose is likely to prevent values larger than 240 (0xf0) to be present in the packet bytes.
 This makes sense when you consider the fact that bytes 0xfa and 0xf8 are used as "control codes" to mark start and end of packets. In summary the
-packet above encodes:
+packet above encodes the following fields:
 
 #+BEGIN_SRC python
 >>> I1 = 0x00
 >>> I2 = 0x32
 >>> 240 * I1 + I2
-50  # charging current 50 * 10 mA = 500 mA
+50
 >>> V1 = 0x01
 >>> V2 = 0x3c
->>> 240 * V1 + V2
-300  # charging voltage 300 * 10 mV = 3V
->>> CUT1 = 0x00
+>>> 240 * V1 + V2https://github.com/dev-strom/esp-ebc-mqtt/blob/main/lib/commands/EbcA20.cpp
 >>> CUT2 = 0x0a
 >>> 240 * CUT1 + CUT2
-10  # cutoff current 10 * 10 mA = 100 mA
+10
 >>>
 #+END_SRC
 
-What follows is a table with descriptions of all of the packets that have been observed so far together with their types, encoded fields and other
-extra information.
+Fields which contain measurable physical quantities like voltage, current and charge are furthermore processed so that the precision and range information is encoded.
+Explaining this encoding in prose would be tedious therefore a Python implementation of the decoding algorithm is provided:
+
+#+BEGIN_SRC python
+
+def decode_ranged(h: int, l: int) -> float:
+    """
+    Decode a base240 value to a float taking into account different offsets and scaling
+    factors for multiple ranges.
+    """
+    if h & 0x80 == 0x80:
+        if h & 0xe0 == 0xe0:
+            # range is > 200.0
+            v = 240 * (h & 0x3f) + l
+            m = 0.1
+            offset = 0x1c00
+        else:
+            # 10.00 < range < 200.0
+            v = 240 * (h & 0x7f) + l
+            m = 0.01
+            offset = 0x800
+    else:
+        # range is < 10.00
+        v = 240 * h + l
+        m = 0.001
+        offset = 0
+
+    return (v - offset) * m
+#+END_SRC
+
+The above code was created based off of the algorithm implemented in the [[https://github.com/dev-strom/esp-ebc-mqtt/blob/main/lib/commands/EbcA20.cpp][esp-ebc-mqtt]] code.
+
+What follows is a table with descriptions of all of the packets that have been observed so far together with their types, encoded fields and other extra information.
 
 *** Field reference
 
 Fields like current or voltage have common encoding for all packet types:
 
-|----------------+------------------+-------+------------------------------------------------------------------------------|
-| Field name     | Description      | Unit  | Notes                                                                        |
-|----------------+------------------+-------+------------------------------------------------------------------------------|
-| /              | <>               | <>    | <>                                                                           |
-| PT             | Packet type      |       |                                                                              |
-|----------------+------------------+-------+------------------------------------------------------------------------------|
-| DT             | Device type      |       | 0x09 is EBC-A20                                                              |
-|----------------+------------------+-------+------------------------------------------------------------------------------|
-| (FW1, FW2)     | Firmware version |       | Displayed in the ZKETECH aplication, for example 302 is displayed as 'V3.02' |
-|----------------+------------------+-------+------------------------------------------------------------------------------|
-| (T1, T2)       | Time             | min   |                                                                              |
-|----------------+------------------+-------+------------------------------------------------------------------------------|
-| (I1, I2)       | Current          | 10 mA |                                                                              |
-| (V1, V2        | Voltage          | 1 mV  |                                                                              |
-| (C1, C2)       | Charge count     | 1 mAh |                                                                              |
-| (E1, E2)       | Unknown          |       | Might be energy in Wh                                                        |
-|----------------+------------------+-------+------------------------------------------------------------------------------|
-| (CC1, CC2)     | Charging current | 10 mA | Charging                                                                     |
-| (CV1, CV2)     | Charging voltage | 10 mV |                                                                              |
-| (CUT1, CUT2)   | Cutoff current   | 10 mA |                                                                              |
-|----------------+------------------+-------+------------------------------------------------------------------------------|
-| (CC1, CC2)     | Charging current | 10 mA | Discharging                                                                  |
-| (CUTV1, CUTV2) | Cutoff voltage   | 10 mV |                                                                              |
-|----------------+------------------+-------+------------------------------------------------------------------------------|
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
+| Field name     | Description         | Unit  | Notes                                                                                            |
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
+| /              | <>                  | <>    | <>                                                                                               |
+| PT             | Packet type         |       |                                                                                                  |
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
+| DT             | Device type         |       | Known types ([[https://github.com/JOGAsoft/EBC-controller/blob/main/ebcc.init][reference]]):                                                                         |
+|                |                     |       |                                                                                                  |
+|                |                     |       | 0x05 is EBC-A05                                                                                  |
+|                |                     |       | 0x06 is EBC-A10H                                                                                 |
+|                |                     |       | 0x09 is EBC-A20                                                                                  |
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
+| (FW1, FW2)     | Firmware version    |       | Displayed in the ZKETECH aplication, for example 302 is displayed as 'V3.02', not confirmed 100% |
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
+| (T1, T2)       | Time                | min   |                                                                                                  |
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
+| (I1, I2)       | Current             | auto  | Units and ranges are encoded in raw 16-bit field value                                           |
+| (V1, V2        | Voltage             | auto  |                                                                                                  |
+| (C1, C2)       | Charge count        | auto  |                                                                                                  |
+| (E1, E2)       | Unknown             |       | Might be energy in Wh                                                                            |
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
+| (CC1, CC2)     | Charging current    | 10 mA | Charging                                                                                         |
+| (CV1, CV2)     | Charging voltage    | 10 mV | Suspected but not confirmed that ranges are encoded in raw 16-bit field values                   |
+| (CUT1, CUT2)   | Cutoff current      | 10 mA |                                                                                                  |
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
+| (CC1, CC2)     | Discharging current | 10 mA | Discharging                                                                                      |
+| (CUTV1, CUTV2) | Cutoff voltage      | 10 mV | Suspected but not confirmed that ranges are encoded in raw 16-bit field values                   |
+|----------------+---------------------+-------+--------------------------------------------------------------------------------------------------|
 
 
 *** Packet reference
@@ -151,85 +189,70 @@ Fields like current or voltage have common encoding for all packet types:
 This table does not exhaust all of the packet that I have seen while sniffing the traffic between the original software and the battery tester. A bit more is
 documented in the [[https://gist.github.com/enkiusz/6408645efd622b8a638a14957cd37f47][Python code]].
 
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Kind    | 0   | 1  |   2 |   3 | 4     |     5 |    6 |    7 |   8 | 9   |  10 |  11 | 12  | 13  |   14 | 15   | 16 | 17  | 18  |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-| /                            | <>      | <>  | <  |     |     |       |       |      |      |     |     |     |     |     |     |      |      |  > | <>  | <>  |
-| *Description*                |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Status  | fa  | 02 |  00 |  00 | 0a    |    13 |   00 |   14 |  00 | 00  |  00 |  32 | 01  | 0a  |   00 | 0a   | 09 | 35  | f8  |
-| Tester idle,                 |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1 | CV2 | CUT1 | CUT2 | DT | CRC | EOF |
-| sent after connecting        |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Status  | fa  | 66 |  00 |  00 | 08    |    88 |   00 |   14 |  00 | 00  |  01 |  3e | 0c  | 8f  |   09 | 05   | 09 | 4b  | f8  |
-|                              |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | FW1 | FW2 | unk | unk |  unk | unk  | DT | CRC | EOF |
-| Idle FW report,              |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| sent after connecting        |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| Maybe HW version too?        |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| unk means unknown            |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Status  | fa  | 0c |  00 |  32 | 07    |    de |   00 |   00 |  00 | 00  |  00 |  32 | 01  | b4  |   00 | 0a   | 09 | 63  | f8  |
-|                              |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1 | CV2 | CUT1 | CUT2 | DT | CRC | EOF |
-| CC-CV charging in progress   |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Status  | fa  | 70 |  00 |  00 | 04    |    53 |   00 |   00 |  00 | 00  |  01 |  3e | 0c  | 8f  |   09 | 05   | 09 | 63  | f8  |
-|                              |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | FW1 | FW2 | unk | unk |  unk | unk  | DT | CRC | EOF |
-| CC-CV charging FW report,    |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| sent for a few               |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| seconds after                |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| charging begins              |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Status  | fa  | 16 |  00 |  0a | 0a    |    64 |   00 |   14 |  00 | 00  |  00 |  32 | 01  | 0a  |   00 | 0a   | 09 | 5c  | f8  |
-|                              |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1 | CV2 | CUT1 | CUT2 | DT | CRC | EOF |
-| CC-CV charging end           |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| sent when current cutoff     |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| threshold is reached         |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Status  | fa  | 00 |  00 |  00 | 10    |    49 |   00 |   00 |  00 | 00  |  00 |  32 | 01  | 3c  |   00 | 78   | 09 | 27  | f8  |
-|                              |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1 | CV2 | CUT1 | CUT2 | DT | CRC | EOF |
-| CC discharge idle            |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Status  | fa  | 0a |  00 |  32 | 0f    |    41 |   00 |   02 |  00 | 00  |  00 |  32 | 01  | 3c  |   00 | 3c   | 09 | 4e  | f8  |
-|                              |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1 | CV2 | CUT1 | CUT2 | DT | CRC | EOF |
-| CC discharge in progress     |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Status  | fa  | 14 |  00 |  32 | 0c    |    77 |   01 |   59 |  00 | 00  |  00 |  32 | 01  | 3c  |   00 | 78   | 09 | 7b  | f8  |
-|                              |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1 | CV2 | CUT1 | CUT2 | DT | CRC | EOF |
-| CC discharge end             |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Command | fa  | 05 |  00 |  00 | 00    |    00 |   00 |   00 |  05 | f8  |     |     |     |     |      |      |    |     |     |
-|                              |         | SOF | PT |     |     |       |       |      |      | CRC | EOF |     |     |     |     |      |      |    |     |     |
-| Connect                      |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| After this '-PC-' appears    |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| on LCD                       |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Command | fa  | 06 |  00 |  00 | 00    |    00 |   00 |   00 |  06 | f8  |     |     |     |     |      |      |    |     |     |
-|                              |         | SOF | PT |     |     |       |       |      |      | CRC | EOF |     |     |     |     |      |      |    |     |     |
-| Disconnect                   |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Command | fa  | 02 |  00 |  00 | 00    |    00 |   00 |   00 |  02 | f8  |     |     |     |     |      |      |    |     |     |
-|                              |         | SOF | PT |     |     |       |       |      |      | CRC | EOF |     |     |     |     |      |      |    |     |     |
-| Stop                         |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| Used for both charging and   |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| discharging                  |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Command | fa  | 21 |  00 |  32 | 01    |    3c |   00 |   78 |  02 | f8  |     |     |     |     |      |      |    |     |     |
-|                              |         | SOF | PT | CC1 | CC2 | CV1   |   CV2 | CUT1 | CUT2 | CRC | EOF |     |     |     |     |      |      |    |     |     |
-| Start CC-CV charging         |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Command | fa  | 0a |  00 |  03 | 00    |    00 |   00 |   00 |  02 | f8  |     |     |     |     |      |      |    |     |     |
-|                              |         | SOF | PT |  T1 |  T2 |       |       |      |      | CRC | EOF |     |     |     |     |      |      |    |     |     |
-| CC-CV time?                  |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| sent every minute while      |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| charging                     |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-|                              | Command | fa  | 01 |  00 |  03 | 00    |    00 |   00 |   00 |  02 | f8  |     |     |     |     |      |      |    |     |     |
-|                              |         | SOF | PT | CC1 | CC2 | CUTV1 | CUTV2 |   T1 |   T2 | CRC | EOF |     |     |     |     |      |      |    |     |     |
-| Start CC discharge           |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| (CUTV1, CUTV2) is the cutoff |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| voltage                      |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-| (T1, T2) is the time limit   |         |     |    |     |     |       |       |      |      |     |     |     |     |     |     |      |      |    |     |     |
-|------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-----+-----+------+------+----+-----+-----|
-
-
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+|                                                     | Kind    | 0   | 1  |   2 |   3 | 4     |     5 |    6 |    7 |   8 | 9   |  10 |  11 | 12    | 13    |   14 | 15   | 16 | 17  | 18  |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| /                                                   | <>      | <>  | <  |     |     |       |       |      |      |     |     |     |     |       |       |      |      |  > | <>  | <>  |
+| *Description*                                       |         |     |    |     |     |       |       |      |      |     |     |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+|                                                     | Status  | fa  | 02 |  00 |  00 | 0a    |    13 |   00 |   14 |  00 | 00  |  00 |  32 | 01    | 0a    |   00 | 0a   | 09 | 35  | f8  |
+| Tester idle,                                        |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  |  X1 |  X2 | Y1    | Y2    |   Z1 | Z2   | DT | CRC | EOF |
+| sent after connecting (X1, X2), (Y1, Y2), (Z1, Z2)  |         |     |    |     |     |       |       |      |      |     |     |     |     |       |       |      |      |    |     |     |
+| Are parameters from a previous charge/discharge     |         |     |    |     |     |       |       |      |      |     |     |     |     |       |       |      |      |    |     |     |
+| operation.                                          |         |     |    |     |     |       |       |      |      |     |     |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| Idle FW report, sent after connecting               | Status  | fa  | 66 |  00 |  00 | 08    |    88 |   00 |   14 |  00 | 00  |  01 |  3e | 0c    | 8f    |   09 | 05   | 09 | 4b  | f8  |
+| Maybe HW version too?                               |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | FW1 | FW2 | unk   | unk   |  unk | unk  | DT | CRC | EOF |
+| unk means unknown                                   |         |     |    |     |     |       |       |      |      |     |     |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| Start CC-CV charging                                | Command | fa  | 21 |  00 |  32 | 01    |    3c |   00 |   78 |  02 | f8  |     |     |       |       |      |      |    |     |     |
+|                                                     |         | SOF | PT | CC1 | CC2 | CV1   |   CV2 | CUT1 | CUT2 | CRC | EOF |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| CC-CV time?                                         | Command | fa  | 0a |  00 |  03 | 00    |    00 |   00 |   00 |  02 | f8  |     |     |       |       |      |      |    |     |     |
+| sent by the original SW every minute while charging |         | SOF | PT |  T1 |  T2 |       |       |      |      | CRC | EOF |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| CC-CV charging in progress                          | Status  | fa  | 0c |  00 |  32 | 07    |    de |   00 |   00 |  00 | 00  |  00 |  32 | 01    | b4    |   00 | 0a   | 09 | 63  | f8  |
+|                                                     |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1   | CV2   | CUT1 | CUT2 | DT | CRC | EOF |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| CC-CV charging FW report                            | Status  | fa  | 70 |  00 |  00 | 04    |    53 |   00 |   00 |  00 | 00  |  01 |  3e | 0c    | 8f    |   09 | 05   | 09 | 63  | f8  |
+| sent for a few seconds after charging begins        |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | FW1 | FW2 | unk   | unk   |  unk | unk  | DT | CRC | EOF |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| CC-CV charging end                                  | Status  | fa  | 16 |  00 |  0a | 0a    |    64 |   00 |   14 |  00 | 00  |  00 |  32 | 01    | 0a    |   00 | 0a   | 09 | 5c  | f8  |
+| sent when current cutoff threshold is reached       |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1   | CV2   | CUT1 | CUT2 | DT | CRC | EOF |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| CC discharge idle                                   | Status  | fa  | 00 |  00 |  00 | 10    |    49 |   00 |   00 |  00 | 00  |  00 |  32 | 01    | 3c    |   00 | 78   | 09 | 27  | f8  |
+|                                                     |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CV1   | CV2   | CUT1 | CUT2 | DT | CRC | EOF |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| Start CC discharge                                  | Command | fa  | 01 |  00 |  03 | 00    |    00 |   00 |   00 |  02 | f8  |     |     |       |       |      |      |    |     |     |
+| (T1, T2) is the time limit, 0 means no time         |         | SOF | PT | CC1 | CC2 | CUTV1 | CUTV2 |   T1 |   T2 | CRC | EOF |     |     |       |       |      |      |    |     |     |
+| limit                                               |         |     |    |     |     |       |       |      |      |     |     |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| Adjust CC discharge                                 | Command | fa  | 07 |  00 |  03 | 00    |    00 |   00 |   00 |  02 | f8  |     |     |       |       |      |      |    |     |     |
+| (unused in [[https://gist.github.com/enkiusz/6408645efd622b8a638a14957cd37f47][zketech_ebc_a20.py]])                      |         | SOF | PT | CC1 | CC2 | CUTV1 | CUTV2 |   T1 |   T2 | CRC | EOF |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| Stop CC discharge                                   | Command | fa  | 08 |  00 |  03 | 00    |    00 |   00 |   00 |  02 | f8  |     |     |       |       |      |      |    |     |     |
+| (unused in [[https://gist.github.com/enkiusz/6408645efd622b8a638a14957cd37f47][zketech_ebc_a20.py]])                      |         | SOF | PT | CC1 | CC2 | CUTV1 | CUTV2 |   T1 |   T2 | CRC | EOF |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| CC discharge in progress                            | Status  | fa  | 0a |  00 |  32 | 0f    |    41 |   00 |   02 |  00 | 00  |  00 |  32 | 01    | 3c    |   00 | 3c   | 09 | 4e  | f8  |
+|                                                     |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CUTV1 | CUTV2 |   T1 | T2   | DT | CRC | EOF |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| CC discharge FW report                              | Status  | fa  | 64 |  00 |  00 | 0f    |    41 |   00 |   00 |  00 | 00  |  01 |  3e | 0c    | 8f    |   09 | 05   | 09 | 63  | f8  |
+| sent for a few seconds after charging begins        |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | FW1 | FW2 | unk   | unk   |  unk | unk  | DT | CRC | EOF |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| CC discharge end                                    | Status  | fa  | 14 |  00 |  32 | 0c    |    77 |   01 |   59 |  00 | 00  |  00 |  32 | 01    | 3c    |   00 | 78   | 09 | 7b  | f8  |
+| voltage reaches reaches (CUTV1, CUTV2)              |         | SOF | PT |  I1 |  I2 | V1    |    V2 |   C1 |   C2 |  E1 | E2  | CC1 | CC2 | CUTV1 | CUTV2 |   T1 | T2   | DT | CRC | EOF |
+| or (T1, T2) expires                                 |         |     |    |     |     |       |       |      |      |     |     |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| Connect                                             | Command | fa  | 05 |  00 |  00 | 00    |    00 |   00 |   00 |  05 | f8  |     |     |       |       |      |      |    |     |     |
+| After this '-PC-' appears on LCD                    |         | SOF | PT |     |     |       |       |      |      | CRC | EOF |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| Disconnect                                          | Command | fa  | 06 |  00 |  00 | 00    |    00 |   00 |   00 |  06 | f8  |     |     |       |       |      |      |    |     |     |
+| After this '-PC-' disappears from LCD               |         | SOF | PT |     |     |       |       |      |      | CRC | EOF |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
+| Stop                                                | Command | fa  | 02 |  00 |  00 | 00    |    00 |   00 |   00 |  02 | f8  |     |     |       |       |      |      |    |     |     |
+| Used for both charging and discharging, sent        |         | SOF | PT |     |     |       |       |      |      | CRC | EOF |     |     |       |       |      |      |    |     |     |
+| before disconnecting                                |         |     |    |     |     |       |       |      |      |     |     |     |     |       |       |      |      |    |     |     |
+|-----------------------------------------------------+---------+-----+----+-----+-----+-------+-------+------+------+-----+-----+-----+-----+-------+-------+------+------+----+-----+-----|
 
