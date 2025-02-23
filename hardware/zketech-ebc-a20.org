@@ -109,7 +109,7 @@ packet above encodes the following fields:
 50
 >>> V1 = 0x01
 >>> V2 = 0x3c
->>> 240 * V1 + V2https://github.com/dev-strom/esp-ebc-mqtt/blob/main/lib/commands/EbcA20.cpp
+>>> 240 * V1 + V2
 >>> CUT2 = 0x0a
 >>> 240 * CUT1 + CUT2
 10
