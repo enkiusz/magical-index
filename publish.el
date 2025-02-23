@@ -16,6 +16,7 @@
          :publishing-directory "_site/"
          :recursive t
          :publishing-function org-html-publish-to-html
+         :html-head-extra "<style>#content { max-width: 90%; margin: auto; }</style>"
          :auto-sitemap t
          :sitemap-title "A Certain Magical Index"
          :with-author t
