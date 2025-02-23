@@ -1655,8 +1655,6 @@ Disk stats (read/write):
     </pre>
 #+END_SRC
 
-** Direct I/O, encrypted using dm-crypt with 
-
 * References
 
 This is a list of references I used when working on the NAS. A lot has been done already by others:
